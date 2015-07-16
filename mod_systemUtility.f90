@@ -1,0 +1,84 @@
+
+include 'systemUtility/sub_check_ifObsInsideHorizontalDomain.f90'
+include 'systemUtility/sub_check_ifObsInsideVerticalDomain.f90'
+include 'systemUtility/sub_turnObsWithInvalidValueIntoUnavailable.f90'
+include 'systemUtility/sub_mapObsToEachGrid.f90'
+include 'systemUtility/sub_convertBackgroundToSounding.f90'
+include 'systemUtility/sub_convertBackgroundToTemperature.f90'
+include 'systemUtility/sub_setSoundingError.f90'
+include 'systemUtility/func_errorFactor.f90'
+
+
+module systemUtility
+
+
+interface
+
+    subroutine check_ifObsInsideHorizontalDomain(domain,obs)
+      use derivedType
+      use basicUtility
+      implicit none
+      type(domainInfo),intent(in) :: domain
+      type(obsParent),intent(inout) :: obs
+    end subroutine check_ifObsInsideHorizontalDomain
+
+    subroutine check_ifObsInsideVerticalDomain(domain,domainSize,obs)
+      use derivedType
+      use basicUtility
+      implicit none
+      integer,intent(in) :: domainSize
+      type(domainInfo),intent(in) :: domain(domainSize)
+      type(obsParent),intent(inout) :: obs
+    end subroutine check_ifObsInsideVerticalDomain
+
+    subroutine turnObsWithInvalidValueIntoUnavailable(obs)
+      use derivedType
+      implicit none
+      type(obsParent),intent(inout) :: obs
+    end subroutine turnObsWithInvalidValueIntoUnavailable
+
+    subroutine mapObsToEachGrid(obsListOfEachGrid,obs,domain)
+      use derivedType
+      use basicUtility
+      implicit none
+      type(integerVector),pointer,dimension(:,:,:) :: obsListOfEachGrid  ! intent(out)
+      type(obsParent),intent(inout) :: obs
+      type(domainInfo),intent(in) :: domain
+    end subroutine mapObsToEachGrid
+
+    subroutine convertBackgroundToTemperature(background,ensembleSize,domain)
+      use derivedType
+      use basicUtility
+      implicit none
+      integer,intent(in)              :: ensembleSize
+      type(backgroundInfo),intent(in) :: background(ensembleSize)
+      type(domainInfo),intent(in)     :: domain(ensembleSize)
+    end subroutine convertBackgroundToTemperature
+
+    subroutine convertBackgroundToSounding(background,ensembleSize,domain,sounding)
+      use derivedType
+      use basicUtility
+      use IOUtility
+      implicit none
+      integer,intent(in)              :: ensembleSize
+      type(backgroundInfo),intent(in) :: background(ensembleSize)
+      type(domainInfo),intent(in)     :: domain(ensembleSize)
+      type(obsParent),intent(inout)   :: sounding
+    end subroutine convertBackgroundToSounding
+
+    subroutine setSoundingError(sounding)
+      use derivedType
+      implicit none
+      type(obsParent),intent(inout)   :: sounding
+    end subroutine setSoundingError
+
+    real(kind=8) function errorFactor(rc,rlev,dh,dz)
+      implicit none
+      real(kind=8) rc,rlev
+      real(kind=8) dh,dz
+    end function errorFactor
+
+end interface
+
+
+end module systemUtility
