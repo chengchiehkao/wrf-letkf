@@ -14,7 +14,7 @@ character(len=255) backgroundSrc,analysisSrc
 character(len=2)  domainSeiralNumInString
 
 integer status,ncID
-integer varID_mu , varID_t , varID_qvapor , varID_u , varID_v , varID_w
+integer varID_mu , varID_t , varID_qvapor , varID_u , varID_v , varID_w ,varID_ph
 
 integer iens
 integer iwe,isn,iz
@@ -64,6 +64,8 @@ do iens = 1 , ensembleSize
     status = nf_inq_varID( ncID , 'W' , varID_w )
     status = nf_put_vara_double( ncID , varID_w , (/1,1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth,domain(iens)%size_bottomToTop_stag,1/) , analysis(iens)%w(:,:,:) )
  
+    status = nf_inq_varID( ncID , 'PH' , varID_ph )
+    status = nf_put_vara_double( ncID , varID_ph , (/1,1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth,domain(iens)%size_bottomToTop_stag,1/) , analysis(iens)%ph(:,:,:) )
 
     status = nf_close( ncID )
     if ( status .ne. nf_noErr ) then
