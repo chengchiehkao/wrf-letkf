@@ -125,7 +125,7 @@ do id=1,domainSize
         stop
     endif
 
-    deallocate( pressure_dummy , GPH_dummy )
+    deallocate( pressure_dummy , GPH_dummy , psfc_dummy )
 
 enddo
 
