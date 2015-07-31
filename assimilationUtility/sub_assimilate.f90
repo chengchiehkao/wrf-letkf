@@ -42,13 +42,16 @@ do iens = 1,ensembleSize
     allocate( analysis(iens) % u( domain(iens)%size_westToEast_stag , domain(iens)%size_southToNorth , domain(iens)%size_bottomToTop ) )
     allocate( analysis(iens) % v( domain(iens)%size_westToEast , domain(iens)%size_southToNorth_stag , domain(iens)%size_bottomToTop ) )
     allocate( analysis(iens) % w( domain(iens)%size_westToEast , domain(iens)%size_southToNorth , domain(iens)%size_bottomToTop_stag ) )
+    allocate( analysis(iens) % ph( domain(iens)%size_westToEast , domain(iens)%size_southToNorth , domain(iens)%size_bottomToTop_stag ) )
 
-    analysis(iens) % mu(:,:)       = background(iens) % mu(:,:)  !background(iens) % mu(:,:) + 10.d0
-    analysis(iens) % t(:,:,:)      = 0.d0  !background(iens) % t(:,:,:) + 10.d0
-    analysis(iens) % qvapor(:,:,:) = 0.d0  !background(iens) % qvapor(:,:,:) + 10.d0
-    analysis(iens) % u(:,:,:)      = background(iens) % u(:,:,:)  !background(iens) % u(:,:,:) + 10.d0
-    analysis(iens) % v(:,:,:)      = background(iens) % v(:,:,:)  !background(iens) % v(:,:,:) + 10.d0
-    analysis(iens) % w(:,:,:)      = background(iens) % w(:,:,:)  !background(iens) % w(:,:,:) + 10.d0
+    analysis(iens) % mu(:,:)       = background(iens) % mu(:,:)
+    analysis(iens) % t(:,:,:)      = 0.d0
+    analysis(iens) % qvapor(:,:,:) = 0.d0
+    analysis(iens) % u(:,:,:)      = background(iens) % u(:,:,:)
+    analysis(iens) % v(:,:,:)      = background(iens) % v(:,:,:)
+    analysis(iens) % w(:,:,:)      = background(iens) % w(:,:,:)
+    analysis(iens) % ph(:,:,:)     = background(iens) % ph(:,:,:)
+
 enddo
 
 

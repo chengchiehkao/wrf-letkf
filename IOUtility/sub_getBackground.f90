@@ -14,7 +14,7 @@ character(len=255) backgroundSrc
 character(len=2)  domainSeiralNumInString
 
 integer status,ncID
-integer varID_mu , varID_t , varID_qvapor , varID_u , varID_v , varID_w
+integer varID_mu , varID_t , varID_qvapor , varID_u , varID_v , varID_w , varID_ph
 
 integer iens
 integer iwe,isn,iz
@@ -43,6 +43,7 @@ do iens = 1 , ensembleSize
     allocate( background(iens) % u( domain(iens)%size_westToEast_stag , domain(iens)%size_southToNorth , domain(iens)%size_bottomToTop ) )
     allocate( background(iens) % v( domain(iens)%size_westToEast , domain(iens)%size_southToNorth_stag , domain(iens)%size_bottomToTop ) )
     allocate( background(iens) % w( domain(iens)%size_westToEast , domain(iens)%size_southToNorth , domain(iens)%size_bottomToTop_stag ) )
+    allocate( background(iens) % ph( domain(iens)%size_westToEast , domain(iens)%size_southToNorth , domain(iens)%size_bottomToTop_stag ) )
 
     background(iens) % mu(:,:)       = 0.d0
     background(iens) % t(:,:,:)      = 0.d0
@@ -50,6 +51,7 @@ do iens = 1 , ensembleSize
     background(iens) % u(:,:,:)      = 0.d0
     background(iens) % v(:,:,:)      = 0.d0
     background(iens) % w(:,:,:)      = 0.d0
+    background(iens) % ph(:,:,:)      = 0.d0
 
 
     status = nf_inq_varID( ncID , 'MU' , varID_mu )
@@ -69,6 +71,9 @@ do iens = 1 , ensembleSize
 
     status = nf_inq_varID( ncID , 'W' , varID_w )
     status = nf_get_vara_double( ncID , varID_w , (/1,1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth,domain(iens)%size_bottomToTop_stag,1/) , background(iens)%w(:,:,:) )
+
+    status = nf_inq_varID( ncID , 'PH' , varID_ph )
+    status = nf_get_vara_double( ncID , varID_ph , (/1,1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth,domain(iens)%size_bottomToTop_stag,1/) , background(iens)%ph(:,:,:) )
 
 
     background(iens)%t(:,:,:) = background(iens)%t(:,:,:) + 300.d0  ! Offset of t in WRF is 300K.

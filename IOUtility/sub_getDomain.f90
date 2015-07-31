@@ -15,9 +15,11 @@ integer status,ncID
 integer dimID_bottomToTop      , dimID_southToNorth      , dimID_westToEast
 integer dimID_bottomToTop_stag , dimID_southToNorth_stag , dimID_westToEast_stag
 integer varID_lon , varID_lat , varID_lon_u , varID_lat_u , varID_lon_v , varID_lat_v
-integer varID_pressure , varID_GPH
+integer varID_pressure , varID_GPH , varID_psfc , varID_p_top
 
 real(kind=8),allocatable,dimension(:,:,:) :: pressure_dummy , GPH_dummy
+real(kind=8),allocatable,dimension(:,:)   :: psfc_dummy
+real(kind=8)                              :: p_top_dummy
 
 integer id  ! loop conuter
 !================================================
@@ -60,19 +62,22 @@ do id=1,domainSize
     allocate( domain(id) % lat_v( domain(id)%size_westToEast , domain(id)%size_southToNorth_stag ) )
     allocate( domain(id) % pressure ( domain(id)%size_westToEast , domain(id)%size_southToNorth , domain(id)%size_bottomToTop      ) )
     allocate( domain(id) % GPH      ( domain(id)%size_westToEast , domain(id)%size_southToNorth , domain(id)%size_bottomToTop_stag ) )
+    allocate( domain(id) % pressure_w ( domain(id)%size_westToEast , domain(id)%size_southToNorth , domain(id)%size_bottomToTop_stag      ) )
     allocate( pressure_dummy ( domain(id)%size_westToEast , domain(id)%size_southToNorth , domain(id)%size_bottomToTop      ) )
     allocate( GPH_dummy      ( domain(id)%size_westToEast , domain(id)%size_southToNorth , domain(id)%size_bottomToTop_stag ) )
+    allocate( psfc_dummy     ( domain(id)%size_westToEast , domain(id)%size_southToNorth ) )
 
-    domain(id)%lon(:,:)        = 0.d0
-    domain(id)%lat(:,:)        = 0.d0
-    domain(id)%lon_u(:,:)      = 0.d0
-    domain(id)%lat_u(:,:)      = 0.d0
-    domain(id)%lon_v(:,:)      = 0.d0
-    domain(id)%lat_v(:,:)      = 0.d0
-    domain(id)%pressure(:,:,:) = 0.d0
-    domain(id)%GPH(:,:,:)      = 0.d0
-    pressure_dummy(:,:,:)      = 0.d0
-    GPH_dummy(:,:,:)           = 0.d0
+    domain(id)%lon(:,:)          = 0.d0
+    domain(id)%lat(:,:)          = 0.d0
+    domain(id)%lon_u(:,:)        = 0.d0
+    domain(id)%lat_u(:,:)        = 0.d0
+    domain(id)%lon_v(:,:)        = 0.d0
+    domain(id)%lat_v(:,:)        = 0.d0
+    domain(id)%pressure(:,:,:)   = 0.d0
+    domain(id)%GPH(:,:,:)        = 0.d0
+    domain(id)%pressure_w(:,:,:) = 0.d0
+    pressure_dummy(:,:,:)        = 0.d0
+    GPH_dummy(:,:,:)             = 0.d0
 
     status = nf_inq_varID( ncID , 'XLONG' , varID_lon )
     status = nf_inq_varID( ncID , 'XLAT'  , varID_lat )
@@ -104,6 +109,16 @@ do id=1,domainSize
     domain(id)%GPH(:,:,:) = domain(id)%GPH(:,:,:) + GPH_dummy(:,:,:)
     domain(id)%GPH(:,:,:) = (1.d0/9.81d0) * domain(id)%GPH(:,:,:)
 
+    status = nf_inq_varID( ncID , 'PSFC' , varID_psfc )
+    status = nf_get_vara_double( ncID , varID_psfc , (/1,1,1/) , (/domain(id)%size_westToEast,domain(id)%size_southToNorth,1/) , psfc_dummy(:,:) )
+
+    status = nf_inq_varID( ncID , 'P_TOP' , varID_p_top )
+    status = nf_get_vara_double( ncID , varID_p_top , (/1/) , (/1/) , p_top_dummy )
+
+    domain(id) % pressure_w(:,:,1) = psfc_dummy(:,:)
+    domain(id) % pressure_w(:,:,2:domain(id)%size_bottomToTop_stag-1) = 0.5d0 * ( domain(id)%pressure(:,:,1:domain(id)%size_bottomToTop-1) + domain(id)%pressure(:,:,2:domain(id)%size_bottomToTop) )
+    domain(id) % pressure_w(:,:,domain(id)%size_bottomToTop_stag) = p_top_dummy
+
     status = nf_close( ncID )
     if ( status .ne. nf_noErr ) then
         print*,nf_strError( status )
@@ -111,10 +126,6 @@ do id=1,domainSize
     endif
 
     deallocate( pressure_dummy , GPH_dummy )
-
-    !print*,id,'=========='
-    !print*,minval(domain(id)%pressure(:,:,:)),maxval(domain(id)%pressure(:,:,:))
-    !print*,minval(domain(id)%GPH(:,:,:)),maxval(domain(id)%GPH(:,:,:))
 
 enddo
 
