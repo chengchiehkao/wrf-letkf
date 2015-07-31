@@ -13,7 +13,7 @@ type(domainInfo),intent(in)        :: domain(ensembleSize)
 character(len=255) backgroundSrc
 character(len=2)  domainSeiralNumInString
 
-integer status,ncID
+integer ncStatus,ncID
 integer varID_mu , varID_t , varID_qvapor , varID_u , varID_v , varID_w , varID_ph
 
 integer iens
@@ -31,9 +31,9 @@ do iens = 1 , ensembleSize
     backgroundSrc = repeat(' ',len(backgroundSrc))
     backgroundSrc = 'input/wrfinput_nc_'//domainSeiralNumInString;
 
-    status = nf_open( backgroundSrc , nf_noWrite , ncID )
-    if ( status .ne. nf_noErr ) then
-        print*,nf_strError( status )
+    ncStatus = nf_open( backgroundSrc , nf_noWrite , ncID )
+    if ( ncStatus .ne. nf_noErr ) then
+        print*,nf_strError( ncStatus )
         stop
     endif
 
@@ -54,34 +54,34 @@ do iens = 1 , ensembleSize
     background(iens) % ph(:,:,:)      = 0.d0
 
 
-    status = nf_inq_varID( ncID , 'MU' , varID_mu )
-    status = nf_get_vara_double( ncID , varID_mu , (/1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth,1/) , background(iens)%mu(:,:) )
+    ncStatus = nf_inq_varID( ncID , 'MU' , varID_mu )
+    ncStatus = nf_get_vara_double( ncID , varID_mu , (/1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth,1/) , background(iens)%mu(:,:) )
 
-    status = nf_inq_varID( ncID , 'T' , varID_t )
-    status = nf_get_vara_double( ncID , varID_t , (/1,1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth,domain(iens)%size_bottomToTop,1/) , background(iens)%t(:,:,:) )
+    ncStatus = nf_inq_varID( ncID , 'T' , varID_t )
+    ncStatus = nf_get_vara_double( ncID , varID_t , (/1,1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth,domain(iens)%size_bottomToTop,1/) , background(iens)%t(:,:,:) )
 
-    status = nf_inq_varID( ncID , 'QVAPOR' , varID_qvapor )
-    status = nf_get_vara_double( ncID , varID_qvapor , (/1,1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth,domain(iens)%size_bottomToTop,1/) , background(iens)%qvapor(:,:,:) )
+    ncStatus = nf_inq_varID( ncID , 'QVAPOR' , varID_qvapor )
+    ncStatus = nf_get_vara_double( ncID , varID_qvapor , (/1,1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth,domain(iens)%size_bottomToTop,1/) , background(iens)%qvapor(:,:,:) )
 
-    status = nf_inq_varID( ncID , 'U' , varID_u )
-    status = nf_get_vara_double( ncID , varID_u , (/1,1,1,1/) , (/domain(iens)%size_westToEast_stag,domain(iens)%size_southToNorth,domain(iens)%size_bottomToTop,1/) , background(iens)%u(:,:,:) )
+    ncStatus = nf_inq_varID( ncID , 'U' , varID_u )
+    ncStatus = nf_get_vara_double( ncID , varID_u , (/1,1,1,1/) , (/domain(iens)%size_westToEast_stag,domain(iens)%size_southToNorth,domain(iens)%size_bottomToTop,1/) , background(iens)%u(:,:,:) )
 
-    status = nf_inq_varID( ncID , 'V' , varID_v )
-    status = nf_get_vara_double( ncID , varID_v , (/1,1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth_stag,domain(iens)%size_bottomToTop,1/) , background(iens)%v(:,:,:) )
+    ncStatus = nf_inq_varID( ncID , 'V' , varID_v )
+    ncStatus = nf_get_vara_double( ncID , varID_v , (/1,1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth_stag,domain(iens)%size_bottomToTop,1/) , background(iens)%v(:,:,:) )
 
-    status = nf_inq_varID( ncID , 'W' , varID_w )
-    status = nf_get_vara_double( ncID , varID_w , (/1,1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth,domain(iens)%size_bottomToTop_stag,1/) , background(iens)%w(:,:,:) )
+    ncStatus = nf_inq_varID( ncID , 'W' , varID_w )
+    ncStatus = nf_get_vara_double( ncID , varID_w , (/1,1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth,domain(iens)%size_bottomToTop_stag,1/) , background(iens)%w(:,:,:) )
 
-    status = nf_inq_varID( ncID , 'PH' , varID_ph )
-    status = nf_get_vara_double( ncID , varID_ph , (/1,1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth,domain(iens)%size_bottomToTop_stag,1/) , background(iens)%ph(:,:,:) )
+    ncStatus = nf_inq_varID( ncID , 'PH' , varID_ph )
+    ncStatus = nf_get_vara_double( ncID , varID_ph , (/1,1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth,domain(iens)%size_bottomToTop_stag,1/) , background(iens)%ph(:,:,:) )
 
 
     background(iens)%t(:,:,:) = background(iens)%t(:,:,:) + 300.d0  ! Offset of t in WRF is 300K.
 
 
-    status = nf_close( ncID )
-    if ( status .ne. nf_noErr ) then
-        print*,nf_strError( status )
+    ncStatus = nf_close( ncID )
+    if ( ncStatus .ne. nf_noErr ) then
+        print*,nf_strError( ncStatus )
         stop
     endif
 
