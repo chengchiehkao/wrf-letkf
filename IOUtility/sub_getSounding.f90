@@ -59,7 +59,7 @@ allocate( sounding%obs(sounding%obsNum) )
 sounding%obs(:)%lon   = 0.0d0
 sounding%obs(:)%lat   = 0.0d0
 sounding%obs(:)%z     = 0.0d0
-sounding%obs(:)%var   = 0.0d0
+sounding%obs(:)%value = 0.0d0
 sounding%obs(:)%error = 0.0d0
 sounding%obs(:)%type       = 'SOUNDING  '
 sounding%obs(:)%instrument = 'SOUNDING  '
@@ -83,10 +83,10 @@ do
         sounding%obs(serialNum)%lat = lat
         sounding%obs(serialNum)%zName = 'SURFACE   '
         sounding%obs(serialNum)%varName = 'PSFC      '
-        read(fileID,*) sounding%obs(serialNum)%var
+        read(fileID,*) sounding%obs(serialNum)%value
         do i = 1,levNum
             serialNum = serialNum + 1
-            read(fileID,*) sounding%obs(serialNum)%z,sounding%obs(serialNum:serialNum+varListSize-1)%var
+            read(fileID,*) sounding%obs(serialNum)%z,sounding%obs(serialNum:serialNum+varListSize-1)%value
 
             sounding%obs(serialNum:serialNum+varListSize-1)%lon = lon
             sounding%obs(serialNum:serialNum+varListSize-1)%lat = lat
@@ -98,7 +98,7 @@ do
     elseif ( index(header,'AIREP') .ne. 0 ) then  ! means it's AIREP
         do i = 1,levNum
             serialNum = serialNum + 1
-            read(fileID,*) sounding%obs(serialNum)%z,sounding%obs(serialNum:serialNum+varListSize-1)%var
+            read(fileID,*) sounding%obs(serialNum)%z,sounding%obs(serialNum:serialNum+varListSize-1)%value
 
             sounding%obs(serialNum:serialNum+varListSize-1)%instrument = 'AIREP     '
             sounding%obs(serialNum:serialNum+varListSize-1)%lon = lon
@@ -121,8 +121,8 @@ enddo
 
 do io = 1 , sounding%obsNum
     if ( trim(adjustl(sounding%obs(io)%varName)).eq.'T' .and. &
-         dabs(sounding%obs(io)%var - invalidValue) .gt. dabs(invalidValue*epsilon(1.d0)) ) then
-        sounding%obs(io)%var = sounding%obs(io)%var + 273.d0  ! not 273.15 but 273. because of the preprocess of sounding obs.
+         dabs(sounding%obs(io)%value - invalidValue) .gt. dabs(invalidValue*epsilon(1.d0)) ) then
+        sounding%obs(io)%value = sounding%obs(io)%value + 273.d0  ! not 273.15 but 273. because of the preprocess of sounding obs.
     endif
 enddo
 

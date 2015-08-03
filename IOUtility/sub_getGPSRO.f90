@@ -46,7 +46,7 @@ allocate( GPSRO%obs(GPSRO%obsNum) )
 GPSRO%obs(:)%lon   = 0.0d0
 GPSRO%obs(:)%lat   = 0.0d0
 GPSRO%obs(:)%z     = 0.0d0
-GPSRO%obs(:)%var   = 0.0d0
+GPSRO%obs(:)%value = 0.0d0
 GPSRO%obs(:)%error = 0.0d0
 GPSRO%obs(:)%rfict = 0.0d0
 GPSRO%obs(:)%instrument = 'COSMIC'
@@ -63,7 +63,7 @@ do
     if ( ioStatus .lt. 0 ) exit
     do i = 1,levNum
         serialNum = serialNum + 1
-        read(fileID,*) GPSRO%obs(serialNum)%z,GPSRO%obs(serialNum:serialNum+varListSize-1)%var
+        read(fileID,*) GPSRO%obs(serialNum)%z,GPSRO%obs(serialNum:serialNum+varListSize-1)%value
 
         GPSRO%obs(serialNum:serialNum+varListSize-1)%lon = lon
         GPSRO%obs(serialNum:serialNum+varListSize-1)%lat = lat

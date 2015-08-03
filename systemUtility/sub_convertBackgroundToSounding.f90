@@ -170,7 +170,7 @@ do io = 1 , sounding%obsNum
 
         enddo
 
-        sounding%obs(io)%innov = sounding%obs(io)%var - sum(sounding%obs(io)%background(:))/real(ensembleSize,8)
+        sounding%obs(io)%innov = sounding%obs(io)%value - sum(sounding%obs(io)%background(:))/real(ensembleSize,8)
 
     endif
 

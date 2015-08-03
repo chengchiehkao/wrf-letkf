@@ -46,7 +46,7 @@ allocate( synop%obs(synop%obsNum) )
 synop%obs(:)%lon   = 0.0d0
 synop%obs(:)%lat   = 0.0d0
 synop%obs(:)%z     = 0.0d0
-synop%obs(:)%var   = 0.0d0
+synop%obs(:)%value = 0.0d0
 synop%obs(:)%error = 0.0d0
 synop%obs(:)%instrument = 'SYNOP'
 synop%obs(:)%zName      = 'TerrainHgt'
@@ -62,7 +62,7 @@ do
     if ( ioStatus .lt. 0 ) exit
     do i = 1,levNum
         serialNum = serialNum + 1
-        read(fileID,*) synop%obs(serialNum:serialNum+varListSize-1)%var,synop%obs(serialNum)%z
+        read(fileID,*) synop%obs(serialNum:serialNum+varListSize-1)%value,synop%obs(serialNum)%z
 
         synop%obs(serialNum:serialNum+varListSize-1)%lon = lon
         synop%obs(serialNum:serialNum+varListSize-1)%lat = lat

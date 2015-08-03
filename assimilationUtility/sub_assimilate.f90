@@ -98,7 +98,7 @@ do iwe = 1,domain(1)%size_westToEast
         do iList = 1,obsListOfEachGrid(iwe,isn,iz)%vectorSize
             if ( obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%available  ) then
                 io = io+1
-                yo(io,1) = obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%var
+                yo(io,1) = obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%value
                 yb(io,:) = obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%background(:)
                 dh = greatCircleDistance( &
                   (/domain(1)%lon(iwe,isn),domain(1)%lat(iwe,isn)/) , &

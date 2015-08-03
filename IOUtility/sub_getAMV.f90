@@ -46,7 +46,7 @@ allocate( amv%obs(amv%obsNum) )
 amv%obs(:)%lon   = 0.0d0
 amv%obs(:)%lat   = 0.0d0
 amv%obs(:)%z     = 0.0d0
-amv%obs(:)%var   = 0.0d0
+amv%obs(:)%value = 0.0d0
 amv%obs(:)%error = 0.0d0
 amv%obs(:)%instrument = 'AMV'
 amv%obs(:)%zName      = 'P'
@@ -62,7 +62,7 @@ do
     if ( ioStatus .lt. 0 ) exit
     do i = 1,levNum
         serialNum = serialNum + 1
-        read(fileID,*) amv%obs(serialNum)%z,amv%obs(serialNum:serialNum+varListSize-1)%var
+        read(fileID,*) amv%obs(serialNum)%z,amv%obs(serialNum:serialNum+varListSize-1)%value
 
         amv%obs(serialNum:serialNum+varListSize-1)%lon = lon
         amv%obs(serialNum:serialNum+varListSize-1)%lat = lat

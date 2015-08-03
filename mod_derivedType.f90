@@ -14,7 +14,7 @@ type domainInfo
 end type domainInfo
 
 type obsChild
-    real(kind=8)      :: lon , lat , z , var , error
+    real(kind=8)      :: lon , lat , z , value , error
     real(kind=8)      :: innov
     real(kind=8)      :: rfict  ! for GPSRO
     character(len=10) :: type , instrument , zName , varName
