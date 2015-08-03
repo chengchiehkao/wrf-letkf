@@ -2,7 +2,7 @@
 
 !include 'sub_LETKF.f90'
 
-subroutine assimilate(background,analysis,ensembleSize,domain,obs,obsListOfEachGrid)
+subroutine assimilate(background,analysis,ensembleSize,domain,domain_mean,obs,obsListOfEachGrid)
 
 use derivedType
 use basicUtility
@@ -15,6 +15,7 @@ integer,intent(in) :: ensembleSize
 type(backgroundInfo),intent(in)  :: background(ensembleSize)
 type(backgroundInfo),intent(out) :: analysis(ensembleSize)
 type(domainInfo),intent(in)      :: domain(ensembleSize)
+type(domainInfo),intent(in)      :: domain_mean
 type(obsParent) :: obs
 type(integerVector),pointer :: obsListOfEachGrid(:,:,:)
 
@@ -55,12 +56,12 @@ do iens = 1,ensembleSize
 enddo
 
 
-!$omp parallel do default(private) shared(domain,obsListOfEachGrid,ensembleSize,analysis,background,obs) &
+!$omp parallel do default(private) shared(domain,domain_mean,obsListOfEachGrid,ensembleSize,analysis,background,obs) &
 !$omp schedule(dynamic,1)
-do iz  = 1,domain(1)%size_bottomToTop
+do iz  = 1,domain_mean%size_bottomToTop
 wt0 = omp_get_wtime()
-do isn = 1,domain(1)%size_southToNorth
-do iwe = 1,domain(1)%size_westToEast
+do isn = 1,domain_mean%size_southToNorth
+do iwe = 1,domain_mean%size_westToEast
 
     if ( obsListOfEachGrid(iwe,isn,iz)%vectorSize .eq. 0 ) then  ! no observation means won't update.
         forall(iens=1:ensembleSize) analysis(iens)%t(iwe,isn,iz)      = background(iens)%t(iwe,isn,iz) -300.d0 ! re-substract the offset for wrf
@@ -101,10 +102,10 @@ do iwe = 1,domain(1)%size_westToEast
                 yo(io,1) = obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%value
                 yb(io,:) = obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%background(:)
                 dh = greatCircleDistance( &
-                  (/domain(1)%lon(iwe,isn),domain(1)%lat(iwe,isn)/) , &
+                  (/domain_mean%lon(iwe,isn),domain_mean%lat(iwe,isn)/) , &
                   (/obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%lon,obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%lat/) &
                   )
-                dz = dabs( dlog(domain(1)%pressure(iwe,isn,iz)) - dlog(obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%z) )
+                dz = dabs( dlog(domain_mean%pressure(iwe,isn,iz)) - dlog(obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%z) )
                 R(io,io) = ( errorFactor(1.d6,0.2d0,dh,dz) * obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%error )**2.d0
             endif
         enddo

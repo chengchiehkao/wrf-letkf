@@ -92,7 +92,7 @@ print*,'cpu time (from the beginning except getDomain)=',ct1-ct0,'sec'
 print*,'Mapping observations to each grid...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call mapObsToEachGrid(obsListOfEachGrid,sounding,domain(1))
+call mapObsToEachGrid(obsListOfEachGrid,sounding,domain_mean)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 print*,'Done.'
@@ -146,7 +146,7 @@ print*,'Starting assimilation...'
 allocate( analysis(ensembleSize) )
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call assimilate(background(:),analysis(:),ensembleSize,domain(:),sounding,obsListOfEachGrid)
+call assimilate(background(:),analysis(:),ensembleSize,domain(:),domain_mean,sounding,obsListOfEachGrid)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 print*,'Done.'

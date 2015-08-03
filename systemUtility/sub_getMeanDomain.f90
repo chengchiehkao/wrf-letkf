@@ -14,15 +14,23 @@ integer iens  ! loop counter
 !
 !  Assume dimensions of each domain are all the same.
 !
-allocate( domain_mean % lon( domain(1)%size_westToEast , domain(1)%size_southToNorth ) )
-allocate( domain_mean % lat( domain(1)%size_westToEast , domain(1)%size_southToNorth ) )
-allocate( domain_mean % lon_u( domain(1)%size_westToEast_stag , domain(1)%size_southToNorth ) )
-allocate( domain_mean % lat_u( domain(1)%size_westToEast_stag , domain(1)%size_southToNorth ) )
-allocate( domain_mean % lon_v( domain(1)%size_westToEast , domain(1)%size_southToNorth_stag ) )
-allocate( domain_mean % lat_v( domain(1)%size_westToEast , domain(1)%size_southToNorth_stag ) )
-allocate( domain_mean % pressure ( domain(1)%size_westToEast , domain(1)%size_southToNorth , domain(1)%size_bottomToTop      ) )
-allocate( domain_mean % GPH      ( domain(1)%size_westToEast , domain(1)%size_southToNorth , domain(1)%size_bottomToTop_stag ) )
-allocate( domain_mean % pressure_w ( domain(1)%size_westToEast , domain(1)%size_southToNorth , domain(1)%size_bottomToTop_stag      ) )
+domain_mean%size_westToEast        = domain(1)%size_westToEast
+domain_mean%size_westToEast_stag   = domain(1)%size_westToEast_stag
+domain_mean%size_southToNorth      = domain(1)%size_southToNorth
+domain_mean%size_southToNorth_stag = domain(1)%size_southToNorth_stag
+domain_mean%size_bottomToTop       = domain(1)%size_bottomToTop
+domain_mean%size_bottomToTop_stag  = domain(1)%size_bottomToTop_stag
+
+allocate( domain_mean % lon( domain_mean%size_westToEast , domain_mean%size_southToNorth ) )
+allocate( domain_mean % lat( domain_mean%size_westToEast , domain_mean%size_southToNorth ) )
+allocate( domain_mean % lon_u( domain_mean%size_westToEast_stag , domain_mean%size_southToNorth ) )
+allocate( domain_mean % lat_u( domain_mean%size_westToEast_stag , domain_mean%size_southToNorth ) )
+allocate( domain_mean % lon_v( domain_mean%size_westToEast , domain_mean%size_southToNorth_stag ) )
+allocate( domain_mean % lat_v( domain_mean%size_westToEast , domain_mean%size_southToNorth_stag ) )
+allocate( domain_mean % pressure ( domain_mean%size_westToEast , domain_mean%size_southToNorth , domain_mean%size_bottomToTop      ) )
+allocate( domain_mean % GPH      ( domain_mean%size_westToEast , domain_mean%size_southToNorth , domain_mean%size_bottomToTop_stag ) )
+allocate( domain_mean % pressure_w ( domain_mean%size_westToEast , domain_mean%size_southToNorth , domain_mean%size_bottomToTop_stag      ) )
+
 
 !
 !  Assume horizontal coordinates of each domain are all the same.

@@ -9,7 +9,7 @@ module assimilationUtility
 
 interface
 
-    subroutine assimilate(background,analysis,ensembleSize,domain,obs,obsListOfEachGrid)
+    subroutine assimilate(background,analysis,ensembleSize,domain,domain_mean,obs,obsListOfEachGrid)
       use derivedType
       use basicUtility
       use systemUtility
@@ -19,6 +19,7 @@ interface
       type(backgroundInfo),intent(in)  :: background(ensembleSize)
       type(backgroundInfo),intent(out) :: analysis(ensembleSize)
       type(domainInfo),intent(in)      :: domain(ensembleSize)
+      type(domainInfo),intent(in)      :: domain_mean
       type(obsParent) :: obs
       type(integerVector),pointer :: obsListOfEachGrid(:,:,:)
     end subroutine assimilate
