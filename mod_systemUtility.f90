@@ -1,4 +1,5 @@
 
+include 'systemUtility/sub_getMeanDomain.f90'
 include 'systemUtility/sub_check_ifObsInsideHorizontalDomain.f90'
 include 'systemUtility/sub_check_ifObsInsideVerticalDomain.f90'
 include 'systemUtility/sub_turnObsWithInvalidValueIntoUnavailable.f90'
@@ -13,6 +14,14 @@ module systemUtility
 
 
 interface
+
+    subroutine getMeanDomain(domain,ensembleSize,domain_mean)
+      use derivedType
+      implicit none
+      integer,intent(in)          :: ensembleSize
+      type(domainInfo),intent(in) :: domain(ensembleSize)
+      type(domainInfo)            :: domain_mean
+    end subroutine getMeanDomain
 
     subroutine check_ifObsInsideHorizontalDomain(domain,obs)
       use derivedType

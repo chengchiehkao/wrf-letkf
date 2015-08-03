@@ -16,6 +16,7 @@ use omp_lib  ! for OpenMP (internal)
 implicit none
 
 type(domainInfo),allocatable     :: domain(:)
+type(domainInfo)                 :: domain_mean
 type(obsParent)                  :: sounding,synop,amv,gpsro
 type(backgroundInfo),allocatable :: background(:)
 type(backgroundInfo),allocatable :: analysis(:)
@@ -35,6 +36,7 @@ allocate( domain(ensembleSize) )
 
 print*,'Getting Domain...'
 call getDomain(domain(:),ensembleSize)
+call getMeanDomain(domain(:),ensembleSize,domain_mean)
 print*,'Done.'
 
 print*,'Getting Observations...'
