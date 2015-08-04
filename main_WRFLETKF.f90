@@ -68,9 +68,9 @@ call turnObsWithInvalidValueIntoUnavailable(sounding)
 call turnObsWithInvalidValueIntoUnavailable(amv)
 call turnObsWithInvalidValueIntoUnavailable(gpsro)
 
-print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) unavalible.'
-print*,'There are ',count(.not.amv%obs(:)%available),'/',amv%obsNum,'amv(s) unavalible.'
-print*,'There are ',count(.not.gpsro%obs(:)%available),'/',gpsro%obsNum,'gpsro(s) unavalible.'
+print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) unavailable.'
+print*,'There are ',count(.not.amv%obs(:)%available),'/',amv%obsNum,'amv(s) unavailable.'
+print*,'There are ',count(.not.gpsro%obs(:)%available),'/',gpsro%obsNum,'gpsro(s) unavailable.'
 
 
 print*,repeat('=',20)
@@ -79,9 +79,9 @@ call check_ifObsInsideVerticalDomain(domain(:),ensembleSize,sounding)
 call check_ifObsInsideVerticalDomain(domain(:),ensembleSize,amv)
 call check_ifObsInsideVerticalDomain(domain(:),ensembleSize,gpsro)
 
-print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) unavalible.'
-print*,'There are ',count(.not.amv%obs(:)%available),'/',amv%obsNum,'amv(s) unavalible.'
-print*,'There are ',count(.not.gpsro%obs(:)%available),'/',gpsro%obsNum,'gpsro(s) unavalible.'
+print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) unavailable.'
+print*,'There are ',count(.not.amv%obs(:)%available),'/',amv%obsNum,'amv(s) unavailable.'
+print*,'There are ',count(.not.gpsro%obs(:)%available),'/',gpsro%obsNum,'gpsro(s) unavailable.'
 
 
 call cpu_time(ct1)
@@ -140,7 +140,7 @@ wt1 = omp_get_wtime()
 print*,'Done.'
 print*,'cpu time(set sounding error) =',ct1-ct0,'sec'
 print*,'walltime(set sounding error) =',wt1-wt0,'sec'
-print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) unavalible.'
+print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) unavailable.'
 
 print*,'Starting assimilation...'
 allocate( analysis(ensembleSize) )
