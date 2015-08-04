@@ -140,7 +140,7 @@ wt1 = omp_get_wtime()
 print*,'Done.'
 print*,'cpu time(set sounding error) =',ct1-ct0,'sec'
 print*,'walltime(set sounding error) =',wt1-wt0,'sec'
-
+print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) unavalible.'
 
 print*,'Starting assimilation...'
 allocate( analysis(ensembleSize) )

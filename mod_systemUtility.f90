@@ -77,6 +77,7 @@ interface
 
     subroutine setSoundingError(sounding)
       use derivedType
+      use basicUtility
       implicit none
       type(obsParent),intent(inout)   :: sounding
     end subroutine setSoundingError
