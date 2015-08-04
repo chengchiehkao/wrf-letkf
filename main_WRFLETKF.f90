@@ -89,25 +89,8 @@ print*,'cpu time (from the beginning except getDomain)=',ct1-ct0,'sec'
 
 
 
-print*,'Mapping observations to each grid...'
-wt0 = omp_get_wtime()
-call cpu_time(ct0)
-call mapObsToEachGrid(obsListOfEachGrid,sounding,domain_mean)
-call cpu_time(ct1)
-wt1 = omp_get_wtime()
-print*,'Done.'
-print*,'cpu time (mapObsToEachGrid)=',ct1-ct0,'sec'
-print*,'walltime (mapObsToEachGrid)=',wt1-wt0,'sec'
-
-
-print*,'There are',count(obsListOfEachGrid(:,:,:)%vectorSize>0),'grids may need to be updated.'
-print*,'Max obs per grid=',maxval(obsListOfEachGrid(:,:,:)%vectorSize)
-print*,'Total obs for all grids=',sum(obsListOfEachGrid(:,:,:)%vectorSize)
-
-
 allocate( background(ensembleSize) )
 call getBackground(background(:),ensembleSize,domain(:))
-
 
 print*,'Converting background to tempertature...'
 wt0 = omp_get_wtime()
@@ -141,6 +124,21 @@ print*,'Done.'
 print*,'cpu time(set sounding error) =',ct1-ct0,'sec'
 print*,'walltime(set sounding error) =',wt1-wt0,'sec'
 print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) unavailable.'
+
+
+print*,'Mapping observations to each grid...'
+wt0 = omp_get_wtime()
+call cpu_time(ct0)
+call mapObsToEachGrid(obsListOfEachGrid,sounding,domain_mean)
+call cpu_time(ct1)
+wt1 = omp_get_wtime()
+print*,'Done.'
+print*,'cpu time (mapObsToEachGrid)=',ct1-ct0,'sec'
+print*,'walltime (mapObsToEachGrid)=',wt1-wt0,'sec'
+print*,'There are',count(obsListOfEachGrid(:,:,:)%vectorSize>0),'grids may need to be updated.'
+print*,'Max obs per grid=',maxval(obsListOfEachGrid(:,:,:)%vectorSize)
+print*,'Total obs for all grids=',sum(obsListOfEachGrid(:,:,:)%vectorSize)
+
 
 print*,'Starting assimilation...'
 allocate( analysis(ensembleSize) )

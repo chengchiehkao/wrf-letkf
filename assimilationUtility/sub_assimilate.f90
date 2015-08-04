@@ -27,8 +27,8 @@ real(kind=8),allocatable,dimension(:,:) :: yb
 real(kind=8),allocatable,dimension(:,:) :: R
 
 integer obsNumForAssimilation
-
 real(kind=8) :: dh,dz
+integer,parameter :: relaxationZone = 5
 
 integer iens,iwe,isn,iz,io,iList  ! loop counter
 real ct0,ct1
@@ -46,8 +46,8 @@ do iens = 1,ensembleSize
     allocate( analysis(iens) % ph( domain(iens)%size_westToEast , domain(iens)%size_southToNorth , domain(iens)%size_bottomToTop_stag ) )
 
     analysis(iens) % mu(:,:)       = background(iens) % mu(:,:)
-    analysis(iens) % t(:,:,:)      = 0.d0
-    analysis(iens) % qvapor(:,:,:) = 0.d0
+    analysis(iens) % t(:,:,:)      = background(iens) % t(:,:,:) -300.d0 ! re-substract the offset for wrf
+    analysis(iens) % qvapor(:,:,:) = background(iens) % qvapor(:,:,:)
     analysis(iens) % u(:,:,:)      = background(iens) % u(:,:,:)
     analysis(iens) % v(:,:,:)      = background(iens) % v(:,:,:)
     analysis(iens) % w(:,:,:)      = background(iens) % w(:,:,:)
@@ -60,8 +60,8 @@ enddo
 !$omp schedule(dynamic,1)
 do iz  = 1,domain_mean%size_bottomToTop
 wt0 = omp_get_wtime()
-do isn = 1,domain_mean%size_southToNorth
-do iwe = 1,domain_mean%size_westToEast
+do isn = 1+relaxationZone,domain_mean%size_southToNorth-relaxationZone
+do iwe = 1+relaxationZone,domain_mean%size_westToEast-relaxationZone
 
     if ( obsListOfEachGrid(iwe,isn,iz)%vectorSize .eq. 0 ) then  ! no observation means won't update.
         forall(iens=1:ensembleSize) analysis(iens)%t(iwe,isn,iz)      = background(iens)%t(iwe,isn,iz) -300.d0 ! re-substract the offset for wrf
