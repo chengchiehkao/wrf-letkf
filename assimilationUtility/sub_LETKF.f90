@@ -22,6 +22,8 @@ real(realKind),dimension(n,k) :: yb_pert
 real(realKind),dimension(m,m) :: pa
 real(realKind),dimension(k,k) :: pa_tilde
 
+real(realKind),parameter :: inflationFactor = 1d0/1.15d0
+
 integer i  ! loop index
 !================================================
 
@@ -30,7 +32,7 @@ do i=1,n
     yb_pert(i,:)=yb(i,:)-yb_mean(i,1)
 enddo
 
-pa_tilde = inv( dble(k-1)*identityMat(k) + &
+pa_tilde = inv( dble(k-1)*identityMat(k)*inflationFactor + &
                 matmul( matmul_latterDiag(transpose(yb_pert(:,:)),inv_diagMat(R(:,:),n),k,n),yb_pert(:,:) ) &
                 ,k )
 
