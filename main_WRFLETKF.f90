@@ -183,7 +183,7 @@ print*,'Total obs for all grids=',sum(obsListOfEachUGrid(:,:,:)%vectorSize)
 print*,'Starting assimilation...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call assimilate_uGrid(background(:),analysis(:),ensembleSize,domain(:),domain_mean,sounding,obsListOfEachMassGrid)
+call assimilate_uGrid(background(:),analysis(:),ensembleSize,domain(:),domain_mean,sounding,obsListOfEachUGrid)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 print*,'Done.'
@@ -210,7 +210,7 @@ print*,'Total obs for all grids=',sum(obsListOfEachVGrid(:,:,:)%vectorSize)
 print*,'Starting assimilation...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call assimilate_vGrid(background(:),analysis(:),ensembleSize,domain(:),domain_mean,sounding,obsListOfEachMassGrid)
+call assimilate_vGrid(background(:),analysis(:),ensembleSize,domain(:),domain_mean,sounding,obsListOfEachVGrid)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 print*,'Done.'
@@ -237,7 +237,7 @@ print*,'Total obs for all grids=',sum(obsListOfEachWGrid(:,:,:)%vectorSize)
 print*,'Starting assimilation...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call assimilate_wGrid(background(:),analysis(:),ensembleSize,domain(:),domain_mean,sounding,obsListOfEachMassGrid)
+call assimilate_wGrid(background(:),analysis(:),ensembleSize,domain(:),domain_mean,sounding,obsListOfEachWGrid)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 print*,'Done.'
