@@ -1,9 +1,14 @@
 
-include 'systemUtility/sub_getMeanDomain.f90'
+include 'systemUtility/sub_build_pressureU.f90'
+include 'systemUtility/sub_build_pressureV.f90'
+include 'systemUtility/sub_build_meanDomain.f90'
 include 'systemUtility/sub_check_ifObsInsideHorizontalDomain.f90'
 include 'systemUtility/sub_check_ifObsInsideVerticalDomain.f90'
 include 'systemUtility/sub_turnObsWithInvalidValueIntoUnavailable.f90'
-include 'systemUtility/sub_mapObsToEachGrid.f90'
+include 'systemUtility/sub_mapObsToEachMassGrid.f90'
+include 'systemUtility/sub_mapObsToEachUGrid.f90'
+include 'systemUtility/sub_mapObsToEachVGrid.f90'
+include 'systemUtility/sub_mapObsToEachWGrid.f90'
 include 'systemUtility/sub_convertBackgroundToSounding.f90'
 include 'systemUtility/sub_convertBackgroundToTemperature.f90'
 include 'systemUtility/sub_setSoundingError.f90'
@@ -15,13 +20,29 @@ module systemUtility
 
 interface
 
-    subroutine getMeanDomain(domain,ensembleSize,domain_mean)
+    subroutine build_pressureU(domain,domainSize)
+      use derivedType
+      use basicUtility
+      implicit none
+      integer,intent(in)             :: domainSize
+      type(domainInfo),intent(inout) :: domain(domainSize)
+    end subroutine build_pressureU
+
+    subroutine build_pressureV(domain,domainSize)
+      use derivedType
+      use basicUtility
+      implicit none
+      integer,intent(in)             :: domainSize
+      type(domainInfo),intent(inout) :: domain(domainSize)
+    end subroutine build_pressureV
+
+    subroutine build_meanDomain(domain,ensembleSize,domain_mean)
       use derivedType
       implicit none
       integer,intent(in)          :: ensembleSize
       type(domainInfo),intent(in) :: domain(ensembleSize)
       type(domainInfo)            :: domain_mean
-    end subroutine getMeanDomain
+    end subroutine build_meanDomain
 
     subroutine check_ifObsInsideHorizontalDomain(domain,obs)
       use derivedType
@@ -46,14 +67,41 @@ interface
       type(obsParent),intent(inout) :: obs
     end subroutine turnObsWithInvalidValueIntoUnavailable
 
-    subroutine mapObsToEachGrid(obsListOfEachGrid,obs,domain)
+    subroutine mapObsToEachMassGrid(obsListOfEachGrid,obs,domain)
       use derivedType
       use basicUtility
       implicit none
       type(integerVector),pointer,dimension(:,:,:) :: obsListOfEachGrid  ! intent(out)
       type(obsParent),intent(inout) :: obs
       type(domainInfo),intent(in) :: domain
-    end subroutine mapObsToEachGrid
+    end subroutine mapObsToEachMassGrid
+
+    subroutine mapObsToEachUGrid(obsListOfEachGrid,obs,domain)
+      use derivedType
+      use basicUtility
+      implicit none
+      type(integerVector),pointer,dimension(:,:,:) :: obsListOfEachGrid  ! intent(out)
+      type(obsParent),intent(inout) :: obs
+      type(domainInfo),intent(in) :: domain
+    end subroutine mapObsToEachUGrid
+
+    subroutine mapObsToEachVGrid(obsListOfEachGrid,obs,domain)
+      use derivedType
+      use basicUtility
+      implicit none
+      type(integerVector),pointer,dimension(:,:,:) :: obsListOfEachGrid  ! intent(out)
+      type(obsParent),intent(inout) :: obs
+      type(domainInfo),intent(in) :: domain
+    end subroutine mapObsToEachVGrid
+
+    subroutine mapObsToEachWGrid(obsListOfEachGrid,obs,domain)
+      use derivedType
+      use basicUtility
+      implicit none
+      type(integerVector),pointer,dimension(:,:,:) :: obsListOfEachGrid  ! intent(out)
+      type(obsParent),intent(inout) :: obs
+      type(domainInfo),intent(in) :: domain
+    end subroutine mapObsToEachWGrid
 
     subroutine convertBackgroundToTemperature(background,ensembleSize,domain)
       use derivedType
@@ -67,7 +115,6 @@ interface
     subroutine convertBackgroundToSounding(background,ensembleSize,domain,sounding)
       use derivedType
       use basicUtility
-      use IOUtility
       implicit none
       integer,intent(in)              :: ensembleSize
       type(backgroundInfo),intent(in) :: background(ensembleSize)

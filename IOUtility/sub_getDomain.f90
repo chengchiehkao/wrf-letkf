@@ -1,7 +1,11 @@
 
+!include 'sub_build_pressureU.f90'
+!include 'sub_build_pressureV.f90'
+
 subroutine getDomain(domain,domainSize)
 
 use derivedType
+use systemUtility
 
 implicit none
 include 'netcdf.inc'
@@ -62,7 +66,9 @@ do id=1,domainSize
     allocate( domain(id) % lat_v( domain(id)%size_westToEast , domain(id)%size_southToNorth_stag ) )
     allocate( domain(id) % pressure ( domain(id)%size_westToEast , domain(id)%size_southToNorth , domain(id)%size_bottomToTop      ) )
     allocate( domain(id) % GPH      ( domain(id)%size_westToEast , domain(id)%size_southToNorth , domain(id)%size_bottomToTop_stag ) )
-    allocate( domain(id) % pressure_w ( domain(id)%size_westToEast , domain(id)%size_southToNorth , domain(id)%size_bottomToTop_stag      ) )
+    allocate( domain(id) % pressure_u ( domain(id)%size_westToEast_stag , domain(id)%size_southToNorth , domain(id)%size_bottomToTop ) )
+    allocate( domain(id) % pressure_v ( domain(id)%size_westToEast , domain(id)%size_southToNorth_stag , domain(id)%size_bottomToTop ) )
+    allocate( domain(id) % pressure_w ( domain(id)%size_westToEast , domain(id)%size_southToNorth , domain(id)%size_bottomToTop_stag ) )
     allocate( pressure_dummy ( domain(id)%size_westToEast , domain(id)%size_southToNorth , domain(id)%size_bottomToTop      ) )
     allocate( GPH_dummy      ( domain(id)%size_westToEast , domain(id)%size_southToNorth , domain(id)%size_bottomToTop_stag ) )
     allocate( psfc_dummy     ( domain(id)%size_westToEast , domain(id)%size_southToNorth ) )
@@ -75,6 +81,8 @@ do id=1,domainSize
     domain(id)%lat_v(:,:)        = 0.d0
     domain(id)%pressure(:,:,:)   = 0.d0
     domain(id)%GPH(:,:,:)        = 0.d0
+    domain(id)%pressure_u(:,:,:) = 0.d0
+    domain(id)%pressure_v(:,:,:) = 0.d0
     domain(id)%pressure_w(:,:,:) = 0.d0
     pressure_dummy(:,:,:)        = 0.d0
     GPH_dummy(:,:,:)             = 0.d0
@@ -128,6 +136,9 @@ do id=1,domainSize
     deallocate( pressure_dummy , GPH_dummy , psfc_dummy )
 
 enddo
+
+call build_pressureU(domain(:),domainSize)
+call build_pressureV(domain(:),domainSize)
 
 !================================================
 return

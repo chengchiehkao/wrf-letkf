@@ -1,5 +1,5 @@
 
-subroutine mapObsToEachGrid(obsListOfEachGrid,obs,domain)
+subroutine mapObsToEachWGrid(obsListOfEachGrid,obs,domain)
 
 use derivedType
 use basicUtility
@@ -34,22 +34,22 @@ real(kind=8),parameter :: radian = 57.29577951308232d0
 integer io,iwe,isn,iz,ir1,ir2
 !================================================
 
-allocate( dummy_z( obs%obsNum ) )
-allocate( indexOfObs( obs%obsNum ) )
+!allocate( dummy_z( obs%obsNum ) )
+!allocate( indexOfObs( obs%obsNum ) )
 
-dummy_z(:) = obs%obs(:)%z
-forall(io=1:size(indexOfObs)) indexOfObs(io) = io
+!dummy_z(:) = obs%obs(:)%z
+!forall(io=1:size(indexOfObs)) indexOfObs(io) = io
 
 
 ! SHALL VERIFY THE FUNCTIONALITY OF SORT OF STRUCTURE DATA!!!!
-call quickSortWithIndex( dummy_z(:) , size(dummy_z(:)) , indexOfObs(:) )
+!call quickSortWithIndex( dummy_z(:) , size(dummy_z(:)) , indexOfObs(:) )
 
-obs%obs(:) = obs%obs( indexOfObs(obs%obsNum:1:-1) )  ! reverse for pressure coordinate
+!obs%obs(:) = obs%obs( indexOfObs(obs%obsNum:1:-1) )  ! reverse for pressure coordinate
 
 allocate( subDomainIndexBuffer( obs%obsNum ) )
 allocate( subDomainStart_rank1( blockNum_rank1 ) , subDomainStart_rank2( blockNum_rank2 ) )
 allocate( subDomainEnd_rank1( blockNum_rank1 )   , subDomainEnd_rank2( blockNum_rank2 ) )
-allocate( obsListOfEachGrid( domain%size_westToEast , domain%size_southToNorth , domain%size_bottomToTop ) )
+allocate( obsListOfEachGrid( domain%size_westToEast , domain%size_southToNorth , domain%size_bottomToTop_stag ) )
 
 subDomainIndexBuffer(:) = 0
 subDomainStart_rank1(:) = 0
@@ -73,7 +73,7 @@ subDomainEnd_rank2( blockNum_rank2 )     = domain%size_southToNorth
 
 
 
-allocate(zGrid_preprocessed(domain%size_westToEast,domain%size_southToNorth,domain%size_bottomToTop))
+allocate(zGrid_preprocessed(domain%size_westToEast,domain%size_southToNorth,domain%size_bottomToTop_stag))
 allocate(zObs_preprocessed(obs%obsNum))
 
 zGrid_preprocessed(:,:,:) = dlog(domain%pressure(:,:,:) * 0.01d0)
@@ -137,7 +137,7 @@ do ir1 = 1 , blockNum_rank1
 
     ! map obs' in sub-domain index buffer to each grids in sub-domain
 !$omp parallel do default(shared) private(iwe,isn,iz,zDiff,io,indexBuffer) schedule(dynamic,2)
-    do iz  = 1 , domain % size_bottomToTop
+    do iz  = 1 , domain % size_bottomToTop_stag
     indexBuffer(:) = 0
     do isn = subDomainStart_rank2(ir2) , subDomainEnd_rank2(ir2)
     do iwe = subDomainStart_rank1(ir1) , subDomainEnd_rank1(ir1)
@@ -176,4 +176,4 @@ enddo
 !================================================
 return
 stop
-end subroutine mapObsToEachGrid
+end subroutine mapObsToEachWGrid

@@ -2,7 +2,7 @@
 
 !include 'sub_LETKF.f90'
 
-subroutine assimilate(background,analysis,ensembleSize,domain,domain_mean,obs,obsListOfEachGrid)
+subroutine assimilate_massGrid(background,analysis,ensembleSize,domain,domain_mean,obs,obsListOfEachGrid)
 
 use derivedType
 use basicUtility
@@ -13,7 +13,7 @@ implicit none
 
 integer,intent(in) :: ensembleSize
 type(backgroundInfo),intent(in)  :: background(ensembleSize)
-type(backgroundInfo),intent(out) :: analysis(ensembleSize)
+type(backgroundInfo),intent(inout) :: analysis(ensembleSize)
 type(domainInfo),intent(in)      :: domain(ensembleSize)
 type(domainInfo),intent(in)      :: domain_mean
 type(obsParent) :: obs
@@ -38,6 +38,7 @@ real(kind=8) wt0,wt1
 do iens = 1,ensembleSize
 
     allocate( analysis(iens) % mu( domain(iens)%size_westToEast , domain(iens)%size_southToNorth ) )
+    allocate( analysis(iens) % stratifiedMU( domain(iens)%size_westToEast , domain(iens)%size_southToNorth , domain(iens)%size_bottomToTop ) )
     allocate( analysis(iens) % t( domain(iens)%size_westToEast , domain(iens)%size_southToNorth , domain(iens)%size_bottomToTop ) )
     allocate( analysis(iens) % qvapor( domain(iens)%size_westToEast , domain(iens)%size_southToNorth , domain(iens)%size_bottomToTop ) )
     allocate( analysis(iens) % u( domain(iens)%size_westToEast_stag , domain(iens)%size_southToNorth , domain(iens)%size_bottomToTop ) )
@@ -46,6 +47,7 @@ do iens = 1,ensembleSize
     allocate( analysis(iens) % ph( domain(iens)%size_westToEast , domain(iens)%size_southToNorth , domain(iens)%size_bottomToTop_stag ) )
 
     analysis(iens) % mu(:,:)       = background(iens) % mu(:,:)
+    analysis(iens) % stratifiedMU(:,:,:) = background(iens) % stratifiedMU(:,:,:)
     analysis(iens) % t(:,:,:)      = background(iens) % t(:,:,:) -300.d0 ! re-substract the offset for wrf
     analysis(iens) % qvapor(:,:,:) = background(iens) % qvapor(:,:,:)
     analysis(iens) % u(:,:,:)      = background(iens) % u(:,:,:)
@@ -66,6 +68,7 @@ do iwe = 1+relaxationZone,domain_mean%size_westToEast-relaxationZone
     if ( obsListOfEachGrid(iwe,isn,iz)%vectorSize .eq. 0 ) then  ! no observation means won't update.
         forall(iens=1:ensembleSize) analysis(iens)%t(iwe,isn,iz)      = background(iens)%t(iwe,isn,iz) -300.d0 ! re-substract the offset for wrf
         forall(iens=1:ensembleSize) analysis(iens)%qvapor(iwe,isn,iz) = background(iens)%qvapor(iwe,isn,iz)
+        forall(iens=1:ensembleSize) analysis(iens)%stratifiedMU(iwe,isn,iz) = background(iens)%stratifiedMU(iwe,isn,iz)
         cycle
     else
 
@@ -74,21 +77,24 @@ do iwe = 1+relaxationZone,domain_mean%size_westToEast-relaxationZone
         if ( obsNumForAssimilation .eq. 0 ) then
             forall(iens=1:ensembleSize) analysis(iens)%t(iwe,isn,iz)      = background(iens)%t(iwe,isn,iz) -300.d0 ! re-substract the offset for wrf
             forall(iens=1:ensembleSize) analysis(iens)%qvapor(iwe,isn,iz) = background(iens)%qvapor(iwe,isn,iz)
+            forall(iens=1:ensembleSize) analysis(iens)%stratifiedMU(iwe,isn,iz) = background(iens)%stratifiedMU(iwe,isn,iz)
             cycle
         endif
 
-        allocate( xb_mean(2,1) , xb_pert(2,ensembleSize) )
-        allocate( xa_mean(2,1) , xa_pert(2,ensembleSize) )
+        allocate( xb_mean(3,1) , xb_pert(3,ensembleSize) )
+        allocate( xa_mean(3,1) , xa_pert(3,ensembleSize) )
 
         xb_mean(:,:) = 0.d0
         do iens = 1,ensembleSize
             xb_mean(1,1) = xb_mean(1,1) + background(iens)%t(iwe,isn,iz)
             xb_mean(2,1) = xb_mean(2,1) + background(iens)%qvapor(iwe,isn,iz)
+            xb_mean(3,1) = xb_mean(3,1) + background(iens)%stratifiedMU(iwe,isn,iz)
         enddo
         xb_mean(:,:) = xb_mean(:,:) / real(ensembleSize,8)
 
         forall(iens=1:ensembleSize) xb_pert(1,iens) = background(iens)%t(iwe,isn,iz)      - xb_mean(1,1)
         forall(iens=1:ensembleSize) xb_pert(2,iens) = background(iens)%qvapor(iwe,isn,iz) - xb_mean(2,1)
+        forall(iens=1:ensembleSize) xb_pert(3,iens) = background(iens)%stratifiedMU(iwe,isn,iz) - xb_mean(3,1)
 
         allocate( yo(obsNumForAssimilation,1) )
         allocate( yb(obsNumForAssimilation,ensembleSize) )
@@ -113,10 +119,11 @@ do iwe = 1+relaxationZone,domain_mean%size_westToEast-relaxationZone
         call LETKF( xb_mean(:,:) , xb_pert(:,:) , &
                     xa_mean(:,:) , xa_pert(:,:) , &
                     yo(:,:) , yb(:,:) , R(:,:) , &
-                    2 , obsNumForAssimilation , ensembleSize )
+                    3 , obsNumForAssimilation , ensembleSize )
 
         forall(iens=1:ensembleSize) analysis(iens)%t(iwe,isn,iz)      = xa_mean(1,1) + xa_pert(1,iens) -300.d0  ! re-substract the offset for wrf
         forall(iens=1:ensembleSize) analysis(iens)%qvapor(iwe,isn,iz) = xa_mean(2,1) + xa_pert(2,iens)
+        forall(iens=1:ensembleSize) analysis(iens)%stratifiedMU(iwe,isn,iz) = xa_mean(3,1) + xa_pert(3,iens)
 
         deallocate(xb_mean,xa_mean,xb_pert,xa_pert,yo,yb,R)
     endif
@@ -131,4 +138,4 @@ enddo
 !================================================
 return
 stop
-end subroutine assimilate
+end subroutine assimilate_massGrid

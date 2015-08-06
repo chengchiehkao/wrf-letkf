@@ -58,9 +58,16 @@ do io = 1 , sounding%obsNum
             sounding%obs(io)%error = 2d-4
         end select
 
-        if ( dabs(sounding%obs(io)%innov) .gt. thresholdFactor * sounding%obs(io)%error ) then
-            sounding%obs(io)%available = .false.
-            deallocate( sounding%obs(io)%background )
+        if ( trim(adjustl(sounding%obs(io)%varName)) .ne. 'QVAPOR' ) then
+            if ( dabs(sounding%obs(io)%innov) .gt. thresholdFactor * sounding%obs(io)%error ) then
+                sounding%obs(io)%available = .false.
+                deallocate( sounding%obs(io)%background )
+            endif
+        else
+            if ( dabs(sounding%obs(io)%innov) .gt. 10.d0 * sounding%obs(io)%error ) then
+                sounding%obs(io)%available = .false.
+                deallocate( sounding%obs(io)%background )
+            endif
         endif
 
     endif

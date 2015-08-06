@@ -14,10 +14,11 @@ character(len=255) backgroundSrc
 character(len=2)  domainSeiralNumInString
 
 integer ncStatus,ncID
-integer varID_mu , varID_t , varID_qvapor , varID_u , varID_v , varID_w , varID_ph
+integer varID_mu , varID_t , varID_qvapor , varID_u , varID_v , varID_w , varID_ph , varID_znw
 
-integer iens
-integer iwe,isn,iz
+real(kind=8),allocatable,dimension(:) :: temp_znw , temp_diffZNW
+
+integer iens , iz  ! loop counter
 !================================================
 
 write(*,'(a)',advance='no') 'Reading background:'
@@ -44,6 +45,9 @@ do iens = 1 , ensembleSize
     allocate( background(iens) % v( domain(iens)%size_westToEast , domain(iens)%size_southToNorth_stag , domain(iens)%size_bottomToTop ) )
     allocate( background(iens) % w( domain(iens)%size_westToEast , domain(iens)%size_southToNorth , domain(iens)%size_bottomToTop_stag ) )
     allocate( background(iens) % ph( domain(iens)%size_westToEast , domain(iens)%size_southToNorth , domain(iens)%size_bottomToTop_stag ) )
+    allocate( background(iens) % stratifiedMU( domain(iens)%size_westToEast , domain(iens)%size_southToNorth , domain(iens)%size_bottomToTop ) )
+    allocate( temp_znw( domain(iens)%size_bottomToTop_stag ) )
+    allocate( temp_diffZNW( domain(iens)%size_bottomToTop ) )
 
     background(iens) % mu(:,:)       = 0.d0
     background(iens) % t(:,:,:)      = 0.d0
@@ -51,7 +55,10 @@ do iens = 1 , ensembleSize
     background(iens) % u(:,:,:)      = 0.d0
     background(iens) % v(:,:,:)      = 0.d0
     background(iens) % w(:,:,:)      = 0.d0
-    background(iens) % ph(:,:,:)      = 0.d0
+    background(iens) % ph(:,:,:)     = 0.d0
+    background(iens) % stratifiedMU(:,:,:) = 0.d0
+    temp_znw(:)     = 0.d0
+    temp_diffZNW(:) = 0.d0
 
 
     ncStatus = nf_inq_varID( ncID , 'MU' , varID_mu )
@@ -75,15 +82,25 @@ do iens = 1 , ensembleSize
     ncStatus = nf_inq_varID( ncID , 'PH' , varID_ph )
     ncStatus = nf_get_vara_double( ncID , varID_ph , (/1,1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth,domain(iens)%size_bottomToTop_stag,1/) , background(iens)%ph(:,:,:) )
 
+    ncStatus = nf_inq_varID( ncID , 'ZNW' , varID_znw )
+    ncStatus = nf_get_vara_double( ncID , varID_znw , (/1,1/) , (/domain(iens)%size_bottomToTop_stag,1/) , temp_znw(:) )
+
+
+    temp_diffZNW(:) = temp_znw(1:domain(iens)%size_bottomToTop_stag-1) - temp_znw(2:domain(iens)%size_bottomToTop_stag)
+
+    do iz = 1,domain(iens)%size_bottomToTop
+        background(iens) % stratifiedMU(:,:,iz) = temp_diffZNW(iz) * background(iens)%mu(:,:)
+    enddo
 
     background(iens)%t(:,:,:) = background(iens)%t(:,:,:) + 300.d0  ! Offset of t in WRF is 300K.
-
 
     ncStatus = nf_close( ncID )
     if ( ncStatus .ne. nf_noErr ) then
         print*,nf_strError( ncStatus )
         stop
     endif
+
+    deallocate(temp_znw,temp_diffZNW)
 
 enddo
 

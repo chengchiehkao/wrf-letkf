@@ -45,6 +45,7 @@ do iens = 1 , ensembleSize
         stop
     endif
 
+    analysis(iens)%mu(:,:) = sum( analysis(iens)%stratifiedMU(:,:,:) , 3 )
 
     ncStatus = nf_inq_varID( ncID , 'MU' , varID_mu )
     ncStatus = nf_put_vara_double( ncID , varID_mu , (/1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth,1/) , analysis(iens)%mu(:,:) )

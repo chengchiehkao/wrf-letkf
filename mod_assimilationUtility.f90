@@ -1,6 +1,9 @@
 
 
-include 'assimilationUtility/sub_assimilate.f90'
+include 'assimilationUtility/sub_assimilate_massGrid.f90'
+include 'assimilationUtility/sub_assimilate_uGrid.f90'
+include 'assimilationUtility/sub_assimilate_vGrid.f90'
+include 'assimilationUtility/sub_assimilate_wGrid.f90'
 include 'assimilationUtility/sub_LETKF.f90'
 
 
@@ -9,7 +12,7 @@ module assimilationUtility
 
 interface
 
-    subroutine assimilate(background,analysis,ensembleSize,domain,domain_mean,obs,obsListOfEachGrid)
+    subroutine assimilate_massGrid(background,analysis,ensembleSize,domain,domain_mean,obs,obsListOfEachGrid)
       use derivedType
       use basicUtility
       use systemUtility
@@ -17,12 +20,57 @@ interface
       implicit none
       integer,intent(in) :: ensembleSize
       type(backgroundInfo),intent(in)  :: background(ensembleSize)
-      type(backgroundInfo),intent(out) :: analysis(ensembleSize)
+      type(backgroundInfo),intent(inout) :: analysis(ensembleSize)
       type(domainInfo),intent(in)      :: domain(ensembleSize)
       type(domainInfo),intent(in)      :: domain_mean
       type(obsParent) :: obs
       type(integerVector),pointer :: obsListOfEachGrid(:,:,:)
-    end subroutine assimilate
+    end subroutine assimilate_massGrid
+
+    subroutine assimilate_uGrid(background,analysis,ensembleSize,domain,domain_mean,obs,obsListOfEachGrid)
+      use derivedType
+      use basicUtility
+      use systemUtility
+      use math
+      implicit none
+      integer,intent(in) :: ensembleSize
+      type(backgroundInfo),intent(in)  :: background(ensembleSize)
+      type(backgroundInfo),intent(inout) :: analysis(ensembleSize)
+      type(domainInfo),intent(in)      :: domain(ensembleSize)
+      type(domainInfo),intent(in)      :: domain_mean
+      type(obsParent) :: obs
+      type(integerVector),pointer :: obsListOfEachGrid(:,:,:)
+    end subroutine assimilate_uGrid
+
+    subroutine assimilate_vGrid(background,analysis,ensembleSize,domain,domain_mean,obs,obsListOfEachGrid)
+      use derivedType
+      use basicUtility
+      use systemUtility
+      use math
+      implicit none
+      integer,intent(in) :: ensembleSize
+      type(backgroundInfo),intent(in)  :: background(ensembleSize)
+      type(backgroundInfo),intent(inout) :: analysis(ensembleSize)
+      type(domainInfo),intent(in)      :: domain(ensembleSize)
+      type(domainInfo),intent(in)      :: domain_mean
+      type(obsParent) :: obs
+      type(integerVector),pointer :: obsListOfEachGrid(:,:,:)
+    end subroutine assimilate_vGrid
+
+    subroutine assimilate_wGrid(background,analysis,ensembleSize,domain,domain_mean,obs,obsListOfEachGrid)
+      use derivedType
+      use basicUtility
+      use systemUtility
+      use math
+      implicit none
+      integer,intent(in) :: ensembleSize
+      type(backgroundInfo),intent(in)  :: background(ensembleSize)
+      type(backgroundInfo),intent(inout) :: analysis(ensembleSize)
+      type(domainInfo),intent(in)      :: domain(ensembleSize)
+      type(domainInfo),intent(in)      :: domain_mean
+      type(obsParent) :: obs
+      type(integerVector),pointer :: obsListOfEachGrid(:,:,:)
+    end subroutine assimilate_wGrid
 
     subroutine LETKF( xb_mean , xb_pert , &
                       xa_mean , xa_pert , &
