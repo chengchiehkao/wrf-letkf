@@ -43,7 +43,7 @@ interface
     function matmul_formerDiag(matrixFormer,matrixLatter,dim1,dim2) result(outArray)
       implicit none
       integer dim1,dim2  ! array dimension
-      real(kind=8),dimension(dim1,dim1),intent(in)  :: matrixFormer
+      real(kind=8),dimension(dim1)     ,intent(in)  :: matrixFormer
       real(kind=8),dimension(dim1,dim2),intent(in)  :: matrixLatter
       real(kind=8),dimension(dim1,dim2) :: outArray
     end function matmul_formerDiag
@@ -52,7 +52,7 @@ interface
       implicit none
       integer dim1,dim2  ! array dimension
       real(kind=8),dimension(dim1,dim2),intent(in)  :: matrixFormer
-      real(kind=8),dimension(dim2,dim2),intent(in)  :: matrixLatter
+      real(kind=8),dimension(dim2)     ,intent(in)  :: matrixLatter
       real(kind=8),dimension(dim1,dim2) :: outArray
     end function matmul_latterDiag
 

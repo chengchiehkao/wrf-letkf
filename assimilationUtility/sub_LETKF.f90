@@ -15,7 +15,7 @@ real(realKind),dimension(m,1) :: xb_mean,xa_mean
 real(realKind),dimension(m,k) :: xb_pert,xa_pert
 real(realKind),dimension(n,1) :: yo 
 real(realKind),dimension(n,k) :: yb
-real(realKind),dimension(n,n) :: R
+real(realKind),dimension(n)   :: R
 
 real(realKind),dimension(n,1) :: yb_mean
 real(realKind),dimension(n,k) :: yb_pert
@@ -33,7 +33,7 @@ do i=1,n
 enddo
 
 pa_tilde = inv( dble(k-1)*identityMat(k)*inflationFactor + &
-                matmul( matmul_latterDiag(transpose(yb_pert(:,:)),inv_diagMat(R(:,:),n),k,n),yb_pert(:,:) ) &
+                matmul( matmul_latterDiag(transpose(yb_pert(:,:)),1d0/R(:),k,n),yb_pert(:,:) ) &
                 ,k )
 
 xa_mean = xb_mean + &
@@ -45,7 +45,7 @@ xa_mean = xb_mean + &
           ), &
             transpose(yb_pert(:,:)) &
           ), &
-            inv_diagMat(R(:,:),n) , m , n &
+            1d0/R(:) , m , n &
           ), &
             (yo(:,:)-yb_mean(:,:)) &
           )

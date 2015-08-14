@@ -84,7 +84,7 @@ interface
       real(realKind),dimension(m,k) :: xb_pert,xa_pert
       real(realKind),dimension(n,1) :: yo
       real(realKind),dimension(n,k) :: yb
-      real(realKind),dimension(n,n) :: R
+      real(realKind),dimension(n)   :: R
     end subroutine LETKF
 
 end interface

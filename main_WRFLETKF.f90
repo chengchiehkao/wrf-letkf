@@ -30,7 +30,8 @@ type(integerVector),pointer,dimension(:,:,:) :: obsListOfEachWGrid    => null()
 integer io,iwe,isn,iz
 
 real         ct0,ct1
-real(kind=8) wt0,wt1
+real(kind=8) wt0,wt1,walltime_assimilation
+data walltime_assimilation/0d0/
 !================================================
 
 ensembleSize=36
@@ -49,6 +50,7 @@ print*,'cpu time(Get domain) =',ct1-ct0,'sec'
 print*,'walltime(Get domain) =',wt1-wt0,'sec'
 
 
+print*,repeat('=',20)
 print*,'Getting Observations...'
 call getSounding(sounding , (/'U         ','V         ','T         ','QVAPOR    '/) , 4 )
 call getSynop(synop,        (/'PSFC      ','U         ','V         ','T         ','Td        '/) , 5 )
@@ -58,8 +60,11 @@ sounding%obs(:)%z = 100.d0 * sounding%obs(:)%z  ! convert hPa to Pa
 amv%obs(:)%z      = 100.d0 * amv%obs(:)%z       ! convert hPa to Pa
 print*,'Done.'
 
+
+wt0 = omp_get_wtime()
 call cpu_time(ct0)
 
+print*,repeat('=',20)
 print*,'Checking if observations inside horizontal domain...'
 call check_ifObsInsideHorizontalDomain(domain(1),sounding)
 call check_ifObsInsideHorizontalDomain(domain(1),synop)
@@ -93,15 +98,20 @@ print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'s
 print*,'There are ',count(.not.amv%obs(:)%available),'/',amv%obsNum,'amv(s) unavailable.'
 print*,'There are ',count(.not.gpsro%obs(:)%available),'/',gpsro%obsNum,'gpsro(s) unavailable.'
 
-
 call cpu_time(ct1)
+wt1 = omp_get_wtime()
 print*,'cpu time (Check observations)=',ct1-ct0,'sec'
+print*,'walltime (Check observations)=',wt1-wt0,'sec'
 
 
-
+print*,repeat('=',20)
+wt0 = omp_get_wtime()
 allocate( background(ensembleSize) )
 call getBackground(background(:),ensembleSize,domain(:))
+wt1 = omp_get_wtime()
+print*,'walltime(get background) =',wt1-wt0,'sec'
 
+print*,repeat('=',20)
 print*,'Converting background to tempertature...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
@@ -113,6 +123,7 @@ print*,'cpu time(background to T) =',ct1-ct0,'sec'
 print*,'walltime(background to T) =',wt1-wt0,'sec'
 
 
+print*,repeat('=',20)
 print*,'Converting background to sounding...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
@@ -124,6 +135,7 @@ print*,'cpu time(H of sounding) =',ct1-ct0,'sec'
 print*,'walltime(H of sounding) =',wt1-wt0,'sec'
 
 
+print*,repeat('=',20)
 print*,'Setting error of sounding...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
@@ -138,6 +150,7 @@ print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'s
 !
 !  Assimilation on mass grid.
 !
+print*,repeat('=',20)
 print*,'Mapping observations to each mass grid...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
@@ -159,6 +172,7 @@ call cpu_time(ct0)
 call assimilate_massGrid(background(:),analysis(:),ensembleSize,domain(:),domain_mean,sounding,obsListOfEachMassGrid)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
+walltime_assimilation = walltime_assimilation + (wt1-wt0)
 print*,'Done.'
 print*,'cpu time(assimilation on mass grid) =',ct1-ct0,'sec'
 print*,'walltime(assimilation on mass grid) =',wt1-wt0,'sec'
@@ -166,6 +180,7 @@ print*,'walltime(assimilation on mass grid) =',wt1-wt0,'sec'
 !
 !  Assimilation on u grid.
 !
+print*,repeat('=',20)
 print*,'Mapping observations to each u grid...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
@@ -186,6 +201,7 @@ call cpu_time(ct0)
 call assimilate_uGrid(background(:),analysis(:),ensembleSize,domain(:),domain_mean,sounding,obsListOfEachUGrid)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
+walltime_assimilation = walltime_assimilation + (wt1-wt0)
 print*,'Done.'
 print*,'cpu time(assimilation on u grid) =',ct1-ct0,'sec'
 print*,'walltime(assimilation on u grid) =',wt1-wt0,'sec'
@@ -193,6 +209,7 @@ print*,'walltime(assimilation on u grid) =',wt1-wt0,'sec'
 !
 !  Assimilation on v grid.
 !
+print*,repeat('=',20)
 print*,'Mapping observations to each v grid...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
@@ -213,6 +230,7 @@ call cpu_time(ct0)
 call assimilate_vGrid(background(:),analysis(:),ensembleSize,domain(:),domain_mean,sounding,obsListOfEachVGrid)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
+walltime_assimilation = walltime_assimilation + (wt1-wt0)
 print*,'Done.'
 print*,'cpu time(assimilation on v grid) =',ct1-ct0,'sec'
 print*,'walltime(assimilation on v grid) =',wt1-wt0,'sec'
@@ -220,6 +238,7 @@ print*,'walltime(assimilation on v grid) =',wt1-wt0,'sec'
 !
 !  Assimilation on w grid.
 !
+print*,repeat('=',20)
 print*,'Mapping observations to each w grid...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
@@ -240,18 +259,15 @@ call cpu_time(ct0)
 call assimilate_wGrid(background(:),analysis(:),ensembleSize,domain(:),domain_mean,sounding,obsListOfEachWGrid)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
+walltime_assimilation = walltime_assimilation + (wt1-wt0)
 print*,'Done.'
 print*,'cpu time(assimilation on w grid) =',ct1-ct0,'sec'
 print*,'walltime(assimilation on w grid) =',wt1-wt0,'sec'
 
-!iz=availableFileID()
-!open(iz,file='obsListOfEachUGrid')
-!write(iz,*) domain(1)%lon_u(90+10,75+10),domain(1)%lat_u(90+10,75+10)
-!do io = 1,obsListOfEachUGrid(90+10,75+10,10)%vectorSize
-!    write(iz,*) sounding%obs(obsListOfEachUGrid(90+10,75+10,10)%vector(io))%lon,sounding%obs(obsListOfEachUGrid(90+10,75+10,10)%vector(io))%lat
-!enddo
-!stop
 
+print*,repeat('=',20)
+print*,'walltime(all assimilation process) =',walltime_assimilation,'sec'
+print*,repeat('=',20)
 !
 !  Output analysis.
 !

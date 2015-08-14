@@ -8,7 +8,7 @@ integer,parameter :: realKind=8
 integer k  ! i/o array dimension
 real(realKind),dimension(k,k),intent(in) :: inArray
 real(realKind),dimension(k,k)            :: outArray
-real(realKind),dimension(k,k)            :: S
+real(realKind),dimension(k)              :: S
 integer i  ! loop index
 !real(realKind),external :: matmul_latterDiag
 interface
@@ -16,7 +16,7 @@ interface
       implicit none
       integer dim1,dim2  ! array dimension
       real(kind=8),dimension(dim1,dim2),intent(in)  :: matrixFormer
-      real(kind=8),dimension(dim2,dim2),intent(in)  :: matrixLatter
+      real(kind=8),dimension(dim2)     ,intent(in)  :: matrixLatter
       real(kind=8),dimension(dim1,dim2) :: outArray
     end function matmul_latterDiag
 endinterface
@@ -85,9 +85,9 @@ endif
 deallocate(WORK)
 deallocate(IWORK)
 
-S(:,:)=0d0
+!S(:,:)=0d0
 do i=1,k
-    S(i,i)=dsqrt(W(i))
+    S(i)=dsqrt(W(i))
     !if( S(i,i).lt.1d-10 ) then
     !    print*,'!!!Warning for rank deficiency!!!'
     !    S(i,i)=0.0d0

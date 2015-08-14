@@ -76,7 +76,7 @@ subDomainEnd_rank2( blockNum_rank2 )     = domain%size_southToNorth
 allocate(zGrid_preprocessed(domain%size_westToEast,domain%size_southToNorth,domain%size_bottomToTop_stag))
 allocate(zObs_preprocessed(obs%obsNum))
 
-zGrid_preprocessed(:,:,:) = dlog(domain%pressure(:,:,:) * 0.01d0)
+zGrid_preprocessed(:,:,:) = dlog(domain%pressure_w(:,:,:) * 0.01d0)
 zObs_preprocessed(:)      = dlog(obs%obs(:)%z * 0.01d0)
 
 allocate( domainLonInRad( domain%size_westToEast , domain%size_southToNorth ) , obsLonInRad( obs%obsNum ) )
