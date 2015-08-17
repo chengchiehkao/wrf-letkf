@@ -13,7 +13,7 @@ include 'systemUtility/sub_convertBackgroundToSounding.f90'
 include 'systemUtility/sub_convertBackgroundToTemperature.f90'
 include 'systemUtility/sub_setSoundingError.f90'
 include 'systemUtility/func_errorFactor.f90'
-
+include 'systemUtility/sub_deallocate_obsListOfEachGrid.f90'
 
 module systemUtility
 
@@ -134,6 +134,12 @@ interface
       real(kind=8) rc,rlev
       real(kind=8) dh,dz
     end function errorFactor
+
+    subroutine deallocate_obsListOfEachGrid(obsListOfEachGrid)
+      use derivedType
+      implicit none
+      type(integerVector),pointer,dimension(:,:,:) :: obsListOfEachGrid
+    end subroutine deallocate_obsListOfEachGrid
 
 end interface
 

@@ -22,6 +22,8 @@ integer io , id  ! loop counter
 
 
 ! Shall aware of unit conversion.
+
+!$omp parallel do default(private) shared(domainSize,domain,obs) schedule(dynamic,100)
 do io=1,obs%obsNum
 
     call locateAsIndex2d( domain(1)%lon(:,:)        , domain(1)%lat(:,:) , &
@@ -82,6 +84,7 @@ do io=1,obs%obsNum
 
     enddo
 enddo
+!$omp end parallel do
 
 !================================================
 return

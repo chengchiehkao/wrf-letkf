@@ -177,6 +177,9 @@ print*,'Done.'
 print*,'cpu time(assimilation on mass grid) =',ct1-ct0,'sec'
 print*,'walltime(assimilation on mass grid) =',wt1-wt0,'sec'
 
+call deallocate_obsListOfEachGrid(obsListOfEachMassGrid)
+
+
 !
 !  Assimilation on u grid.
 !
@@ -205,6 +208,9 @@ walltime_assimilation = walltime_assimilation + (wt1-wt0)
 print*,'Done.'
 print*,'cpu time(assimilation on u grid) =',ct1-ct0,'sec'
 print*,'walltime(assimilation on u grid) =',wt1-wt0,'sec'
+
+call deallocate_obsListOfEachGrid(obsListOfEachUGrid)
+
 
 !
 !  Assimilation on v grid.
@@ -235,6 +241,9 @@ print*,'Done.'
 print*,'cpu time(assimilation on v grid) =',ct1-ct0,'sec'
 print*,'walltime(assimilation on v grid) =',wt1-wt0,'sec'
 
+call deallocate_obsListOfEachGrid(obsListOfEachVGrid)
+
+
 !
 !  Assimilation on w grid.
 !
@@ -263,6 +272,8 @@ walltime_assimilation = walltime_assimilation + (wt1-wt0)
 print*,'Done.'
 print*,'cpu time(assimilation on w grid) =',ct1-ct0,'sec'
 print*,'walltime(assimilation on w grid) =',wt1-wt0,'sec'
+
+call deallocate_obsListOfEachGrid(obsListOfEachWGrid)
 
 
 print*,repeat('=',20)

@@ -14,9 +14,7 @@ integer io
 !logical,external :: inPolygon
 !================================================
 
-!domain%size_westToEast = size(domain%lon(:,:),1)
-!domain%size_southToNorth = size(domain%lon(:,:),2)
-
+!$omp parallel do default(shared) private(io) schedule(dynamic,100)
 do io=1,obs%obsNum
 
     obs%obs(io)%available = inPolygon( (/domain%lon(1:domain%size_westToEast-1,1), &
@@ -31,6 +29,7 @@ do io=1,obs%obsNum
                                          obs%obs(io)%lon,obs%obs(io)%lat )
 
 enddo
+!$omp end parallel do
 
 !================================================
 return
