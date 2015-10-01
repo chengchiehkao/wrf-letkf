@@ -70,14 +70,7 @@ do iwe = 1+relaxationZone,domain_mean%size_westToEast_stag-relaxationZone
         cycle
     else
 
-        obsNumForAssimilation = 0
-        do io = 1,obsListOfEachGrid(iwe,isn,iz)%vectorSize
-            if ( obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(io) ) % available .and.  &
-                 (trim(adjustl(obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(io) ) % varName)) .eq. 'U' .or. &
-                  trim(adjustl(obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(io) ) % varName)) .eq. 'V') ) then
-                obsNumForAssimilation = 1 + obsNumForAssimilation 
-            endif
-        enddo
+        obsNumForAssimilation = count( obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(:) ) % available )
 
         if ( obsNumForAssimilation .eq. 0 ) then
             forall(iens=1:ensembleSize) analysis(iens)%u(iwe,isn,iz) = background(iens)%u(iwe,isn,iz)
@@ -102,9 +95,7 @@ do iwe = 1+relaxationZone,domain_mean%size_westToEast_stag-relaxationZone
 
         io = 0
         do iList = 1,obsListOfEachGrid(iwe,isn,iz)%vectorSize
-            if ( obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%available .and.  &
-                 (trim(adjustl(obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) ) % varName)) .eq. 'U' .or. &
-                  trim(adjustl(obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) ) % varName)) .eq. 'V') ) then
+            if ( obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%available ) then
                 io = io+1
                 yo(io,1) = obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%value
                 yb(io,:) = obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%background(:)
