@@ -13,6 +13,15 @@ type domainInfo
     integer                               :: size_westToEast_stag , size_southToNorth_stag , size_bottomToTop_stag
 end type domainInfo
 
+type systemParameter
+    integer :: ensembleSize
+    logical :: use_sound , use_synop , use_amv , use_gpsro
+    character(len=10),pointer,dimension(:) :: varList_sound , varList_synop , varList_amv , varList_gpsro
+    integer :: varListSize_sound , varListSize_synop , varListSize_amv , varListSize_gpsro
+    real(kind=8) :: rd , rc  ! Decorrelated & highly correlated distance on horizontal space.
+    real(kind=8) :: rv       ! Decorrelated distance on vertical space.
+end type systemParameter
+
 type obsChild
     real(kind=8)      :: lon , lat , z , value , error
     real(kind=8)      :: innov

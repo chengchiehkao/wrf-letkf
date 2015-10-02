@@ -7,6 +7,7 @@ include 'IOUtility/sub_getDomain.f90'
 include 'IOUtility/sub_getGPSRO.f90'
 include 'IOUtility/sub_getSounding.f90'
 include 'IOUtility/sub_getSynop.f90'
+include 'IOUtility/sub_getSystemParameter.f90'
 include 'IOUtility/sub_outputAnalysis.f90'
 
 module IOUtility
@@ -51,7 +52,6 @@ interface
       character(len=10),dimension(varListSize),intent(in)  :: varList
     end subroutine getGPSRO
 
-
     subroutine getSounding(sounding,varList,varListSize)
       use derivedType
       implicit none
@@ -59,7 +59,7 @@ interface
       integer,intent(in)                                   :: varListSize
       character(len=10),dimension(varListSize),intent(in)  :: varList
     end subroutine getSounding
-    
+
     subroutine getSynop(synop,varList,varListSize)
       use derivedType
       implicit none
@@ -67,7 +67,13 @@ interface
       integer,intent(in)                                   :: varListSize
       character(len=10),dimension(varListSize),intent(in)  :: varList
     end subroutine getSynop
-    
+ 
+    subroutine getSystemParameter(systemParameters)
+      use derivedType
+      implicit none
+      type(systemParameter),intent(out) :: systemParameters
+    end subroutine getSystemParameter
+
     subroutine outputAnalysis(analysis,ensembleSize,domain)
       use derivedType
       implicit none

@@ -15,6 +15,7 @@ use omp_lib  ! for OpenMP (internal)
 
 implicit none
 
+type(systemParameter)            :: systemParameters
 type(domainInfo),allocatable     :: domain(:)
 type(domainInfo)                 :: domain_mean
 type(obsParent)                  :: sounding,synop,amv,gpsro
@@ -34,7 +35,10 @@ real(kind=8) wt0,wt1,walltime_assimilation
 data walltime_assimilation/0d0/
 !================================================
 
-ensembleSize=36
+
+call getSystemParameter(systemParameters)
+
+ensembleSize = systemParameters % ensembleSize
 
 allocate( domain(ensembleSize) )
 
@@ -52,12 +56,10 @@ print*,'walltime(Get domain) =',wt1-wt0,'sec'
 
 print*,repeat('=',20)
 print*,'Getting Observations...'
-call getSounding(sounding , (/'U         ','V         ','T         ','QVAPOR    '/) , 4 )
-call getSynop(synop,        (/'PSFC      ','U         ','V         ','T         ','Td        '/) , 5 )
-call getAMV(amv,            (/'U         ','V         '/) , 2 )
-call getGPSRO(gpsro,        (/'REF       ','BANGLE    ','ImpctParam'/) , 3 )
-sounding%obs(:)%z = 100.d0 * sounding%obs(:)%z  ! convert hPa to Pa
-amv%obs(:)%z      = 100.d0 * amv%obs(:)%z       ! convert hPa to Pa
+if ( systemParameters % use_sound )  call getSounding(sounding , systemParameters%varList_sound(:) , systemParameters%varListSize_sound )
+if ( systemParameters % use_synop )  call getSynop(synop, systemParameters%varList_synop(:) , systemParameters%varListSize_synop )
+if ( systemParameters % use_amv )    call getAMV(amv, systemParameters%varList_amv(:) , systemParameters%varListSize_amv )
+if ( systemParameters % use_gpsro )  call getGPSRO(gpsro, systemParameters%varList_gpsro(:) , systemParameters%varListSize_gpsro )
 print*,'Done.'
 
 
@@ -66,37 +68,37 @@ call cpu_time(ct0)
 
 print*,repeat('=',20)
 print*,'Checking if observations inside horizontal domain...'
-call check_ifObsInsideHorizontalDomain(domain(1),sounding)
-call check_ifObsInsideHorizontalDomain(domain(1),synop)
-call check_ifObsInsideHorizontalDomain(domain(1),amv)
-call check_ifObsInsideHorizontalDomain(domain(1),gpsro)
+if ( systemParameters % use_sound )  call check_ifObsInsideHorizontalDomain(domain(1),sounding)
+if ( systemParameters % use_synop )  call check_ifObsInsideHorizontalDomain(domain(1),synop)
+if ( systemParameters % use_amv )    call check_ifObsInsideHorizontalDomain(domain(1),amv)
+if ( systemParameters % use_gpsro )  call check_ifObsInsideHorizontalDomain(domain(1),gpsro)
 
-print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) out of horizontal domain.'
-print*,'There are ',count(.not.synop%obs(:)%available),'/',synop%obsNum,'synop(s) out of horizontal domain.'
-print*,'There are ',count(.not.amv%obs(:)%available),'/',amv%obsNum,'amv(s) out of horizontal domain.'
-print*,'There are ',count(.not.gpsro%obs(:)%available),'/',gpsro%obsNum,'gpsro(s) out of horizontal domain.'
+if ( systemParameters % use_sound )  print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) out of horizontal domain.'
+if ( systemParameters % use_synop )  print*,'There are ',count(.not.synop%obs(:)%available),'/',synop%obsNum,'synop(s) out of horizontal domain.'
+if ( systemParameters % use_amv )    print*,'There are ',count(.not.amv%obs(:)%available),'/',amv%obsNum,'amv(s) out of horizontal domain.'
+if ( systemParameters % use_gpsro )  print*,'There are ',count(.not.gpsro%obs(:)%available),'/',gpsro%obsNum,'gpsro(s) out of horizontal domain.'
 
 
 print*,repeat('=',20)
 print*,'Turning observations with invalid value into unavailable...'
-call turnObsWithInvalidValueIntoUnavailable(sounding)
-call turnObsWithInvalidValueIntoUnavailable(amv)
-call turnObsWithInvalidValueIntoUnavailable(gpsro)
+if ( systemParameters % use_sound )  call turnObsWithInvalidValueIntoUnavailable(sounding)
+if ( systemParameters % use_amv )    call turnObsWithInvalidValueIntoUnavailable(amv)
+if ( systemParameters % use_gpsro )  call turnObsWithInvalidValueIntoUnavailable(gpsro)
 
-print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) unavailable.'
-print*,'There are ',count(.not.amv%obs(:)%available),'/',amv%obsNum,'amv(s) unavailable.'
-print*,'There are ',count(.not.gpsro%obs(:)%available),'/',gpsro%obsNum,'gpsro(s) unavailable.'
+if ( systemParameters % use_sound )  print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) unavailable.'
+if ( systemParameters % use_amv )    print*,'There are ',count(.not.amv%obs(:)%available),'/',amv%obsNum,'amv(s) unavailable.'
+if ( systemParameters % use_gpsro )  print*,'There are ',count(.not.gpsro%obs(:)%available),'/',gpsro%obsNum,'gpsro(s) unavailable.'
 
 
 print*,repeat('=',20)
 print*,'Checking if observations inside vertical domain...'
-call check_ifObsInsideVerticalDomain(domain(:),ensembleSize,sounding)
-call check_ifObsInsideVerticalDomain(domain(:),ensembleSize,amv)
-call check_ifObsInsideVerticalDomain(domain(:),ensembleSize,gpsro)
+if ( systemParameters % use_sound )  call check_ifObsInsideVerticalDomain(domain(:),ensembleSize,sounding)
+if ( systemParameters % use_amv )    call check_ifObsInsideVerticalDomain(domain(:),ensembleSize,amv)
+if ( systemParameters % use_gpsro )  call check_ifObsInsideVerticalDomain(domain(:),ensembleSize,gpsro)
 
-print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) unavailable.'
-print*,'There are ',count(.not.amv%obs(:)%available),'/',amv%obsNum,'amv(s) unavailable.'
-print*,'There are ',count(.not.gpsro%obs(:)%available),'/',gpsro%obsNum,'gpsro(s) unavailable.'
+if ( systemParameters % use_sound )  print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) unavailable.'
+if ( systemParameters % use_amv )    print*,'There are ',count(.not.amv%obs(:)%available),'/',amv%obsNum,'amv(s) unavailable.'
+if ( systemParameters % use_gpsro )  print*,'There are ',count(.not.gpsro%obs(:)%available),'/',gpsro%obsNum,'gpsro(s) unavailable.'
 
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
@@ -154,7 +156,7 @@ print*,repeat('=',20)
 print*,'Mapping observations to each mass grid...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call mapObsToEachMassGrid(obsListOfEachMassGrid,sounding,domain_mean)
+call mapObsToEachMassGrid(obsListOfEachMassGrid,sounding,domain_mean,systemParameters)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 print*,'Done.'
@@ -169,7 +171,7 @@ print*,'Starting assimilation...'
 allocate( analysis(ensembleSize) )
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call assimilate_massGrid(background(:),analysis(:),ensembleSize,domain(:),domain_mean,sounding,obsListOfEachMassGrid)
+call assimilate_massGrid(background(:),analysis(:),ensembleSize,domain(:),domain_mean,sounding,obsListOfEachMassGrid,systemParameters)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 walltime_assimilation = walltime_assimilation + (wt1-wt0)
@@ -187,7 +189,7 @@ print*,repeat('=',20)
 print*,'Mapping observations to each u grid...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call mapObsToEachUGrid(obsListOfEachUGrid,sounding,domain_mean)
+call mapObsToEachUGrid(obsListOfEachUGrid,sounding,domain_mean,systemParameters)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 print*,'Done.'
@@ -201,7 +203,7 @@ print*,'Total obs for all grids=',sum(obsListOfEachUGrid(:,:,:)%vectorSize)
 print*,'Starting assimilation...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call assimilate_uGrid(background(:),analysis(:),ensembleSize,domain(:),domain_mean,sounding,obsListOfEachUGrid)
+call assimilate_uGrid(background(:),analysis(:),ensembleSize,domain(:),domain_mean,sounding,obsListOfEachUGrid,systemParameters)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 walltime_assimilation = walltime_assimilation + (wt1-wt0)
@@ -219,7 +221,7 @@ print*,repeat('=',20)
 print*,'Mapping observations to each v grid...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call mapObsToEachVGrid(obsListOfEachVGrid,sounding,domain_mean)
+call mapObsToEachVGrid(obsListOfEachVGrid,sounding,domain_mean,systemParameters)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 print*,'Done.'
@@ -233,7 +235,7 @@ print*,'Total obs for all grids=',sum(obsListOfEachVGrid(:,:,:)%vectorSize)
 print*,'Starting assimilation...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call assimilate_vGrid(background(:),analysis(:),ensembleSize,domain(:),domain_mean,sounding,obsListOfEachVGrid)
+call assimilate_vGrid(background(:),analysis(:),ensembleSize,domain(:),domain_mean,sounding,obsListOfEachVGrid,systemParameters)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 walltime_assimilation = walltime_assimilation + (wt1-wt0)
@@ -251,7 +253,7 @@ print*,repeat('=',20)
 print*,'Mapping observations to each w grid...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call mapObsToEachWGrid(obsListOfEachWGrid,sounding,domain_mean)
+call mapObsToEachWGrid(obsListOfEachWGrid,sounding,domain_mean,systemParameters)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 print*,'Done.'
@@ -265,7 +267,7 @@ print*,'Total obs for all grids=',sum(obsListOfEachWGrid(:,:,:)%vectorSize)
 print*,'Starting assimilation...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call assimilate_wGrid(background(:),analysis(:),ensembleSize,domain(:),domain_mean,sounding,obsListOfEachWGrid)
+call assimilate_wGrid(background(:),analysis(:),ensembleSize,domain(:),domain_mean,sounding,obsListOfEachWGrid,systemParameters)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 walltime_assimilation = walltime_assimilation + (wt1-wt0)

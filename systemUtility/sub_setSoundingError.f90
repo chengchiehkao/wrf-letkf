@@ -58,16 +58,10 @@ do io = 1 , sounding%obsNum
             sounding%obs(io)%available = .false.  ! Disable PSFC by default before figure out how to assimilate it.
         end select
 
-        if ( trim(adjustl(sounding%obs(io)%varName)) .ne. 'QVAPOR' ) then
-            if ( dabs(sounding%obs(io)%innov) .gt. thresholdFactor * sounding%obs(io)%error ) then
-                sounding%obs(io)%available = .false.
-                deallocate( sounding%obs(io)%background )
-            endif
-        else
-            if ( dabs(sounding%obs(io)%innov) .gt. 10.d0 * sounding%obs(io)%error ) then
-                sounding%obs(io)%available = .false.
-                deallocate( sounding%obs(io)%background )
-            endif
+
+        if ( dabs(sounding%obs(io)%innov) .gt. thresholdFactor * sounding%obs(io)%error ) then
+            sounding%obs(io)%available = .false.
+            deallocate( sounding%obs(io)%background )
         endif
 
     endif

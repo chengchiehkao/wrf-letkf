@@ -1,5 +1,5 @@
 
-subroutine mapObsToEachUGrid(obsListOfEachGrid,obs,domain)
+subroutine mapObsToEachUGrid(obsListOfEachGrid,obs,domain,systemParameters)
 
 use derivedType
 use basicUtility
@@ -8,12 +8,13 @@ implicit none
 type(integerVector),pointer,dimension(:,:,:) :: obsListOfEachGrid  ! intent(out)
 type(obsParent),intent(inout) :: obs
 type(domainInfo),intent(in) :: domain
+type(systemParameter),intent(in) :: systemParameters
 
 real(kind=8),allocatable,dimension(:) :: dummy_z
 integer,allocatable,dimension(:) :: indexOfObs
 integer :: indexBuffer(obs%obsNum)
 
-real(kind=8) :: rlocv=0.2d0,rd=1000000.d0
+real(kind=8) :: rlocv,rd
 real(kind=8) zDiff
 
 integer :: blockNum_rank1=40,blockNum_rank2=35,subDomainObsNum
@@ -33,6 +34,9 @@ real(kind=8),parameter :: radian = 57.29577951308232d0
 
 integer io,iwe,isn,iz,ir1,ir2
 !================================================
+
+rd    = systemParameters % rd
+rlocv = systemParameters % rv
 
 !allocate( dummy_z( obs%obsNum ) )
 !allocate( indexOfObs( obs%obsNum ) )

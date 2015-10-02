@@ -2,7 +2,7 @@
 
 !include 'sub_LETKF.f90'
 
-subroutine assimilate_vGrid(background,analysis,ensembleSize,domain,domain_mean,obs,obsListOfEachGrid)
+subroutine assimilate_vGrid(background,analysis,ensembleSize,domain,domain_mean,obs,obsListOfEachGrid,systemParameters)
 
 use derivedType
 use basicUtility
@@ -18,6 +18,7 @@ type(domainInfo),intent(in)      :: domain(ensembleSize)
 type(domainInfo),intent(in)      :: domain_mean
 type(obsParent) :: obs
 type(integerVector),pointer :: obsListOfEachGrid(:,:,:)
+type(systemParameter),intent(in) :: systemParameters
 
 
 real(kind=8),allocatable,dimension(:,:) :: xb_mean,xa_mean
@@ -104,7 +105,7 @@ do iwe = 1+relaxationZone,domain_mean%size_westToEast-relaxationZone
                   (/obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%lon,obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%lat/) &
                   )
                 dz = dabs( dlog(domain_mean%pressure_v(iwe,isn,iz)) - dlog(obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%z) )
-                R(io) = ( errorFactor(1.d6,0.2d0,dh,dz) * obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%error )**2.d0
+                R(io) = ( errorFactor(systemParameters%rc,systemParameters%rv,dh,dz) * obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%error )**2.d0
             endif
         enddo
 

@@ -1,0 +1,25 @@
+
+&sizeOfEnsemble
+ensembleSize=36
+/
+
+&correlativeDistance
+rd = 3.d5
+rc = 1.d5
+rv = 0.2d0
+/
+
+&use_observation
+use_sound = .true.
+use_synop = .false.
+use_amv   = .false.
+use_gpsro = .false.
+/
+
+&varList_observation
+varList_sound = 'U','V','T','QVAPOR'
+varList_synop = 'PSFC','U','V','T','Td'
+varList_amv = 'U','V'
+varList_gpsro = 'REF','BANGLE','ImpctParam'
+/
+

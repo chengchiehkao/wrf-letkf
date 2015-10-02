@@ -72,6 +72,9 @@ do
     enddo
 enddo
 
+
+amv%obs(:)%z = 100.d0 * amv%obs(:)%z  !  convert hPa to Pa
+
 close(fileID)
 !================================================
 return

@@ -122,7 +122,13 @@ enddo
 do io = 1 , sounding%obsNum
     if ( trim(adjustl(sounding%obs(io)%varName)).eq.'T' .and. &
          dabs(sounding%obs(io)%value - invalidValue) .gt. dabs(invalidValue*epsilon(1.d0)) ) then
-        sounding%obs(io)%value = sounding%obs(io)%value + 273.d0  ! not 273.15 but 273. because of the preprocess of sounding obs.
+        sounding%obs(io)%value = sounding%obs(io)%value + 273.15d0
+    endif
+enddo
+
+do io = 1 , sounding%obsNum
+    if ( trim(adjustl(sounding%obs(io)%zName)) .ne. 'SURFACE' ) then
+        sounding%obs(io)%z = 100.d0 * sounding%obs(io)%z  !  convert hPa to Pa
     endif
 enddo
 

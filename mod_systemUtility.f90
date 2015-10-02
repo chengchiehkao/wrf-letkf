@@ -67,40 +67,44 @@ interface
       type(obsParent),intent(inout) :: obs
     end subroutine turnObsWithInvalidValueIntoUnavailable
 
-    subroutine mapObsToEachMassGrid(obsListOfEachGrid,obs,domain)
+    subroutine mapObsToEachMassGrid(obsListOfEachGrid,obs,domain,systemParameters)
       use derivedType
       use basicUtility
       implicit none
       type(integerVector),pointer,dimension(:,:,:) :: obsListOfEachGrid  ! intent(out)
       type(obsParent),intent(inout) :: obs
       type(domainInfo),intent(in) :: domain
+      type(systemParameter),intent(in) :: systemParameters
     end subroutine mapObsToEachMassGrid
 
-    subroutine mapObsToEachUGrid(obsListOfEachGrid,obs,domain)
+    subroutine mapObsToEachUGrid(obsListOfEachGrid,obs,domain,systemParameters)
       use derivedType
       use basicUtility
       implicit none
       type(integerVector),pointer,dimension(:,:,:) :: obsListOfEachGrid  ! intent(out)
       type(obsParent),intent(inout) :: obs
       type(domainInfo),intent(in) :: domain
+      type(systemParameter),intent(in) :: systemParameters
     end subroutine mapObsToEachUGrid
 
-    subroutine mapObsToEachVGrid(obsListOfEachGrid,obs,domain)
+    subroutine mapObsToEachVGrid(obsListOfEachGrid,obs,domain,systemParameters)
       use derivedType
       use basicUtility
       implicit none
       type(integerVector),pointer,dimension(:,:,:) :: obsListOfEachGrid  ! intent(out)
       type(obsParent),intent(inout) :: obs
       type(domainInfo),intent(in) :: domain
+      type(systemParameter),intent(in) :: systemParameters
     end subroutine mapObsToEachVGrid
 
-    subroutine mapObsToEachWGrid(obsListOfEachGrid,obs,domain)
+    subroutine mapObsToEachWGrid(obsListOfEachGrid,obs,domain,systemParameters)
       use derivedType
       use basicUtility
       implicit none
       type(integerVector),pointer,dimension(:,:,:) :: obsListOfEachGrid  ! intent(out)
       type(obsParent),intent(inout) :: obs
       type(domainInfo),intent(in) :: domain
+      type(systemParameter),intent(in) :: systemParameters
     end subroutine mapObsToEachWGrid
 
     subroutine convertBackgroundToTemperature(background,ensembleSize,domain)
