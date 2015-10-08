@@ -26,10 +26,14 @@ integer io , id  ! loop counter
 !$omp parallel do default(private) shared(domainSize,domain,obs) schedule(dynamic,100)
 do io=1,obs%obsNum
 
+    if ( .not. obs%obs(io)%available ) cycle
+
     call locateAsIndex2d( domain(1)%lon(:,:)        , domain(1)%lat(:,:) , &
                           domain(1)%size_westToEast , domain(1)%size_southToNorth , &
                           obs%obs(io)%lon , obs%obs(io)%lat , &
                           obsIndexRankOne , obsIndexRankTwo )
+
+    if ( obsIndexRankOne .lt. 1 .or. obsIndexRankTwo .lt. 1 ) cycle
 
     do id=1,domainSize
 

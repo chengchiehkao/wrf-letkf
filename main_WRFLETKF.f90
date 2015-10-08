@@ -35,8 +35,10 @@ real(kind=8) wt0,wt1,walltime_assimilation
 data walltime_assimilation/0d0/
 !================================================
 
-
+print*,'Getting System Parameters...'
 call getSystemParameter(systemParameters)
+print*,'Done.'
+print*,repeat('=',20)
 
 ensembleSize = systemParameters % ensembleSize
 
@@ -56,12 +58,15 @@ print*,'walltime(Get domain) =',wt1-wt0,'sec'
 
 print*,repeat('=',20)
 print*,'Getting Observations...'
-print*,'systemParameters%varListSize_sound=',systemParameters%varListSize_sound
-if ( systemParameters % use_sound )  call getSounding(sounding , systemParameters%varList_sound(:) , systemParameters%varListSize_sound )
-if ( systemParameters % use_synop )  call getSynop(synop, systemParameters%varList_synop(:) , systemParameters%varListSize_synop )
-if ( systemParameters % use_amv )    call getAMV(amv, systemParameters%varList_amv(:) , systemParameters%varListSize_amv )
-if ( systemParameters % use_gpsro )  call getGPSRO(gpsro, systemParameters%varList_gpsro(:) , systemParameters%varListSize_gpsro )
+if ( systemParameters % use_sound )  call getSounding(sounding , systemParameters%varList_sound(:) , systemParameters%varListSize_sound , systemParameters%use_varList_sound )
+if ( systemParameters % use_synop )  call getSynop(synop, systemParameters%varList_synop(:) , systemParameters%varListSize_synop , systemParameters%use_varList_synop )
+if ( systemParameters % use_amv )    call getAMV(amv, systemParameters%varList_amv(:) , systemParameters%varListSize_amv , systemParameters%use_varList_amv )
+if ( systemParameters % use_gpsro )  call getGPSRO(gpsro, systemParameters%varList_gpsro(:) , systemParameters%varListSize_gpsro , systemParameters%use_varList_gpsro )
 print*,'Done.'
+if ( systemParameters % use_sound )  print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) set to be unavailable by default.'
+if ( systemParameters % use_synop )  print*,'There are ',count(.not.synop%obs(:)%available),'/',synop%obsNum,'synop(s) set to be unavailable by default.'
+if ( systemParameters % use_amv )    print*,'There are ',count(.not.amv%obs(:)%available),'/',amv%obsNum,'amv(s) set to be unavailable by default.'
+if ( systemParameters % use_gpsro )  print*,'There are ',count(.not.gpsro%obs(:)%available),'/',gpsro%obsNum,'gpsro(s) set to be unavailable by default.'
 
 
 wt0 = omp_get_wtime()
@@ -74,10 +79,10 @@ if ( systemParameters % use_synop )  call check_ifObsInsideHorizontalDomain(doma
 if ( systemParameters % use_amv )    call check_ifObsInsideHorizontalDomain(domain(1),amv)
 if ( systemParameters % use_gpsro )  call check_ifObsInsideHorizontalDomain(domain(1),gpsro)
 
-if ( systemParameters % use_sound )  print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) out of horizontal domain.'
-if ( systemParameters % use_synop )  print*,'There are ',count(.not.synop%obs(:)%available),'/',synop%obsNum,'synop(s) out of horizontal domain.'
-if ( systemParameters % use_amv )    print*,'There are ',count(.not.amv%obs(:)%available),'/',amv%obsNum,'amv(s) out of horizontal domain.'
-if ( systemParameters % use_gpsro )  print*,'There are ',count(.not.gpsro%obs(:)%available),'/',gpsro%obsNum,'gpsro(s) out of horizontal domain.'
+if ( systemParameters % use_sound )  print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) unavailable.'
+if ( systemParameters % use_synop )  print*,'There are ',count(.not.synop%obs(:)%available),'/',synop%obsNum,'synop(s) unavailable.'
+if ( systemParameters % use_amv )    print*,'There are ',count(.not.amv%obs(:)%available),'/',amv%obsNum,'amv(s) unavailable.'
+if ( systemParameters % use_gpsro )  print*,'There are ',count(.not.gpsro%obs(:)%available),'/',gpsro%obsNum,'gpsro(s) unavailable.'
 
 
 print*,repeat('=',20)

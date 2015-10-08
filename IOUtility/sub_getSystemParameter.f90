@@ -14,6 +14,7 @@ integer :: ensembleSize
 logical :: use_sound , use_synop , use_amv , use_gpsro
 integer,parameter :: defaultVarListSize=10
 character(len=10),dimension(defaultVarListSize) :: varList_sound , varList_synop , varList_amv , varList_gpsro
+logical,dimension(defaultVarListSize) :: use_varList_sound , use_varList_synop , use_varList_amv , use_varList_gpsro
 integer :: varListSize_sound , varListSize_synop , varListSize_amv , varListSize_gpsro
 real(kind=8) :: rd , rc  ! Decorrelated & highly correlated distance on horizontal space.
 real(kind=8) :: rv       ! Decorrelated distance on vertical space.teger ioStatus,fileID
@@ -22,6 +23,7 @@ real(kind=8) :: inflationFactor
 namelist /sizeOfEnsemble/ ensembleSize
 namelist /use_observation/ use_sound,use_synop,use_amv,use_gpsro
 namelist /varList_observation/ varList_sound,varList_synop,varList_amv,varList_gpsro
+namelist /use_varList_observation/ use_varList_sound,use_varList_synop,use_varList_amv,use_varList_gpsro
 namelist /correlativeDistance/ rd,rc,rv
 namelist /inflation/ inflationFactor
 
@@ -35,6 +37,10 @@ use_sound = .false.
 use_synop = .false.
 use_amv   = .false.
 use_gpsro = .false.
+use_varList_sound(:) = .true.
+use_varList_synop(:) = .true.
+use_varList_amv(:)   = .true.
+use_varList_gpsro(:) = .true.
 inflationFactor = 1.d0
 varList_sound(:) = repeat(' ',len(varList_sound(1)))
 varList_synop(:) = repeat(' ',len(varList_synop(1)))
@@ -50,6 +56,7 @@ read(fileID,nml = correlativeDistance)
 read(fileID,nml = inflation)
 read(fileID,nml = use_observation)
 read(fileID,nml = varList_observation)
+read(fileID,nml = use_varList_observation)
 close(fileID)
 
 if ( ensembleSize .lt. 2 ) then
@@ -105,13 +112,18 @@ if ( use_synop )  allocate( systemParameters % varList_synop(varListSize_synop) 
 if ( use_amv   )  allocate( systemParameters % varList_amv(varListSize_amv) )
 if ( use_gpsro )  allocate( systemParameters % varList_gpsro(varListSize_gpsro) )
 
+if ( use_sound )  allocate( systemParameters % use_varList_sound(varListSize_sound) )
+if ( use_synop )  allocate( systemParameters % use_varList_synop(varListSize_synop) )
+if ( use_amv   )  allocate( systemParameters % use_varList_amv(varListSize_amv) )
+if ( use_gpsro )  allocate( systemParameters % use_varList_gpsro(varListSize_gpsro) )
+
 if ( use_sound )  systemParameters % varList_sound(:) = repeat(' ',len(varList_sound(1)))
 if ( use_synop )  systemParameters % varList_synop(:) = repeat(' ',len(varList_synop(1)))
 if ( use_amv   )  systemParameters % varList_amv(:)   = repeat(' ',len(varList_amv(1)))
 if ( use_gpsro )  systemParameters % varList_gpsro(:) = repeat(' ',len(varList_gpsro(1)))
 
 
-systemParameters % ensembleSize =  ensembleSize
+systemParameters % ensembleSize = ensembleSize
 systemParameters % use_sound = use_sound
 systemParameters % use_synop = use_synop
 systemParameters % use_amv   = use_amv
@@ -124,6 +136,11 @@ if ( use_sound )  systemParameters % varList_sound(:) = varList_sound(1:varListS
 if ( use_synop )  systemParameters % varList_synop(:) = varList_synop(1:varListSize_synop)
 if ( use_amv   )  systemParameters % varList_amv(:)   = varList_amv(1:varListSize_amv)
 if ( use_gpsro )  systemParameters % varList_gpsro(:) = varList_gpsro(1:varListSize_gpsro)
+
+if ( use_sound )  systemParameters % use_varList_sound(:) = use_varList_sound(1:varListSize_sound)
+if ( use_synop )  systemParameters % use_varList_synop(:) = use_varList_synop(1:varListSize_synop)
+if ( use_amv   )  systemParameters % use_varList_amv(:)   = use_varList_amv(1:varListSize_amv)
+if ( use_gpsro )  systemParameters % use_varList_gpsro(:) = use_varList_gpsro(1:varListSize_gpsro)
 systemParameters % rd = rd
 systemParameters % rc = rc
 systemParameters % rv = rv

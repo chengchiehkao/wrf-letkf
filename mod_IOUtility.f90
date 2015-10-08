@@ -19,12 +19,13 @@ interface
       implicit none
     end function availableFileID
 
-    subroutine getAMV(amv,varList,varListSize)
+    subroutine getAMV(amv,varList,varListSize,use_varList)
       use derivedType
       implicit none
       type(obsParent),intent(out) :: amv
       integer,intent(in)                                   :: varListSize
       character(len=10),dimension(varListSize),intent(in)  :: varList
+      logical,dimension(varListSize),intent(in)            :: use_varList
     end subroutine getAMV
 
     subroutine getBackground(background,ensembleSize,domain)
@@ -44,28 +45,31 @@ interface
       type(domainInfo),intent(out) :: domain(domainSize)
     end subroutine getDomain
 
-    subroutine getGPSRO(GPSRO,varList,varListSize)
+    subroutine getGPSRO(GPSRO,varList,varListSize,use_varList)
       use derivedType
       implicit none
       type(obsParent),intent(out) :: GPSRO
       integer,intent(in)                                   :: varListSize
       character(len=10),dimension(varListSize),intent(in)  :: varList
+      logical,dimension(varListSize),intent(in)            :: use_varList
     end subroutine getGPSRO
 
-    subroutine getSounding(sounding,varList,varListSize)
+    subroutine getSounding(sounding,varList,varListSize,use_varList)
       use derivedType
       implicit none
       type(obsParent),intent(out) :: sounding
       integer,intent(in)                                   :: varListSize
       character(len=10),dimension(varListSize),intent(in)  :: varList
+      logical,dimension(varListSize),intent(in)            :: use_varList
     end subroutine getSounding
 
-    subroutine getSynop(synop,varList,varListSize)
+    subroutine getSynop(synop,varList,varListSize,use_varList)
       use derivedType
       implicit none
       type(obsParent),intent(out) :: synop
       integer,intent(in)                                   :: varListSize
       character(len=10),dimension(varListSize),intent(in)  :: varList
+      logical,dimension(varListSize),intent(in)            :: use_varList
     end subroutine getSynop
  
     subroutine getSystemParameter(systemParameters)

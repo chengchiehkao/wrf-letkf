@@ -2,7 +2,7 @@
 !  include 'mod_derivedType.f90'
 !  include 'func_availableFileID.f90'
 
-subroutine getAMV(amv,varList,varListSize)
+subroutine getAMV(amv,varList,varListSize,use_varList)
 
 use derivedType
 
@@ -10,13 +10,14 @@ implicit none
 type(obsParent),intent(out) :: amv
 integer,intent(in)                                   :: varListSize
 character(len=10),dimension(varListSize),intent(in)  :: varList
+logical,dimension(varListSize),intent(in)            :: use_varList
 
 real(kind=8) lon,lat
 integer levNum,serialNum
 real :: dummyArg1,dummyArg2
 
 integer ioStatus,fileID
-integer i  ! loop counter
+integer i,iObsVar  ! loop counter
 
 integer,external :: availableFileID
 !================================================
@@ -74,6 +75,13 @@ enddo
 
 
 amv%obs(:)%z = 100.d0 * amv%obs(:)%z  !  convert hPa to Pa
+
+do iObsVar = 1 , varListSize
+    where ( adjustl(amv%obs(:)%varName) .eq. adjustl(varList(iObsVar)) )
+        amv%obs%available = use_varList(iObsVar)
+    end where
+enddo
+
 
 close(fileID)
 !================================================

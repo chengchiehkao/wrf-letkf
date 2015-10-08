@@ -54,8 +54,6 @@ do io = 1 , sounding%obsNum
             sounding%obs(io)%error = 1.d0
         case ( 'QVAPOR' )
             sounding%obs(io)%error = 2d-4
-        case ( 'PSFC' )
-            sounding%obs(io)%available = .false.  ! Disable PSFC by default before figure out how to assimilate it.
         end select
 
 

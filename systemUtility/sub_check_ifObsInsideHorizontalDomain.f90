@@ -17,6 +17,8 @@ integer io
 !$omp parallel do default(shared) private(io) schedule(dynamic,100)
 do io=1,obs%obsNum
 
+    if ( .not. obs%obs(io)%available ) cycle
+
     obs%obs(io)%available = inPolygon( (/domain%lon(1:domain%size_westToEast-1,1), &
                                          domain%lon(domain%size_westToEast,1:domain%size_southToNorth-1), &
                                          domain%lon(domain%size_westToEast:2:-1,domain%size_southToNorth), &

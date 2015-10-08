@@ -23,7 +23,13 @@ use_gpsro = .false.
 &varList_observation
 varList_sound = 'U','V','T','QVAPOR'
 varList_synop = 'PSFC','U','V','T','Td'
-varList_amv = 'U','V'
+varList_amv   = 'U','V'
 varList_gpsro = 'REF','BANGLE','ImpctParam'
 /
 
+&use_varList_observation
+use_varList_sound = .true.,.true.,.true.,.true.
+use_varList_synop = .false.,.false.,.false.,.false.,.false.
+use_varList_amv   = .false.,.false.
+use_varList_gpsro = .false.,.false.,.false.
+/

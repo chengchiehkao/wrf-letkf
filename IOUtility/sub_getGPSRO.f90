@@ -2,7 +2,7 @@
 !  include 'mod_derivedType.f90'
 !  include 'func_availableFileID.f90'
 
-subroutine getGPSRO(GPSRO,varList,varListSize)
+subroutine getGPSRO(GPSRO,varList,varListSize,use_varList)
 
 use derivedType
 
@@ -10,13 +10,14 @@ implicit none
 type(obsParent),intent(out) :: GPSRO
 integer,intent(in)                                   :: varListSize
 character(len=10),dimension(varListSize),intent(in)  :: varList
+logical,dimension(varListSize),intent(in)            :: use_varList
 
 real(kind=8) lon,lat,rfict
 integer levNum,serialNum
 real :: dummyArg(1:3)
 
 integer ioStatus,fileID
-integer i  ! loop counter
+integer i,iObsVar  ! loop counter
 
 integer,external :: availableFileID
 !================================================
@@ -73,6 +74,14 @@ do
         serialNum = serialNum + (varListSize-1)
     enddo
 enddo
+
+
+do iObsVar = 1 , varListSize
+    where ( adjustl(GPSRO%obs(:)%varName) .eq. adjustl(varList(iObsVar)) )
+        GPSRO%obs%available = use_varList(iObsVar)
+    end where
+enddo
+
 
 close(fileID)
 !================================================

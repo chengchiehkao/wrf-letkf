@@ -2,7 +2,7 @@
 !  include 'mod_derivedType.f90'
 !  include 'func_availableFileID.f90'
 
-subroutine getSounding(sounding,varList,varListSize)
+subroutine getSounding(sounding,varList,varListSize,use_varList)
 
 use derivedType
 
@@ -10,6 +10,7 @@ implicit none
 type(obsParent),intent(out) :: sounding
 integer,intent(in)                                   :: varListSize
 character(len=10),dimension(varListSize),intent(in)  :: varList
+logical,dimension(varListSize),intent(in)            :: use_varList
 
 real(kind=8) lon,lat
 integer levNum,serialNum
@@ -18,7 +19,7 @@ character(len=100) header
 real(kind=8),parameter :: invalidValue = -888888.d0
 
 integer ioStatus,fileID
-integer i,io  ! loop counter
+integer i,io,iObsVar  ! loop counter
 
 integer,external :: availableFileID
 !================================================
@@ -113,12 +114,6 @@ enddo
 
 
 ! Convert temperature in Celsius to Kelvin
-!where ( trim(adjustl(sounding%obs(:)%varName)).eq.'T' .and. &
-!        dabs(sounding%obs(:)%var - invalidValue) .gt. dabs(invalidValue*epsilon(1.d0)) )
-!
-!    sounding%obs(:)%var = sounding%obs(:)%var + 273.d0  ! not 273.15 but 273. because of the preprocess of sounding obs
-!end where
-
 do io = 1 , sounding%obsNum
     if ( trim(adjustl(sounding%obs(io)%varName)).eq.'T' .and. &
          dabs(sounding%obs(io)%value - invalidValue) .gt. dabs(invalidValue*epsilon(1.d0)) ) then
@@ -129,7 +124,15 @@ enddo
 do io = 1 , sounding%obsNum
     if ( trim(adjustl(sounding%obs(io)%zName)) .ne. 'SURFACE' ) then
         sounding%obs(io)%z = 100.d0 * sounding%obs(io)%z  !  convert hPa to Pa
+    else if ( trim(adjustl(sounding%obs(io)%varName)) .eq. 'PSFC' ) then
+        sounding%obs(io)%available = .false.  ! Disable PSFC by default before figure out how to assimilate it.
     endif
+enddo
+
+do iObsVar = 1 , varListSize
+    where ( adjustl(sounding%obs(:)%varName) .eq. adjustl(varList(iObsVar)) )
+        sounding%obs%available = use_varList(iObsVar)
+    end where
 enddo
 
 
