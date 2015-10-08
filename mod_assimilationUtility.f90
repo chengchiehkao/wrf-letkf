@@ -79,7 +79,7 @@ interface
     subroutine LETKF( xb_mean , xb_pert , &
                       xa_mean , xa_pert , &
                       yo , yb , R , &
-                      m , n , k )
+                      m , n , k , inflationFactor )
       use math
       implicit none
       integer,parameter :: realKind=8
@@ -89,6 +89,7 @@ interface
       real(realKind),dimension(n,1) :: yo
       real(realKind),dimension(n,k) :: yb
       real(realKind),dimension(n)   :: R
+      real(realKind) :: inflationFactor
     end subroutine LETKF
 
 end interface

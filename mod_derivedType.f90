@@ -16,10 +16,11 @@ end type domainInfo
 type systemParameter
     integer :: ensembleSize
     logical :: use_sound , use_synop , use_amv , use_gpsro
-    character(len=10),pointer,dimension(:) :: varList_sound , varList_synop , varList_amv , varList_gpsro
+    character(len=10),pointer,dimension(:) :: varList_sound=>null() , varList_synop=>null() , varList_amv=>null() , varList_gpsro=>null()
     integer :: varListSize_sound , varListSize_synop , varListSize_amv , varListSize_gpsro
     real(kind=8) :: rd , rc  ! Decorrelated & highly correlated distance on horizontal space.
     real(kind=8) :: rv       ! Decorrelated distance on vertical space.
+    real(kind=8) :: inflationFactor
 end type systemParameter
 
 type obsChild

@@ -56,6 +56,7 @@ print*,'walltime(Get domain) =',wt1-wt0,'sec'
 
 print*,repeat('=',20)
 print*,'Getting Observations...'
+print*,'systemParameters%varListSize_sound=',systemParameters%varListSize_sound
 if ( systemParameters % use_sound )  call getSounding(sounding , systemParameters%varList_sound(:) , systemParameters%varListSize_sound )
 if ( systemParameters % use_synop )  call getSynop(synop, systemParameters%varList_synop(:) , systemParameters%varListSize_synop )
 if ( systemParameters % use_amv )    call getAMV(amv, systemParameters%varList_amv(:) , systemParameters%varListSize_amv )

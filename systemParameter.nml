@@ -9,6 +9,10 @@ rc = 1.d5
 rv = 0.2d0
 /
 
+&inflation
+inflationFactor = 1.15d0
+/
+
 &use_observation
 use_sound = .true.
 use_synop = .false.

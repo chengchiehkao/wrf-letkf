@@ -17,23 +17,39 @@ character(len=10),dimension(defaultVarListSize) :: varList_sound , varList_synop
 integer :: varListSize_sound , varListSize_synop , varListSize_amv , varListSize_gpsro
 real(kind=8) :: rd , rc  ! Decorrelated & highly correlated distance on horizontal space.
 real(kind=8) :: rv       ! Decorrelated distance on vertical space.teger ioStatus,fileID
+real(kind=8) :: inflationFactor
 
 namelist /sizeOfEnsemble/ ensembleSize
 namelist /use_observation/ use_sound,use_synop,use_amv,use_gpsro
 namelist /varList_observation/ varList_sound,varList_synop,varList_amv,varList_gpsro
 namelist /correlativeDistance/ rd,rc,rv
+namelist /inflation/ inflationFactor
 
 integer :: fileID
 
 integer,external :: availableFileID
 !================================================
 
+! Set default value
+use_sound = .false.
+use_synop = .false.
+use_amv   = .false.
+use_gpsro = .false.
+inflationFactor = 1.d0
+varList_sound(:) = repeat(' ',len(varList_sound(1)))
+varList_synop(:) = repeat(' ',len(varList_synop(1)))
+varList_amv(:)   = repeat(' ',len(varList_amv(1)))
+varList_gpsro(:) = repeat(' ',len(varList_gpsro(1)))
+! End of assignment
+
+
 fileID = availableFileID()
-open(fileID,file='systemParameter.nml',status='old')
+open(fileID,file='input/systemParameter.nml',status='old')
 read(fileID,nml = sizeOfEnsemble)
+read(fileID,nml = correlativeDistance)
+read(fileID,nml = inflation)
 read(fileID,nml = use_observation)
 read(fileID,nml = varList_observation)
-read(fileID,nml = correlativeDistance)
 close(fileID)
 
 if ( ensembleSize .lt. 2 ) then
@@ -65,15 +81,34 @@ if ( use_gpsro .and. varListSize_gpsro.eq.0 ) then
 endif
 
 
+if ( rd .le. 0.d0 ) then
+    print*,'Rd shall > 0., program stopped.'
+    stop
+endif
+if ( rc .le. 0.d0 ) then
+    print*,'Rc shall > 0., program stopped.'
+    stop
+endif
+if ( rv .le. 0.d0 ) then
+    print*,'Rv shall > 0., program stopped.'
+    stop
+endif
+
+if ( inflationFactor .le. 0.d0 ) then
+    print*,'inflation factor shall > 0., will automatically set to be 1.'
+    inflationFactor = 1.d0
+endif
+
+
 if ( use_sound )  allocate( systemParameters % varList_sound(varListSize_sound) )
 if ( use_synop )  allocate( systemParameters % varList_synop(varListSize_synop) )
 if ( use_amv   )  allocate( systemParameters % varList_amv(varListSize_amv) )
 if ( use_gpsro )  allocate( systemParameters % varList_gpsro(varListSize_gpsro) )
 
-if ( use_sound )  systemParameters % varList_sound(:) = repeat(' ',len(varList_sound))
-if ( use_synop )  systemParameters % varList_synop(:) = repeat(' ',len(varList_synop))
-if ( use_amv   )  systemParameters % varList_amv(:)   = repeat(' ',len(varList_amv))
-if ( use_gpsro )  systemParameters % varList_gpsro(:) = repeat(' ',len(varList_gpsro))
+if ( use_sound )  systemParameters % varList_sound(:) = repeat(' ',len(varList_sound(1)))
+if ( use_synop )  systemParameters % varList_synop(:) = repeat(' ',len(varList_synop(1)))
+if ( use_amv   )  systemParameters % varList_amv(:)   = repeat(' ',len(varList_amv(1)))
+if ( use_gpsro )  systemParameters % varList_gpsro(:) = repeat(' ',len(varList_gpsro(1)))
 
 
 systemParameters % ensembleSize =  ensembleSize
@@ -92,6 +127,7 @@ if ( use_gpsro )  systemParameters % varList_gpsro(:) = varList_gpsro(1:varListS
 systemParameters % rd = rd
 systemParameters % rc = rc
 systemParameters % rv = rv
+systemParameters % inflationFactor = inflationFactor
 
 
 !================================================

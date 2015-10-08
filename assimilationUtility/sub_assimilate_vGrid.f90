@@ -59,7 +59,7 @@ real(kind=8) wt0,wt1
 !enddo
 
 
-!$omp parallel do default(private) shared(domain,domain_mean,obsListOfEachGrid,ensembleSize,analysis,background,obs) &
+!$omp parallel do default(private) shared(domain,domain_mean,obsListOfEachGrid,ensembleSize,analysis,background,obs,systemParameters) &
 !$omp schedule(dynamic,1)
 do iz  = 1,domain_mean%size_bottomToTop
 wt0 = omp_get_wtime()
@@ -112,7 +112,7 @@ do iwe = 1+relaxationZone,domain_mean%size_westToEast-relaxationZone
         call LETKF( xb_mean(:,:) , xb_pert(:,:) , &
                     xa_mean(:,:) , xa_pert(:,:) , &
                     yo(:,:) , yb(:,:) , R(:) , &
-                    1 , obsNumForAssimilation , ensembleSize )
+                    1 , obsNumForAssimilation , ensembleSize , systemParameters%inflationFactor )
 
         forall(iens=1:ensembleSize) analysis(iens)%v(iwe,isn,iz) = xa_mean(1,1) + xa_pert(1,iens)
 

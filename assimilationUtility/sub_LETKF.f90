@@ -5,7 +5,7 @@
 subroutine LETKF( xb_mean , xb_pert , &
                   xa_mean , xa_pert , &
                   yo , yb , R , &
-                  m , n , k )
+                  m , n , k , inflationFactor )
 
 use math
 implicit none
@@ -22,17 +22,19 @@ real(realKind),dimension(n,k) :: yb_pert
 real(realKind),dimension(m,m) :: pa
 real(realKind),dimension(k,k) :: pa_tilde
 
-real(realKind),parameter :: inflationFactor = 1d0/1.15d0
+real(realKind) :: inflationFactor , rho
 
 integer i  ! loop index
 !================================================
+
+rho = 1d0/inflationFactor
 
 do i=1,n
     yb_mean(i,1)=sum(yb(i,:))/real(k,8)
     yb_pert(i,:)=yb(i,:)-yb_mean(i,1)
 enddo
 
-pa_tilde = inv( dble(k-1)*identityMat(k)*inflationFactor + &
+pa_tilde = inv( dble(k-1)*identityMat(k)*rho + &
                 matmul( matmul_latterDiag(transpose(yb_pert(:,:)),1d0/R(:),k,n),yb_pert(:,:) ) &
                 ,k )
 
