@@ -12,7 +12,7 @@ openmp_flag=-openmp
 netcdf_path=/SAS002/zerocustom/netcdf/REAS/icc_ifort_15.0.1.133/
 #netcdf_path=/SAS002/zerocustom/20140823/gcc_ifort_4.1.2_afterGCC44Installed/
 netcdf_flag="-lnetcdf -lnetcdff"  # for REAS
-lapack_path=/SAS002/zerocustom/LAPACK/V3.4.2/build_REAS/ifort_v5/liblapack.a
+lapack_path=/SAS002/zerocustom/LAPACK/V3.4.2/build_REAS/ifort_v1/liblapack.a
 
 $compiler  -r8 -c mod_basicUtility.f90 ${optimization_flag} ${openmp_flag}
 #$compiler  -r8 -c mod_basicUtility.f90 ${optimization_flag} -recursive #${openmp_flag}

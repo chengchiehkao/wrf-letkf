@@ -136,6 +136,11 @@ print*,'Processing: iz=',iz,'walltime=',wt1-wt0,'sec'
 enddo
 !$omp end parallel do
 
+
+do iens =1,ensembleSize
+    analysis(iens)%mu(:,:) = sum( analysis(iens)%stratifiedMU(:,:,:) , 3 )
+enddo
+
 !================================================
 return
 stop
