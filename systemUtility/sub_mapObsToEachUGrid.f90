@@ -87,11 +87,11 @@ allocate( domainLonInRad( domain%size_westToEast_stag , domain%size_southToNorth
 allocate( sin_domainLatInRad( domain%size_westToEast_stag , domain%size_southToNorth ) , sin_obsLatInRad( obs%obsNum ) )
 allocate( cos_domainLatInRad( domain%size_westToEast_stag , domain%size_southToNorth ) , cos_obsLatInRad( obs%obsNum ) )
 
-domainLonInRad(:,:) = domain%lon(:,:) / radian
+domainLonInRad(:,:) = domain%lon_u(:,:) / radian
 obsLonInRad(:)    = obs%obs(:)%lon / radian
 
-sin_domainLatInRad(:,:) = dsin( domain%lat(:,:) / radian )
-cos_domainLatInRad(:,:) = dcos( domain%lat(:,:) / radian )
+sin_domainLatInRad(:,:) = dsin( domain%lat_u(:,:) / radian )
+cos_domainLatInRad(:,:) = dcos( domain%lat_u(:,:) / radian )
 sin_obsLatInRad(:)    = dsin( obs%obs(:)%lat / radian )
 cos_obsLatInRad(:)    = dcos( obs%obs(:)%lat / radian )
 
@@ -100,12 +100,12 @@ do ir2 = 1 , blockNum_rank2
 do ir1 = 1 , blockNum_rank1
 
     ! find out the center of sub-domain
-    subDomainCenter_lon = sum( domain%lon( subDomainStart_rank1(ir1):subDomainEnd_rank1(ir1) , &
+    subDomainCenter_lon = sum( domain%lon_u( subDomainStart_rank1(ir1):subDomainEnd_rank1(ir1) , &
                                            subDomainStart_rank2(ir2):subDomainEnd_rank2(ir2) ) ) &
                                / real( (subDomainEnd_rank1(ir1)-subDomainStart_rank1(ir1)+1) * &
                                        (subDomainEnd_rank2(ir2)-subDomainStart_rank2(ir2)+1) )
 
-    subDomainCenter_lat = sum( domain%lat( subDomainStart_rank1(ir1):subDomainEnd_rank1(ir1) , &
+    subDomainCenter_lat = sum( domain%lat_u( subDomainStart_rank1(ir1):subDomainEnd_rank1(ir1) , &
                                            subDomainStart_rank2(ir2):subDomainEnd_rank2(ir2) ) ) &
                                / real( (subDomainEnd_rank1(ir1)-subDomainStart_rank1(ir1)+1) * &
                                        (subDomainEnd_rank2(ir2)-subDomainStart_rank2(ir2)+1) )
@@ -120,7 +120,7 @@ do ir1 = 1 , blockNum_rank1
     do isn = subDomainStart_rank2(ir2) , subDomainEnd_rank2(ir2)
     do iwe = subDomainStart_rank1(ir1) , subDomainEnd_rank1(ir1)
         longestDistanceBetweenCenterAndGrids = max( greatCircleDistance( (/ subDomainCenter_lon , subDomainCenter_lat /) , &
-                                                                         (/ domain%lon(iwe,isn) , domain%lat(iwe,isn) /) ) ,&
+                                                                         (/ domain%lon_u(iwe,isn) , domain%lat_u(iwe,isn) /) ) ,&
                                                     longestDistanceBetweenCenterAndGrids )
     enddo
     enddo
