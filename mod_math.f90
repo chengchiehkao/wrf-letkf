@@ -3,6 +3,7 @@ include 'math/func_inv.f90'
 include 'math/func_matSqrt.f90'
 include 'math/func_identityMat.f90'
 include 'math/func_inv_diagMat.f90'
+include 'math/func_matmul_ext.f90'
 include 'math/func_matmul_formerDiag.f90'
 include 'math/func_matmul_latterDiag.f90'
 
@@ -39,6 +40,12 @@ interface
       real(kind=8),dimension(n,n),intent(in)  :: inArray
       real(kind=8),dimension(n,n) :: outArray
     end function inv_diagMat
+
+    function matmul_ext(A,B,m,k,n) result(C)
+      implicit none
+      integer m,n,k
+      real(kind=8) :: A(m,k),B(k,n),C(m,n)
+    end function matmul_ext
 
     function matmul_formerDiag(matrixFormer,matrixLatter,dim1,dim2) result(outArray)
       implicit none

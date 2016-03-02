@@ -19,6 +19,12 @@ interface
       real(kind=8),dimension(dim2)     ,intent(in)  :: matrixLatter
       real(kind=8),dimension(dim1,dim2) :: outArray
     end function matmul_latterDiag
+
+    function matmul_ext(A,B,m,k,n) result(C)
+      implicit none
+      integer m,k,n
+      real(kind=8) :: A(m,k),B(k,n),C(m,n)
+    end function matmul_ext
 endinterface
 !================================================
 !==declaration for subprogram of LAPACK==========
@@ -97,7 +103,7 @@ do i=1,k
 enddo
 
 !outArray = matmul(matmul(Z,S),transpose(Z))
-outArray = matmul(matmul_latterDiag(Z,S,k,k),transpose(Z))
+outArray = matmul_ext(matmul_latterDiag(Z,S,k,k),transpose(Z),k,k,k)
 
 !================================================
 return

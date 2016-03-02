@@ -35,24 +35,24 @@ do i=1,n
 enddo
 
 pa_tilde = inv( dble(k-1)*identityMat(k)*rho + &
-                matmul( matmul_latterDiag(transpose(yb_pert(:,:)),1d0/R(:),k,n),yb_pert(:,:) ) &
+                matmul_ext( matmul_latterDiag(transpose(yb_pert(:,:)),1d0/R(:),k,n),yb_pert(:,:) , k,n,k ) &
                 ,k )
 
 xa_mean = xb_mean + &
-          matmul( &
+          matmul_ext( &
           matmul_latterDiag( &
-          matmul( &
-          matmul( &
-            xb_pert(:,:),pa_tilde(:,:) &
+          matmul_ext( &
+          matmul_ext( &
+            xb_pert(:,:),pa_tilde(:,:) , m,k,k &
           ), &
-            transpose(yb_pert(:,:)) &
+            transpose(yb_pert(:,:)) , m,k,n  &
           ), &
             1d0/R(:) , m , n &
           ), &
-            (yo(:,:)-yb_mean(:,:)) &
+            (yo(:,:)-yb_mean(:,:)) , m,n,1 &
           )
 
-xa_pert = matmul( xb_pert(:,:) , matSqrt(dble(k-1)*pa_tilde(:,:),k) )
+xa_pert = matmul_ext( xb_pert(:,:) , matSqrt(dble(k-1)*pa_tilde(:,:),k) , m,k,k )
 
 !================================================
 return
