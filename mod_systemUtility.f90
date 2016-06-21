@@ -5,6 +5,8 @@ include 'systemUtility/sub_build_meanDomain.f90'
 include 'systemUtility/sub_check_ifObsInsideHorizontalDomain.f90'
 include 'systemUtility/sub_check_ifObsInsideVerticalDomain.f90'
 include 'systemUtility/sub_turnObsWithInvalidValueIntoUnavailable.f90'
+include 'systemUtility/sub_rearrangeObsToBeBottomToTop.f90'
+include 'systemUtility/sub_initializeAnalysis.f90'
 include 'systemUtility/sub_mapObsToEachMassGrid.f90'
 include 'systemUtility/sub_mapObsToEachUGrid.f90'
 include 'systemUtility/sub_mapObsToEachVGrid.f90'
@@ -66,6 +68,21 @@ interface
       implicit none
       type(obsParent),intent(inout) :: obs
     end subroutine turnObsWithInvalidValueIntoUnavailable
+
+    subroutine rearrangeObsToBeBottomToTop(obs)
+      use derivedType
+      implicit none
+      type(obsParent),intent(inout) :: obs
+    end subroutine rearrangeObsToBeBottomToTop
+
+    subroutine initializeAnalysis(background,analysis,ensembleSize,domain)
+      use derivedType
+      implicit none
+      integer,intent(in) :: ensembleSize
+      type(backgroundInfo),intent(in)    :: background(ensembleSize)
+      type(backgroundInfo),intent(inout) :: analysis(ensembleSize)
+      type(domainInfo),intent(in)        :: domain(ensembleSize)
+    end subroutine initializeAnalysis
 
     subroutine mapObsToEachMassGrid(obsListOfEachGrid,obs,domain,systemParameters)
       use derivedType

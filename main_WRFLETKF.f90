@@ -155,6 +155,26 @@ print*,'cpu time(set sounding error) =',ct1-ct0,'sec'
 print*,'walltime(set sounding error) =',wt1-wt0,'sec'
 print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) unavailable.'
 
+
+print*,repeat('=',20)
+print*,'Rearranging observation base on their veritcal position...'
+wt0 = omp_get_wtime()
+call rearrangeObsToBeBottomToTop(sounding)
+wt1 = omp_get_wtime()
+print*,'Done.'
+print*,'walltime(rearrange observation) =',wt1-wt0,'sec'
+
+
+print*,repeat('=',20)
+print*,'Initilizing the analysis...'
+wt0 = omp_get_wtime()
+allocate( analysis(ensembleSize) )
+call initializeAnalysis(background,analysis,ensembleSize,domain)
+wt1 = omp_get_wtime()
+print*,'Done.'
+print*,'walltime(initialize analysis) =',wt1-wt0,'sec'
+
+
 !
 !  Assimilation on mass grid.
 !
@@ -174,7 +194,6 @@ print*,'Total obs for all grids=',sum(obsListOfEachMassGrid(:,:,:)%vectorSize)
 
 
 print*,'Starting assimilation...'
-allocate( analysis(ensembleSize) )
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
 call assimilate_massGrid(background(:),analysis(:),ensembleSize,domain(:),domain_mean,sounding,obsListOfEachMassGrid,systemParameters)

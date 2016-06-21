@@ -10,14 +10,13 @@ type(obsParent),intent(inout) :: obs
 type(domainInfo),intent(in) :: domain
 type(systemParameter),intent(in) :: systemParameters
 
-real(kind=8),allocatable,dimension(:) :: dummy_z
 integer,allocatable,dimension(:) :: indexOfObs
 integer :: indexBuffer(obs%obsNum)
 
 real(kind=8) :: rlocv,rd
 real(kind=8) zDiff
 
-integer :: blockNum_rank1=40,blockNum_rank2=35,subDomainObsNum
+integer :: blockNum_rank1=36,blockNum_rank2=30,subDomainObsNum
 integer,allocatable,dimension(:) :: subDomainStart_rank1,subDomainStart_rank2
 integer,allocatable,dimension(:) :: subDomainEnd_rank1  ,subDomainEnd_rank2
 integer,allocatable,dimension(:) :: subDomainIndexBuffer
@@ -29,6 +28,7 @@ real(kind=8),allocatable :: zGrid_preprocessed(:,:,:),zObs_preprocessed(:)
 real(kind=8),allocatable :: domainLonInRad(:,:) , obsLonInRad(:)
 real(kind=8),allocatable :: sin_domainLatInRad(:,:) , sin_obsLatInRad(:)
 real(kind=8),allocatable :: cos_domainLatInRad(:,:) , cos_obsLatInRad(:)
+real(kind=8) :: zLayerMax,zLayerMin
 
 real(kind=8),parameter :: radian = 57.29577951308232d0
 
@@ -38,17 +38,6 @@ integer io,iwe,isn,iz,ir1,ir2
 rd    = systemParameters % rd
 rlocv = systemParameters % rv
 
-!allocate( dummy_z( obs%obsNum ) )
-!allocate( indexOfObs( obs%obsNum ) )
-
-!dummy_z(:) = obs%obs(:)%z
-!forall(io=1:size(indexOfObs)) indexOfObs(io) = io
-
-
-! SHALL VERIFY THE FUNCTIONALITY OF SORT OF STRUCTURE DATA!!!!
-!call quickSortWithIndex( dummy_z(:) , size(dummy_z(:)) , indexOfObs(:) )
-
-!obs%obs(:) = obs%obs( indexOfObs(obs%obsNum:1:-1) )  ! reverse for pressure coordinate
 
 allocate( subDomainIndexBuffer( obs%obsNum ) )
 allocate( subDomainStart_rank1( blockNum_rank1 ) , subDomainStart_rank2( blockNum_rank2 ) )
@@ -125,50 +114,56 @@ do ir1 = 1 , blockNum_rank1
     enddo
     enddo
 
-    ! gather obs' into sub-domain index buffer
-    subDomainObsNum = 0
-    subDomainIndexBuffer(:) = 0
-    do io  = 1 , obs % obsNum
-        if ( obs%obs(io)%available ) then
-            if ( greatCircleDistance_preCalc( subDomainCenter_lonInRad , obsLonInRad(io) , &
-                                              sin_subDomainCenter_latInRad , sin_obsLatInRad(io) , &
-                                              cos_subDomainCenter_latInRad , cos_obsLatInRad(io) ) .le. (rd+longestDistanceBetweenCenterAndGrids) ) then
-                subDomainObsNum = subDomainObsNum + 1
-                subDomainIndexBuffer(subDomainObsNum) = io
-            endif
-        endif
-    enddo
-
     ! map obs' in sub-domain index buffer to each grids in sub-domain
-!$omp parallel do default(shared) private(iwe,isn,iz,zDiff,io,indexBuffer) schedule(dynamic,2)
+!$omp parallel do default(shared) private(iwe,isn,iz,zDiff,io,indexBuffer,subDomainObsNum,subDomainIndexBuffer,zLayerMax,zLayerMin) schedule(dynamic,1)
     do iz  = 1 , domain % size_bottomToTop_stag
-    indexBuffer(:) = 0
-    do isn = subDomainStart_rank2(ir2) , subDomainEnd_rank2(ir2)
-    do iwe = subDomainStart_rank1(ir1) , subDomainEnd_rank1(ir1)
 
-        zDiff = 0.d0  ! shall not less than -rlocv
-        do io  = 1 , subDomainObsNum
-            if ( zDiff .lt. -rlocv ) exit
-            if ( obs%obs(subDomainIndexBuffer(io))%available ) then
-                zDiff = zObs_preprocessed(subDomainIndexBuffer(io)) - zGrid_preprocessed(iwe,isn,iz)
-                if ( dabs( zDiff ) .le. rlocv ) then
-                    if ( greatCircleDistance_preCalc( domainLonInRad(iwe,isn) , obsLonInRad(subDomainIndexBuffer(io)) , &
-                                                      sin_domainLatInRad(iwe,isn) , sin_obsLatInRad(subDomainIndexBuffer(io)) , &
-                                                      cos_domainLatInRad(iwe,isn) , cos_obsLatInRad(subDomainIndexBuffer(io)) ) .le. rd ) then
-                        obsListOfEachGrid(iwe,isn,iz)%vectorSize = obsListOfEachGrid(iwe,isn,iz)%vectorSize + 1
-                        indexBuffer(obsListOfEachGrid(iwe,isn,iz)%vectorSize) = subDomainIndexBuffer(io)
+        ! gather obs' into sub-domain index buffer
+        subDomainObsNum = 0
+        subDomainIndexBuffer(:) = 0
+        zLayerMax = maxval(zGrid_preprocessed(subDomainStart_rank1(ir1):subDomainEnd_rank1(ir1),subDomainStart_rank2(ir2):subDomainEnd_rank2(ir2),iz))
+        zLayerMin = minval(zGrid_preprocessed(subDomainStart_rank1(ir1):subDomainEnd_rank1(ir1),subDomainStart_rank2(ir2):subDomainEnd_rank2(ir2),iz))
+        do io  = 1 , obs % obsNum
+            if ( obs%obs(io)%available ) then
+                if ( zObs_preprocessed(io)-zLayerMax .le. rlocv .and. zObs_preprocessed(io)-zLayerMin .ge. -rlocv ) then
+                    if ( greatCircleDistance_preCalc( subDomainCenter_lonInRad , obsLonInRad(io) , &
+                                                      sin_subDomainCenter_latInRad , sin_obsLatInRad(io) , &
+                                                      cos_subDomainCenter_latInRad , cos_obsLatInRad(io) ) .le. (rd+longestDistanceBetweenCenterAndGrids) ) then
+                        subDomainObsNum = subDomainObsNum + 1
+                        subDomainIndexBuffer(subDomainObsNum) = io
                     endif
                 endif
             endif
         enddo
 
-        if ( obsListOfEachGrid(iwe,isn,iz)%vectorSize .gt. 0 ) then
-            allocate( obsListOfEachGrid(iwe,isn,iz)%vector(obsListOfEachGrid(iwe,isn,iz)%vectorSize) )
-            obsListOfEachGrid(iwe,isn,iz)%vector(:) = indexBuffer(1:obsListOfEachGrid(iwe,isn,iz)%vectorSize)
-        endif
+        indexBuffer(:) = 0
+        do isn = subDomainStart_rank2(ir2) , subDomainEnd_rank2(ir2)
+        do iwe = subDomainStart_rank1(ir1) , subDomainEnd_rank1(ir1)
 
-    enddo
-    enddo
+            zDiff = 0.d0  ! shall not less than -rlocv
+            do io  = 1 , subDomainObsNum
+                if ( zDiff .lt. -rlocv ) exit
+                if ( obs%obs(subDomainIndexBuffer(io))%available ) then
+                    zDiff = zObs_preprocessed(subDomainIndexBuffer(io)) - zGrid_preprocessed(iwe,isn,iz)
+                    if ( dabs( zDiff ) .le. rlocv ) then
+                        if ( greatCircleDistance_preCalc( domainLonInRad(iwe,isn) , obsLonInRad(subDomainIndexBuffer(io)) , &
+                                                          sin_domainLatInRad(iwe,isn) , sin_obsLatInRad(subDomainIndexBuffer(io)) , &
+                                                          cos_domainLatInRad(iwe,isn) , cos_obsLatInRad(subDomainIndexBuffer(io)) ) .le. rd ) then
+                            obsListOfEachGrid(iwe,isn,iz)%vectorSize = obsListOfEachGrid(iwe,isn,iz)%vectorSize + 1
+                            indexBuffer(obsListOfEachGrid(iwe,isn,iz)%vectorSize) = subDomainIndexBuffer(io)
+                        endif
+                    endif
+                endif
+            enddo
+
+            if ( obsListOfEachGrid(iwe,isn,iz)%vectorSize .gt. 0 ) then
+                allocate( obsListOfEachGrid(iwe,isn,iz)%vector(obsListOfEachGrid(iwe,isn,iz)%vectorSize) )
+                obsListOfEachGrid(iwe,isn,iz)%vector(:) = indexBuffer(1:obsListOfEachGrid(iwe,isn,iz)%vectorSize)
+            endif
+
+        enddo
+        enddo
+
     enddo
 !$omp end parallel do
 
