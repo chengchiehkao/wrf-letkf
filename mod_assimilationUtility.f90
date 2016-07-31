@@ -12,7 +12,7 @@ module assimilationUtility
 
 interface
 
-    subroutine assimilate_massGrid(background,analysis,ensembleSize,domain,domain_mean,obs,obsListOfEachGrid,systemParameters)
+    subroutine assimilate_massGrid(background,analysis,ensembleSize,domain_mean,obs,obsListOfEachGrid,systemParameters)
       use derivedType
       use basicUtility
       use systemUtility
@@ -21,14 +21,13 @@ interface
       integer,intent(in) :: ensembleSize
       type(backgroundInfo),intent(in)  :: background(ensembleSize)
       type(backgroundInfo),intent(inout) :: analysis(ensembleSize)
-      type(domainInfo),intent(in)      :: domain(ensembleSize)
       type(domainInfo),intent(in)      :: domain_mean
       type(obsParent) :: obs
       type(integerVector),pointer :: obsListOfEachGrid(:,:,:)
       type(systemParameter),intent(in) :: systemParameters
     end subroutine assimilate_massGrid
 
-    subroutine assimilate_uGrid(background,analysis,ensembleSize,domain,domain_mean,obs,obsListOfEachGrid,systemParameters)
+    subroutine assimilate_uGrid(background,analysis,ensembleSize,domain_mean,obs,obsListOfEachGrid,systemParameters)
       use derivedType
       use basicUtility
       use systemUtility
@@ -37,14 +36,13 @@ interface
       integer,intent(in) :: ensembleSize
       type(backgroundInfo),intent(in)  :: background(ensembleSize)
       type(backgroundInfo),intent(inout) :: analysis(ensembleSize)
-      type(domainInfo),intent(in)      :: domain(ensembleSize)
       type(domainInfo),intent(in)      :: domain_mean
       type(obsParent) :: obs
       type(integerVector),pointer :: obsListOfEachGrid(:,:,:)
       type(systemParameter),intent(in) :: systemParameters
     end subroutine assimilate_uGrid
 
-    subroutine assimilate_vGrid(background,analysis,ensembleSize,domain,domain_mean,obs,obsListOfEachGrid,systemParameters)
+    subroutine assimilate_vGrid(background,analysis,ensembleSize,domain_mean,obs,obsListOfEachGrid,systemParameters)
       use derivedType
       use basicUtility
       use systemUtility
@@ -53,14 +51,13 @@ interface
       integer,intent(in) :: ensembleSize
       type(backgroundInfo),intent(in)  :: background(ensembleSize)
       type(backgroundInfo),intent(inout) :: analysis(ensembleSize)
-      type(domainInfo),intent(in)      :: domain(ensembleSize)
       type(domainInfo),intent(in)      :: domain_mean
       type(obsParent) :: obs
       type(integerVector),pointer :: obsListOfEachGrid(:,:,:)
       type(systemParameter),intent(in) :: systemParameters
     end subroutine assimilate_vGrid
 
-    subroutine assimilate_wGrid(background,analysis,ensembleSize,domain,domain_mean,obs,obsListOfEachGrid,systemParameters)
+    subroutine assimilate_wGrid(background,analysis,ensembleSize,domain_mean,obs,obsListOfEachGrid,systemParameters)
       use derivedType
       use basicUtility
       use systemUtility
@@ -69,7 +66,6 @@ interface
       integer,intent(in) :: ensembleSize
       type(backgroundInfo),intent(in)  :: background(ensembleSize)
       type(backgroundInfo),intent(inout) :: analysis(ensembleSize)
-      type(domainInfo),intent(in)      :: domain(ensembleSize)
       type(domainInfo),intent(in)      :: domain_mean
       type(obsParent) :: obs
       type(integerVector),pointer :: obsListOfEachGrid(:,:,:)

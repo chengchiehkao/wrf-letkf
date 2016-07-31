@@ -2,7 +2,7 @@
 
 !include 'sub_LETKF.f90'
 
-subroutine assimilate_wGrid(background,analysis,ensembleSize,domain,domain_mean,obs,obsListOfEachGrid,systemParameters)
+subroutine assimilate_wGrid(background,analysis,ensembleSize,domain_mean,obs,obsListOfEachGrid,systemParameters)
 
 use derivedType
 use basicUtility
@@ -14,7 +14,6 @@ implicit none
 integer,intent(in) :: ensembleSize
 type(backgroundInfo),intent(in)  :: background(ensembleSize)
 type(backgroundInfo),intent(inout) :: analysis(ensembleSize)
-type(domainInfo),intent(in)      :: domain(ensembleSize)
 type(domainInfo),intent(in)      :: domain_mean
 type(obsParent) :: obs
 type(integerVector),pointer :: obsListOfEachGrid(:,:,:)
@@ -37,11 +36,11 @@ real(kind=8) wt0,wt1
 !================================================
 
 
-!$omp parallel do default(private) shared(domain,domain_mean,obsListOfEachGrid,ensembleSize,analysis,background,obs,systemParameters) &
-!$omp schedule(dynamic,1)
 do iz  = 1,domain_mean%size_bottomToTop_stag
 wt0 = omp_get_wtime()
 do isn = 1+relaxationZone,domain_mean%size_southToNorth-relaxationZone
+!$omp parallel do default(private) shared(iz,isn,domain_mean,obsListOfEachGrid,ensembleSize,analysis,background,obs,systemParameters) &
+!$omp schedule(dynamic,1)
 do iwe = 1+relaxationZone,domain_mean%size_westToEast-relaxationZone
 
     if ( obsListOfEachGrid(iwe,isn,iz)%vectorSize .eq. 0 ) then  ! no observation means won't update.
@@ -103,11 +102,11 @@ do iwe = 1+relaxationZone,domain_mean%size_westToEast-relaxationZone
     endif
 
 enddo
+!$omp end parallel do
 enddo
 wt1 = omp_get_wtime()
 print*,'Processing: iz=',iz,'walltime=',wt1-wt0,'sec'
 enddo
-!$omp end parallel do
 
 !================================================
 return

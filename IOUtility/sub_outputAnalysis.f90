@@ -20,6 +20,11 @@ integer iens
 integer iwe,isn,iz
 !================================================
 
+
+do iens =1,ensembleSize
+    analysis(iens)%mu(:,:) = sum( analysis(iens)%stratifiedMU(:,:,:) , 3 )
+enddo
+
 !write(*,'(a)',advance='no') 'Output analysis:'
 write(*,'(a,$)') 'Output analysis:'
 
