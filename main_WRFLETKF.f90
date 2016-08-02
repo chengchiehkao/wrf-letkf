@@ -19,6 +19,7 @@ type(systemParameter)            :: systemParameters
 type(domainInfo),allocatable     :: domain(:)
 type(domainInfo)                 :: domain_mean
 type(obsParent)                  :: sounding,synop,amv,gpsro
+type(obsParent)                  :: allObs
 type(backgroundInfo),allocatable :: background(:)
 type(backgroundInfo),allocatable :: analysis(:)
 integer                          :: ensembleSize
@@ -131,35 +132,78 @@ print*,'cpu time(background to T) =',ct1-ct0,'sec'
 print*,'walltime(background to T) =',wt1-wt0,'sec'
 
 
-print*,repeat('=',20)
-print*,'Converting background to sounding...'
-wt0 = omp_get_wtime()
-call cpu_time(ct0)
-call convertBackgroundToSounding(background(:),ensembleSize,domain(:),sounding)
-call cpu_time(ct1)
-wt1 = omp_get_wtime()
-print*,'Done.'
-print*,'cpu time(H of sounding) =',ct1-ct0,'sec'
-print*,'walltime(H of sounding) =',wt1-wt0,'sec'
+if ( systemParameters % use_sound ) then
+    print*,repeat('=',20)
+    print*,'Converting background to sounding...'
+    wt0 = omp_get_wtime()
+    call cpu_time(ct0)
+    call convertBackgroundToSounding(background(:),ensembleSize,domain(:),sounding)
+    call cpu_time(ct1)
+    wt1 = omp_get_wtime()
+    print*,'Done.'
+    print*,'cpu time(H of sounding) =',ct1-ct0,'sec'
+    print*,'walltime(H of sounding) =',wt1-wt0,'sec'
+
+
+    print*,repeat('=',20)
+    print*,'Setting error of sounding...'
+    wt0 = omp_get_wtime()
+    call cpu_time(ct0)
+    call setSoundingError(sounding)
+    call cpu_time(ct1)
+    wt1 = omp_get_wtime()
+    print*,'Done.'
+    print*,'cpu time(set sounding error) =',ct1-ct0,'sec'
+    print*,'walltime(set sounding error) =',wt1-wt0,'sec'
+    print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) unavailable.'
+endif
+
+
+if ( systemParameters % use_sound ) then
+    print*,repeat('=',20)
+    print*,'Converting background to AMV...'
+    wt0 = omp_get_wtime()
+    call cpu_time(ct0)
+    call convertBackgroundToAMV(background(:),ensembleSize,domain(:),amv)
+    call cpu_time(ct1)
+    wt1 = omp_get_wtime()
+    print*,'Done.'
+    print*,'cpu time(H of AMV) =',ct1-ct0,'sec'
+    print*,'walltime(H of AMV) =',wt1-wt0,'sec'
+
+
+    print*,repeat('=',20)
+    print*,'Setting error of AMV...'
+    wt0 = omp_get_wtime()
+    call cpu_time(ct0)
+    call setAMVError(amv)
+    call cpu_time(ct1)
+    wt1 = omp_get_wtime()
+    print*,'Done.'
+    print*,'cpu time(set AMV error) =',ct1-ct0,'sec'
+    print*,'walltime(set AMV error) =',wt1-wt0,'sec'
+    print*,'There are ',count(.not.amv%obs(:)%available),'/',amv%obsNum,'AMV(s) unavailable.'
+endif
 
 
 print*,repeat('=',20)
-print*,'Setting error of sounding...'
+print*,'Merging observation(s)...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call setSoundingError(sounding)
+if ( systemParameters % use_sound )  call mergeObs(allObs,sounding)
+if ( systemParameters % use_amv )    call mergeObs(allObs,amv)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 print*,'Done.'
-print*,'cpu time(set sounding error) =',ct1-ct0,'sec'
-print*,'walltime(set sounding error) =',wt1-wt0,'sec'
-print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) unavailable.'
+print*,'cpu time(merge obs) =',ct1-ct0,'sec'
+print*,'walltime(merge obs) =',wt1-wt0,'sec'
+print*,'There are ',count(.not.allObs%obs(:)%available),'/',allObs%obsNum,'obs unavailable.'
 
 
 print*,repeat('=',20)
 print*,'Rearranging observation base on their veritcal position...'
 wt0 = omp_get_wtime()
-call rearrangeObsToBeBottomToTop(sounding)
+call rearrangeObsToBeBottomToTop(allObs)
 wt1 = omp_get_wtime()
 print*,'Done.'
 print*,'walltime(rearrange observation) =',wt1-wt0,'sec'
@@ -182,7 +226,7 @@ print*,repeat('=',20)
 print*,'Mapping observations to each mass grid...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call mapObsToEachMassGrid(obsListOfEachMassGrid,sounding,domain_mean,systemParameters)
+call mapObsToEachMassGrid(obsListOfEachMassGrid,allObs,domain_mean,systemParameters)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 print*,'Done.'
@@ -196,7 +240,7 @@ print*,'Total obs for all grids=',sum(obsListOfEachMassGrid(:,:,:)%vectorSize)
 print*,'Starting assimilation...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call assimilate_massGrid(background(:),analysis(:),ensembleSize,domain_mean,sounding,obsListOfEachMassGrid,systemParameters)
+call assimilate_massGrid(background(:),analysis(:),ensembleSize,domain_mean,allObs,obsListOfEachMassGrid,systemParameters)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 walltime_assimilation = walltime_assimilation + (wt1-wt0)
@@ -214,7 +258,7 @@ print*,repeat('=',20)
 print*,'Mapping observations to each u grid...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call mapObsToEachUGrid(obsListOfEachUGrid,sounding,domain_mean,systemParameters)
+call mapObsToEachUGrid(obsListOfEachUGrid,allObs,domain_mean,systemParameters)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 print*,'Done.'
@@ -228,7 +272,7 @@ print*,'Total obs for all grids=',sum(obsListOfEachUGrid(:,:,:)%vectorSize)
 print*,'Starting assimilation...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call assimilate_uGrid(background(:),analysis(:),ensembleSize,domain_mean,sounding,obsListOfEachUGrid,systemParameters)
+call assimilate_uGrid(background(:),analysis(:),ensembleSize,domain_mean,allObs,obsListOfEachUGrid,systemParameters)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 walltime_assimilation = walltime_assimilation + (wt1-wt0)
@@ -246,7 +290,7 @@ print*,repeat('=',20)
 print*,'Mapping observations to each v grid...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call mapObsToEachVGrid(obsListOfEachVGrid,sounding,domain_mean,systemParameters)
+call mapObsToEachVGrid(obsListOfEachVGrid,allObs,domain_mean,systemParameters)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 print*,'Done.'
@@ -260,7 +304,7 @@ print*,'Total obs for all grids=',sum(obsListOfEachVGrid(:,:,:)%vectorSize)
 print*,'Starting assimilation...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call assimilate_vGrid(background(:),analysis(:),ensembleSize,domain_mean,sounding,obsListOfEachVGrid,systemParameters)
+call assimilate_vGrid(background(:),analysis(:),ensembleSize,domain_mean,allObs,obsListOfEachVGrid,systemParameters)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 walltime_assimilation = walltime_assimilation + (wt1-wt0)
@@ -278,7 +322,7 @@ print*,repeat('=',20)
 print*,'Mapping observations to each w grid...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call mapObsToEachWGrid(obsListOfEachWGrid,sounding,domain_mean,systemParameters)
+call mapObsToEachWGrid(obsListOfEachWGrid,allObs,domain_mean,systemParameters)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 print*,'Done.'
@@ -292,7 +336,7 @@ print*,'Total obs for all grids=',sum(obsListOfEachWGrid(:,:,:)%vectorSize)
 print*,'Starting assimilation...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call assimilate_wGrid(background(:),analysis(:),ensembleSize,domain_mean,sounding,obsListOfEachWGrid,systemParameters)
+call assimilate_wGrid(background(:),analysis(:),ensembleSize,domain_mean,allObs,obsListOfEachWGrid,systemParameters)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 walltime_assimilation = walltime_assimilation + (wt1-wt0)

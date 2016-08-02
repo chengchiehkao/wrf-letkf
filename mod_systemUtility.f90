@@ -11,9 +11,12 @@ include 'systemUtility/sub_mapObsToEachMassGrid.f90'
 include 'systemUtility/sub_mapObsToEachUGrid.f90'
 include 'systemUtility/sub_mapObsToEachVGrid.f90'
 include 'systemUtility/sub_mapObsToEachWGrid.f90'
-include 'systemUtility/sub_convertBackgroundToSounding.f90'
 include 'systemUtility/sub_convertBackgroundToTemperature.f90'
+include 'systemUtility/sub_convertBackgroundToSounding.f90'
+include 'systemUtility/sub_convertBackgroundToAMV.f90'
 include 'systemUtility/sub_setSoundingError.f90'
+include 'systemUtility/sub_setAMVError.f90'
+include 'systemUtility/sub_mergeObs.f90'
 include 'systemUtility/func_errorFactor.f90'
 include 'systemUtility/sub_deallocate_obsListOfEachGrid.f90'
 
@@ -143,12 +146,36 @@ interface
       type(obsParent),intent(inout)   :: sounding
     end subroutine convertBackgroundToSounding
 
+    subroutine convertBackgroundToAMV(background,ensembleSize,domain,amv)
+      use derivedType
+      use basicUtility
+      implicit none
+      integer,intent(in)              :: ensembleSize
+      type(backgroundInfo),intent(in) :: background(ensembleSize)
+      type(domainInfo),intent(in)     :: domain(ensembleSize)
+      type(obsParent),intent(inout)   :: amv
+    end subroutine convertBackgroundToAMV
+
     subroutine setSoundingError(sounding)
       use derivedType
       use basicUtility
       implicit none
       type(obsParent),intent(inout)   :: sounding
     end subroutine setSoundingError
+
+    subroutine setAMVError(amv)
+      use derivedType
+      use basicUtility
+      implicit none
+      type(obsParent),intent(inout)   :: amv
+    end subroutine setAMVError
+
+    subroutine mergeObs(allObs,obsToBeMerged)
+      use derivedType
+      implicit none
+      type(obsParent),intent(inout) :: allObs
+      type(obsParent),intent(inout) :: obsToBeMerged
+    end subroutine mergeObs
 
     real(kind=8) function errorFactor(rc,rlev,dh,dz)
       implicit none
