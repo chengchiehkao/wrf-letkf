@@ -6,9 +6,9 @@ use derivedType
 implicit none
 include 'netcdf.inc'
 
-integer,intent(in)              :: ensembleSize
-type(backgroundInfo),intent(in) :: analysis(ensembleSize)
-type(domainInfo),intent(in)     :: domain(ensembleSize)
+integer,intent(in)                 :: ensembleSize
+type(backgroundInfo),intent(inout) :: analysis(ensembleSize)
+type(domainInfo),intent(in)        :: domain(ensembleSize)
 
 character(len=255) backgroundSrc,analysisSrc
 character(len=2)  domainSeiralNumInString
