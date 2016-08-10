@@ -78,7 +78,7 @@ do io = 1 , sounding%obsNum
                 sounding%obs(io)%available = .false.
                 cycle
             endif
-            call interp1d( qvErrorProfile_pressure(qvErrorProfileLevelNum:1:-1) , qvErrorProfile_value(tErrorProfileLevelNum:1:-1) , qvErrorProfileLevelNum , &
+            call interp1d( qvErrorProfile_pressure(qvErrorProfileLevelNum:1:-1) , qvErrorProfile_value(qvErrorProfileLevelNum:1:-1) , qvErrorProfileLevelNum , &
                            (/sounding%obs(io)%z/) , dummyArg_soundingError(1:1) , 1 , &
                            2 , .false. , dummyInvalidValue )
             sounding%obs(io)%error = dummyArg_soundingError(1)
