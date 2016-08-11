@@ -164,9 +164,9 @@ do io = 1 , airs%obsNum
             !select case ( trim(adjustl(airs%obs(io)%zName)) )
             select case ( airs%obs(io)%zName(1:1) )
             case ( 'P' )
-                call interp1d( obsZBuffer(domain(1)%size_bottomToTop:1:-1) , obsVarBuffer(domain(1)%size_bottomToTop:1:-1) , &
+                call interp1d( dlog(obsZBuffer(domain(1)%size_bottomToTop:1:-1)) , obsVarBuffer(domain(1)%size_bottomToTop:1:-1) , &
                                domain(1)%size_bottomToTop , &
-                               (/airs%obs(io)%z/) , airs%obs(io)%background(iens:iens) , &
+                               dlog((/airs%obs(io)%z/)) , airs%obs(io)%background(iens:iens) , &
                                1 , &
                                2 , .false. , invalidValue )
             end select

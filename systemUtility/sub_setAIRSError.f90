@@ -43,8 +43,8 @@ do io = 1 , airs%obsNum
                 airs%obs(io)%available = .false.
                 cycle
             endif
-            call interp1d( tErrorProfile_pressure(tErrorProfileLevelNum:1:-1) , tErrorProfile_value(tErrorProfileLevelNum:1:-1) , tErrorProfileLevelNum , &
-                           (/airs%obs(io)%z/) , dummyArg_airsError(1:1) , 1 , &
+            call interp1d( dlog(tErrorProfile_pressure(tErrorProfileLevelNum:1:-1)) , tErrorProfile_value(tErrorProfileLevelNum:1:-1) , tErrorProfileLevelNum , &
+                           dlog((/airs%obs(io)%z/)) , dummyArg_airsError(1:1) , 1 , &
                            2 , .false. , dummyInvalidValue )
             airs%obs(io)%error = dummyArg_airsError(1)
         case ( 'QVAPOR' )
@@ -53,8 +53,8 @@ do io = 1 , airs%obsNum
                 airs%obs(io)%available = .false.
                 cycle
             endif
-            call interp1d( qvErrorProfile_pressure(qvErrorProfileLevelNum:1:-1) , qvErrorProfile_value(qvErrorProfileLevelNum:1:-1) , qvErrorProfileLevelNum , &
-                           (/airs%obs(io)%z/) , dummyArg_airsError(1:1) , 1 , &
+            call interp1d( dlog(qvErrorProfile_pressure(qvErrorProfileLevelNum:1:-1)) , qvErrorProfile_value(qvErrorProfileLevelNum:1:-1) , qvErrorProfileLevelNum , &
+                           dlog((/airs%obs(io)%z/)) , dummyArg_airsError(1:1) , 1 , &
                            2 , .false. , dummyInvalidValue )
             airs%obs(io)%error = dummyArg_airsError(1)
         end select

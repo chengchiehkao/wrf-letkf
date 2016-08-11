@@ -112,9 +112,9 @@ do io = 1 , amv%obsNum
             !select case ( trim(adjustl(amv%obs(io)%zName)) )
             select case ( amv%obs(io)%zName(1:1) )
             case ( 'P' )
-                call interp1d( obsZBuffer(domain(1)%size_bottomToTop:1:-1) , obsVarBuffer(domain(1)%size_bottomToTop:1:-1) , &
+                call interp1d( dlog(obsZBuffer(domain(1)%size_bottomToTop:1:-1)) , obsVarBuffer(domain(1)%size_bottomToTop:1:-1) , &
                                domain(1)%size_bottomToTop , &
-                               (/amv%obs(io)%z/) , amv%obs(io)%background(iens:iens) , &
+                               dlog((/amv%obs(io)%z/)) , amv%obs(io)%background(iens:iens) , &
                                1 , &
                                2 , .false. , invalidValue )
             end select

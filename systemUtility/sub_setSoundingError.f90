@@ -48,8 +48,8 @@ do io = 1 , sounding%obsNum
                 sounding%obs(io)%available = .false.
                 cycle
             endif
-            call interp1d( windErrorProfile_pressure(windErrorProfileLevelNum:1:-1) , windErrorProfile_value(windErrorProfileLevelNum:1:-1) , windErrorProfileLevelNum , &
-                           (/sounding%obs(io)%z/) , dummyArg_soundingError(1:1) , 1 , &
+            call interp1d( dlog(windErrorProfile_pressure(windErrorProfileLevelNum:1:-1)) , windErrorProfile_value(windErrorProfileLevelNum:1:-1) , windErrorProfileLevelNum , &
+                           dlog((/sounding%obs(io)%z/)) , dummyArg_soundingError(1:1) , 1 , &
                            2 , .false. , dummyInvalidValue )
             sounding%obs(io)%error = dummyArg_soundingError(1)
         case ( 'V' )
@@ -58,8 +58,8 @@ do io = 1 , sounding%obsNum
                 sounding%obs(io)%available = .false.
                 cycle
             endif
-            call interp1d( windErrorProfile_pressure(windErrorProfileLevelNum:1:-1) , windErrorProfile_value(windErrorProfileLevelNum:1:-1) , windErrorProfileLevelNum , &
-                           (/sounding%obs(io)%z/) , dummyArg_soundingError(1:1) , 1 , &
+            call interp1d( dlog(windErrorProfile_pressure(windErrorProfileLevelNum:1:-1)) , windErrorProfile_value(windErrorProfileLevelNum:1:-1) , windErrorProfileLevelNum , &
+                           dlog((/sounding%obs(io)%z/)) , dummyArg_soundingError(1:1) , 1 , &
                            2 , .false. , dummyInvalidValue )
             sounding%obs(io)%error = dummyArg_soundingError(1)
         case ( 'T' )
@@ -68,8 +68,8 @@ do io = 1 , sounding%obsNum
                 sounding%obs(io)%available = .false.
                 cycle
             endif
-            call interp1d( tErrorProfile_pressure(tErrorProfileLevelNum:1:-1) , tErrorProfile_value(tErrorProfileLevelNum:1:-1) , tErrorProfileLevelNum , &
-                           (/sounding%obs(io)%z/) , dummyArg_soundingError(1:1) , 1 , &
+            call interp1d( dlog(tErrorProfile_pressure(tErrorProfileLevelNum:1:-1)) , tErrorProfile_value(tErrorProfileLevelNum:1:-1) , tErrorProfileLevelNum , &
+                           dlog((/sounding%obs(io)%z/)) , dummyArg_soundingError(1:1) , 1 , &
                            2 , .false. , dummyInvalidValue )
             sounding%obs(io)%error = dummyArg_soundingError(1)
         case ( 'QVAPOR' )
@@ -78,8 +78,8 @@ do io = 1 , sounding%obsNum
                 sounding%obs(io)%available = .false.
                 cycle
             endif
-            call interp1d( qvErrorProfile_pressure(qvErrorProfileLevelNum:1:-1) , qvErrorProfile_value(qvErrorProfileLevelNum:1:-1) , qvErrorProfileLevelNum , &
-                           (/sounding%obs(io)%z/) , dummyArg_soundingError(1:1) , 1 , &
+            call interp1d( dlog(qvErrorProfile_pressure(qvErrorProfileLevelNum:1:-1)) , qvErrorProfile_value(qvErrorProfileLevelNum:1:-1) , qvErrorProfileLevelNum , &
+                           dlog((/sounding%obs(io)%z/)) , dummyArg_soundingError(1:1) , 1 , &
                            2 , .false. , dummyInvalidValue )
             sounding%obs(io)%error = dummyArg_soundingError(1)
         end select
