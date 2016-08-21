@@ -15,6 +15,7 @@ inflationFactor = 1.15d0
 
 &use_observation
 use_sound = .true.
+use_airep = .false.
 use_synop = .false.
 use_amv   = .false.
 use_gpsro = .false.
@@ -23,6 +24,7 @@ use_airs  = .false.
 
 &varList_observation
 varList_sound = 'U','V','T','QVAPOR'
+varList_airep = 'U','V','T','QVAPOR'
 varList_synop = 'PSFC','U','V','T','Td'
 varList_amv   = 'U','V'
 varList_gpsro = 'REF','BANGLE','ImpctParam'
@@ -31,8 +33,9 @@ varList_airs  = 'U','V','T','QVAPOR'
 
 &use_varList_observation
 use_varList_sound = .true.,.true.,.true.,.true.
+use_varList_airep = .false.,.false.,.false.,.false.
 use_varList_synop = .false.,.false.,.false.,.false.,.false.
 use_varList_amv   = .false.,.false.
 use_varList_gpsro = .false.,.false.,.false.
-use_varList_airs  = .false.,.false.,.false.,.false..
+use_varList_airs  = .false.,.false.,.false.,.false.
 /

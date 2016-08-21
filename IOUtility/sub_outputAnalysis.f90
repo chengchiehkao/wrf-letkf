@@ -22,7 +22,13 @@ integer iwe,isn,iz
 
 
 do iens =1,ensembleSize
+
     analysis(iens)%mu(:,:) = sum( analysis(iens)%stratifiedMU(:,:,:) , 3 )
+
+    where ( analysis(iens)%qvapor(:,:,:) .lt. 0.d0 )
+        analysis(iens)%qvapor = 0.d0
+    end where
+
 enddo
 
 !write(*,'(a)',advance='no') 'Output analysis:'

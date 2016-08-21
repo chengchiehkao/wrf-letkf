@@ -1,6 +1,7 @@
 
 
 include 'IOUtility/func_availableFileID.f90'
+include 'IOUtility/sub_getAirep.f90'
 include 'IOUtility/sub_getAIRS.f90'
 include 'IOUtility/sub_getAMV.f90'
 include 'IOUtility/sub_getBackground.f90'
@@ -19,6 +20,15 @@ interface
     integer function availableFileID()
       implicit none
     end function availableFileID
+
+    subroutine getAirep(airep,varList,varListSize,use_varList)
+      use derivedType
+      implicit none
+      type(obsParent),intent(out) :: airep
+      integer,intent(in)                                   :: varListSize
+      character(len=10),dimension(varListSize),intent(in)  :: varList
+      logical,dimension(varListSize),intent(in)            :: use_varList
+    end subroutine getAirep
 
     subroutine getAIRS(airs,varList,varListSize,use_varList)
       use derivedType

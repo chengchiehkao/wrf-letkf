@@ -36,7 +36,7 @@ integer io  ! loop counter
 !================================================
 
 
-!$omp parallel do default(private) shared(sounding,windErrorProfile_value,windErrorProfile_pressure) schedule(dynamic,100)
+!$omp parallel do default(private) shared(sounding,windErrorProfile_value,windErrorProfile_pressure,tErrorProfile_value,tErrorProfile_pressure,qvErrorProfile_value,qvErrorProfile_pressure) schedule(dynamic,100)
 do io = 1 , sounding%obsNum
 
     if ( sounding%obs(io)%available ) then

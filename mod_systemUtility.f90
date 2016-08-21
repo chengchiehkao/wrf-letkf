@@ -13,9 +13,11 @@ include 'systemUtility/sub_mapObsToEachVGrid.f90'
 include 'systemUtility/sub_mapObsToEachWGrid.f90'
 include 'systemUtility/sub_convertBackgroundToTemperature.f90'
 include 'systemUtility/sub_convertBackgroundToSounding.f90'
+include 'systemUtility/sub_convertBackgroundToAirep.f90'
 include 'systemUtility/sub_convertBackgroundToAMV.f90'
 include 'systemUtility/sub_convertBackgroundToAIRS.f90'
 include 'systemUtility/sub_setSoundingError.f90'
+include 'systemUtility/sub_setAirepError.f90'
 include 'systemUtility/sub_setAMVError.f90'
 include 'systemUtility/sub_setAIRSError.f90'
 include 'systemUtility/sub_mergeObs.f90'
@@ -148,6 +150,16 @@ interface
       type(obsParent),intent(inout)   :: sounding
     end subroutine convertBackgroundToSounding
 
+    subroutine convertBackgroundToAirep(background,ensembleSize,domain,airep)
+      use derivedType
+      use basicUtility
+      implicit none
+      integer,intent(in)              :: ensembleSize
+      type(backgroundInfo),intent(in) :: background(ensembleSize)
+      type(domainInfo),intent(in)     :: domain(ensembleSize)
+      type(obsParent),intent(inout)   :: airep
+    end subroutine convertBackgroundToAirep
+
     subroutine convertBackgroundToAMV(background,ensembleSize,domain,amv)
       use derivedType
       use basicUtility
@@ -174,6 +186,13 @@ interface
       implicit none
       type(obsParent),intent(inout)   :: sounding
     end subroutine setSoundingError
+
+    subroutine setAirepError(airep)
+      use derivedType
+      use basicUtility
+      implicit none
+      type(obsParent),intent(inout)   :: airep
+    end subroutine setAirepError
 
     subroutine setAMVError(amv)
       use derivedType
