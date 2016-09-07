@@ -6,7 +6,8 @@ ensembleSize=36
 &correlativeDistance
 rd = 3.d5
 rc = 1.d5
-rv = 0.2d0
+rd_z = 0.6d0
+rc_z = 0.2d0
 /
 
 &inflation

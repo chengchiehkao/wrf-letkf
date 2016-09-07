@@ -13,7 +13,7 @@ type(systemParameter),intent(in) :: systemParameters
 integer,allocatable,dimension(:) :: indexOfObs
 integer :: indexBuffer(obs%obsNum)
 
-real(kind=8) :: rlocv,rd
+real(kind=8) :: rd,rd_z
 real(kind=8) zDiff
 
 integer :: blockNum_rank1=36,blockNum_rank2=30,subDomainObsNum
@@ -36,7 +36,7 @@ integer io,iwe,isn,iz,ir1,ir2
 !================================================
 
 rd    = systemParameters % rd
-rlocv = systemParameters % rv
+rd_z  = systemParameters % rd_z
 
 
 allocate( subDomainIndexBuffer( obs%obsNum ) )
@@ -125,7 +125,7 @@ do ir1 = 1 , blockNum_rank1
         zLayerMin = minval(zGrid_preprocessed(subDomainStart_rank1(ir1):subDomainEnd_rank1(ir1),subDomainStart_rank2(ir2):subDomainEnd_rank2(ir2),iz))
         do io  = 1 , obs % obsNum
             if ( obs%obs(io)%available ) then
-                if ( zObs_preprocessed(io)-zLayerMax .le. rlocv .and. zObs_preprocessed(io)-zLayerMin .ge. -rlocv ) then
+                if ( zObs_preprocessed(io)-zLayerMax .le. rd_z .and. zObs_preprocessed(io)-zLayerMin .ge. -(rd_z) ) then
                     if ( greatCircleDistance_preCalc( subDomainCenter_lonInRad , obsLonInRad(io) , &
                                                       sin_subDomainCenter_latInRad , sin_obsLatInRad(io) , &
                                                       cos_subDomainCenter_latInRad , cos_obsLatInRad(io) ) .le. (rd+longestDistanceBetweenCenterAndGrids) ) then
@@ -140,12 +140,12 @@ do ir1 = 1 , blockNum_rank1
         do isn = subDomainStart_rank2(ir2) , subDomainEnd_rank2(ir2)
         do iwe = subDomainStart_rank1(ir1) , subDomainEnd_rank1(ir1)
 
-            zDiff = 0.d0  ! shall not less than -rlocv
+            zDiff = 0.d0  ! shall not less than -rd_z
             do io  = 1 , subDomainObsNum
-                if ( zDiff .lt. -rlocv ) exit
+                if ( zDiff .lt. -rd_z ) exit
                 if ( obs%obs(subDomainIndexBuffer(io))%available ) then
                     zDiff = zObs_preprocessed(subDomainIndexBuffer(io)) - zGrid_preprocessed(iwe,isn,iz)
-                    if ( dabs( zDiff ) .le. rlocv ) then
+                    if ( dabs( zDiff ) .le. rd_z ) then
                         if ( greatCircleDistance_preCalc( domainLonInRad(iwe,isn) , obsLonInRad(subDomainIndexBuffer(io)) , &
                                                           sin_domainLatInRad(iwe,isn) , sin_obsLatInRad(subDomainIndexBuffer(io)) , &
                                                           cos_domainLatInRad(iwe,isn) , cos_obsLatInRad(subDomainIndexBuffer(io)) ) .le. rd ) then

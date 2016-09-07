@@ -19,8 +19,8 @@ type systemParameter
     integer :: varListSize_sound , varListSize_airep , varListSize_synop , varListSize_amv , varListSize_gpsro , varListSize_airs
     character(len=10),pointer,dimension(:) :: varList_sound=>null() , varList_airep=>null() , varList_synop=>null() , varList_amv=>null() , varList_gpsro=>null() , varList_airs=>null()
     logical,pointer,dimension(:) :: use_varList_sound=>null() , use_varList_airep=>null() , use_varList_synop=>null() , use_varList_amv=>null() , use_varList_gpsro=>null() , use_varList_airs=>null()
-    real(kind=8) :: rd , rc  ! Decorrelated & highly correlated distance on horizontal space.
-    real(kind=8) :: rv       ! Decorrelated distance on vertical space.
+    real(kind=8) :: rd   , rc    ! Decorrelated & highly correlated distance on horizontal space.
+    real(kind=8) :: rd_z , rc_z  ! Decorrelated & highly correlated distance on vertical space.
     real(kind=8) :: inflationFactor
 end type systemParameter
 

@@ -86,7 +86,7 @@ do iwe = 1+relaxationZone,domain_mean%size_westToEast-relaxationZone
                   (/obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%lon,obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%lat/) &
                   )
                 dz = dabs( dlog(domain_mean%pressure_w(iwe,isn,iz)) - dlog(obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%z) )
-                R(io) = ( errorFactor(systemParameters%rc,systemParameters%rv,dh,dz) * obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%error )**2.d0
+                R(io) = ( errorFactor(systemParameters%rc,systemParameters%rc_z,dh,dz) * obs%obs( obsListOfEachGrid(iwe,isn,iz)%vector(iList) )%error )**2.d0
             endif
         enddo
 

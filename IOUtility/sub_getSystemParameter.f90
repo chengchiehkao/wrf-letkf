@@ -16,15 +16,15 @@ integer,parameter :: defaultVarListSize=10
 character(len=10),dimension(defaultVarListSize) :: varList_sound , varList_airep , varList_synop , varList_amv , varList_gpsro , varList_airs
 logical,dimension(defaultVarListSize) :: use_varList_sound , use_varList_airep , use_varList_synop , use_varList_amv , use_varList_gpsro , use_varList_airs
 integer :: varListSize_sound , varListSize_airep , varListSize_synop , varListSize_amv , varListSize_gpsro , varListSize_airs
-real(kind=8) :: rd , rc  ! Decorrelated & highly correlated distance on horizontal space.
-real(kind=8) :: rv       ! Decorrelated distance on vertical space.teger ioStatus,fileID
+real(kind=8) :: rd   , rc    ! Decorrelated & highly correlated distance on horizontal space.
+real(kind=8) :: rd_z , rc_z  ! Decorrelated & highly correlated distance on vertical space.
 real(kind=8) :: inflationFactor
 
 namelist /sizeOfEnsemble/ ensembleSize
 namelist /use_observation/ use_sound,use_airep,use_synop,use_amv,use_gpsro,use_airs
 namelist /varList_observation/ varList_sound,varList_airep,varList_synop,varList_amv,varList_gpsro,varList_airs
 namelist /use_varList_observation/ use_varList_sound,use_varList_airep,use_varList_synop,use_varList_amv,use_varList_gpsro,use_varList_airs
-namelist /correlativeDistance/ rd,rc,rv
+namelist /correlativeDistance/ rd,rc,rd_z,rc_z
 namelist /inflation/ inflationFactor
 
 integer :: fileID
@@ -112,8 +112,12 @@ if ( rc .le. 0.d0 ) then
     print*,'Rc shall > 0., program stopped.'
     stop
 endif
-if ( rv .le. 0.d0 ) then
-    print*,'Rv shall > 0., program stopped.'
+if ( rd_z .le. 0.d0 ) then
+    print*,'Rd_z shall > 0., program stopped.'
+    stop
+endif
+if ( rc_z .le. 0.d0 ) then
+    print*,'Rc_z shall > 0., program stopped.'
     stop
 endif
 
@@ -173,7 +177,8 @@ if ( use_gpsro )  systemParameters % use_varList_gpsro(:) = use_varList_gpsro(1:
 if ( use_airs  )  systemParameters % use_varList_airs(:)  = use_varList_airs(1:varListSize_airs)
 systemParameters % rd = rd
 systemParameters % rc = rc
-systemParameters % rv = rv
+systemParameters % rd_z = rd_z
+systemParameters % rc_z = rc_z
 systemParameters % inflationFactor = inflationFactor
 
 
