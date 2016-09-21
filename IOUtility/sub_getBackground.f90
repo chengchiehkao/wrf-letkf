@@ -14,7 +14,7 @@ character(len=255) backgroundSrc
 character(len=2)  domainSeiralNumInString
 
 integer ncStatus,ncID
-integer varID_mu , varID_t , varID_qvapor , varID_u , varID_v , varID_w , varID_ph , varID_znw
+integer varID_mu , varID_t , varID_qvapor , varID_u , varID_v , varID_w , varID_ph , varID_znw , varID_u10 , varID_v10
 
 real(kind=8),allocatable,dimension(:) :: temp_znw , temp_diffZNW
 
@@ -39,6 +39,8 @@ do iens = 1 , ensembleSize
     endif
 
     allocate( background(iens) % mu( domain(iens)%size_westToEast , domain(iens)%size_southToNorth ) )
+    allocate( background(iens) % u10( domain(iens)%size_westToEast , domain(iens)%size_southToNorth ) )
+    allocate( background(iens) % v10( domain(iens)%size_westToEast , domain(iens)%size_southToNorth ) )
     allocate( background(iens) % t( domain(iens)%size_westToEast , domain(iens)%size_southToNorth , domain(iens)%size_bottomToTop ) )
     allocate( background(iens) % qvapor( domain(iens)%size_westToEast , domain(iens)%size_southToNorth , domain(iens)%size_bottomToTop ) )
     allocate( background(iens) % u( domain(iens)%size_westToEast_stag , domain(iens)%size_southToNorth , domain(iens)%size_bottomToTop ) )
@@ -50,6 +52,8 @@ do iens = 1 , ensembleSize
     allocate( temp_diffZNW( domain(iens)%size_bottomToTop ) )
 
     background(iens) % mu(:,:)       = 0.d0
+    background(iens) % u10(:,:)      = 0.d0
+    background(iens) % v10(:,:)      = 0.d0
     background(iens) % t(:,:,:)      = 0.d0
     background(iens) % qvapor(:,:,:) = 0.d0
     background(iens) % u(:,:,:)      = 0.d0
@@ -63,6 +67,12 @@ do iens = 1 , ensembleSize
 
     ncStatus = nf_inq_varID( ncID , 'MU' , varID_mu )
     ncStatus = nf_get_vara_double( ncID , varID_mu , (/1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth,1/) , background(iens)%mu(:,:) )
+
+    ncStatus = nf_inq_varID( ncID , 'U10' , varID_u10 )
+    ncStatus = nf_get_vara_double( ncID , varID_u10 , (/1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth,1/) , background(iens)%u10(:,:) )
+
+    ncStatus = nf_inq_varID( ncID , 'V10' , varID_v10 )
+    ncStatus = nf_get_vara_double( ncID , varID_v10 , (/1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth,1/) , background(iens)%v10(:,:) )
 
     ncStatus = nf_inq_varID( ncID , 'T' , varID_t )
     ncStatus = nf_get_vara_double( ncID , varID_t , (/1,1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth,domain(iens)%size_bottomToTop,1/) , background(iens)%t(:,:,:) )

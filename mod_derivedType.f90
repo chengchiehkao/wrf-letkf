@@ -15,10 +15,10 @@ end type domainInfo
 
 type systemParameter
     integer :: ensembleSize
-    logical :: use_sound , use_airep , use_synop , use_amv , use_gpsro , use_airs
-    integer :: varListSize_sound , varListSize_airep , varListSize_synop , varListSize_amv , varListSize_gpsro , varListSize_airs
-    character(len=10),pointer,dimension(:) :: varList_sound=>null() , varList_airep=>null() , varList_synop=>null() , varList_amv=>null() , varList_gpsro=>null() , varList_airs=>null()
-    logical,pointer,dimension(:) :: use_varList_sound=>null() , use_varList_airep=>null() , use_varList_synop=>null() , use_varList_amv=>null() , use_varList_gpsro=>null() , use_varList_airs=>null()
+    logical :: use_sound , use_airep , use_synop , use_amv , use_gpsro , use_airs , use_quikscat
+    integer :: varListSize_sound , varListSize_airep , varListSize_synop , varListSize_amv , varListSize_gpsro , varListSize_airs , varListSize_quikscat
+    character(len=10),pointer,dimension(:) :: varList_sound=>null() , varList_airep=>null() , varList_synop=>null() , varList_amv=>null() , varList_gpsro=>null() , varList_airs=>null() , varList_quikscat=>null()
+    logical,pointer,dimension(:) :: use_varList_sound=>null() , use_varList_airep=>null() , use_varList_synop=>null() , use_varList_amv=>null() , use_varList_gpsro=>null() , use_varList_airs=>null() , use_varList_quikscat=>null()
     real(kind=8) :: rd   , rc    ! Decorrelated & highly correlated distance on horizontal space.
     real(kind=8) :: rd_z , rc_z  ! Decorrelated & highly correlated distance on vertical space.
     real(kind=8) :: inflationFactor
@@ -44,7 +44,7 @@ type integerVector
 end type integerVector
 
 type backgroundInfo
-    real(kind=8),pointer,dimension(:,:)   :: mu=>null()
+    real(kind=8),pointer,dimension(:,:)   :: mu=>null() , u10=>null() , v10=>null()
     real(kind=8),pointer,dimension(:,:,:) :: u=>null() , v=>null() , w=>null() , t=>null() , qvapor=>null()
     real(kind=8),pointer,dimension(:,:,:) :: ph=>null()  ! PH as perturbation geopotential in WRF.
     real(kind=8),pointer,dimension(:,:,:) :: normalT=>null() , stratifiedMU=>null()

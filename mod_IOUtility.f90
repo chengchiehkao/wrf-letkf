@@ -7,6 +7,7 @@ include 'IOUtility/sub_getAMV.f90'
 include 'IOUtility/sub_getBackground.f90'
 include 'IOUtility/sub_getDomain.f90'
 include 'IOUtility/sub_getGPSRO.f90'
+include 'IOUtility/sub_getQuikSCAT.f90'
 include 'IOUtility/sub_getSounding.f90'
 include 'IOUtility/sub_getSynop.f90'
 include 'IOUtility/sub_getSystemParameter.f90'
@@ -73,6 +74,15 @@ interface
       character(len=10),dimension(varListSize),intent(in)  :: varList
       logical,dimension(varListSize),intent(in)            :: use_varList
     end subroutine getGPSRO
+
+    subroutine getQuikSCAT(quikscat,varList,varListSize,use_varList)
+      use derivedType
+      implicit none
+      type(obsParent),intent(out) :: quikscat
+      integer,intent(in)                                   :: varListSize
+      character(len=10),dimension(varListSize),intent(in)  :: varList
+      logical,dimension(varListSize),intent(in)            :: use_varList
+    end subroutine getQuikSCAT
 
     subroutine getSounding(sounding,varList,varListSize,use_varList)
       use derivedType
