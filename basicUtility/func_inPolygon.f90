@@ -124,8 +124,7 @@ allocate(yDiffOfTargetAndVertex(vertexSize))
 yDiffOfTargetAndVertex(:) = yVertex(:) - yTarget
 
 ! check if the eastward ray from the target point tangentially cross the indexically 1st vertex.
-if ( yDiffOfTargetAndVertex(1) .eq. 0. .and. &
-  (xVertex(vertexSize).gt.xTarget .or. xVertex(2).gt.xTarget) ) then
+if ( yDiffOfTargetAndVertex(1) .eq. 0. .and. xTarget.lt.xVertex(1) ) then
     if ( yDiffOfTargetAndVertex(vertexSize)*yDiffOfTargetAndVertex(2) .gt. 0. ) then
         intersectionCounter = intersectionCounter + 2
     elseif ( yDiffOfTargetAndVertex(vertexSize)*yDiffOfTargetAndVertex(2) .lt. 0. ) then
@@ -142,8 +141,7 @@ endif
 ! check if the eastward ray from the target point tangentially cross the vertices between
 !  2nd to (vertexSize-1)th vertex.
 do iv=2,vertexSize-1
-    if ( yDiffOfTargetAndVertex(iv) .eq. 0. .and. &
-      (xVertex(iv-1).gt.xTarget .or. xVertex(iv+1).gt.xTarget) ) then
+    if ( yDiffOfTargetAndVertex(iv) .eq. 0. .and. xTarget.lt.xVertex(iv) ) then
         if ( yDiffOfTargetAndVertex(iv-1)*yDiffOfTargetAndVertex(iv+1) .gt. 0. ) then
             intersectionCounter = intersectionCounter + 2
         elseif ( yDiffOfTargetAndVertex(iv-1)*yDiffOfTargetAndVertex(iv+1) .lt. 0. ) then
@@ -159,8 +157,7 @@ do iv=2,vertexSize-1
 enddo
 
 ! check if the eastward ray from the target point tangentially cross the indexically last vertex.
-if ( yDiffOfTargetAndVertex(vertexSize) .eq. 0. .and. &
-  (xVertex(vertexSize-1).gt.xTarget .or. xVertex(1).gt.xTarget) ) then
+if ( yDiffOfTargetAndVertex(vertexSize) .eq. 0. .and. xTarget.lt.xVertex(vertexSize) ) then
     if ( yDiffOfTargetAndVertex(vertexSize-1)*yDiffOfTargetAndVertex(1) .gt. 0. ) then
         intersectionCounter = intersectionCounter + 2
     elseif ( yDiffOfTargetAndVertex(vertexSize-1)*yDiffOfTargetAndVertex(1) .lt. 0. ) then

@@ -37,7 +37,7 @@ interface
       integer,intent(in)                     :: targetSize  ! size of target values.
       real,intent(in) ,dimension(targetSize) :: xTarget     ! target x.
       real,intent(out),dimension(targetSize) :: yTarget     ! target y.
-      integer,intent(in) :: method
+      integer,intent(in) :: method  ! method=1 means nearest; method=2 means linear.
       logical,intent(in) :: extrap
       real,intent(in)    :: invalidValue
     end subroutine interp1d

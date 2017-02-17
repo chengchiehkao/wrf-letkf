@@ -13,7 +13,7 @@ subroutine interp1d( xRef    , yRef    , refSize   , &
 !     yRef(rank-1, default real, input only).
 !     targetSize(rank-0, default integer, input only).
 !     xTarget(rank-1, default real, input only).
-!     method(rank-0, default integer, input only).
+!     method(rank-0, default integer, input only). method=1 means nearest; method=2 means linear.
 !     extrap(rank-0, logical, input only).
 !     invalidValue(rank-0, default real, input only).
 ! output:

@@ -6,7 +6,7 @@ subroutine locateAsIndex1d(valueRef,valueRefSize,valueTarget,indexReturned)
 !     referenced values it lies.
 !     Basically, valueRef(indexReturned) <= valueTarget < valueRef(indexReturned+1),
 !     but indexReturned=valueRefSize-1  when  valueTarget=valueRef(valueRefSize).
-!     This subroutine is base on binary search algorithm.
+!     This subroutine is based on binary search algorithm.
 ! Input:
 !     valueRef(rank-1, default real, input only), should be strictly increasing.
 !     valueRefSize(rank-0, default integer, input only), should be greater than or equal to 1.
