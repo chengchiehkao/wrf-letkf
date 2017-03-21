@@ -4,6 +4,7 @@ include 'IOUtility/func_availableFileID.f90'
 include 'IOUtility/sub_getAirep.f90'
 include 'IOUtility/sub_getAIRS.f90'
 include 'IOUtility/sub_getAMV.f90'
+include 'IOUtility/sub_getASCAT.f90'
 include 'IOUtility/sub_getBackground.f90'
 include 'IOUtility/sub_getDomain.f90'
 include 'IOUtility/sub_getGPSRO.f90'
@@ -48,6 +49,15 @@ interface
       character(len=10),dimension(varListSize),intent(in)  :: varList
       logical,dimension(varListSize),intent(in)            :: use_varList
     end subroutine getAMV
+
+    subroutine getASCAT(ascat,varList,varListSize,use_varList)
+      use derivedType
+      implicit none
+      type(obsParent),intent(out) :: ascat
+      integer,intent(in)                                   :: varListSize
+      character(len=10),dimension(varListSize),intent(in)  :: varList
+      logical,dimension(varListSize),intent(in)            :: use_varList
+    end subroutine getASCAT
 
     subroutine getBackground(background,ensembleSize,domain)
       use derivedType

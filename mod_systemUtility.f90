@@ -17,11 +17,13 @@ include 'systemUtility/sub_convertBackgroundToAirep.f90'
 include 'systemUtility/sub_convertBackgroundToAMV.f90'
 include 'systemUtility/sub_convertBackgroundToAIRS.f90'
 include 'systemUtility/sub_convertBackgroundToQuikSCAT.f90'
+include 'systemUtility/sub_convertBackgroundToASCAT.f90'
 include 'systemUtility/sub_setSoundingError.f90'
 include 'systemUtility/sub_setAirepError.f90'
 include 'systemUtility/sub_setAMVError.f90'
 include 'systemUtility/sub_setAIRSError.f90'
 include 'systemUtility/sub_setQuikSCATError.f90'
+include 'systemUtility/sub_setASCATError.f90'
 include 'systemUtility/sub_mergeObs.f90'
 include 'systemUtility/func_errorFactor.f90'
 include 'systemUtility/sub_deallocate_obsListOfEachGrid.f90'
@@ -193,6 +195,17 @@ interface
       type(obsParent),intent(inout)   :: quikscat
     end subroutine convertBackgroundToQuikSCAT
 
+    subroutine convertBackgroundToASCAT(background,ensembleSize,domain,domain_mean,ascat)
+      use derivedType
+      use basicUtility
+      implicit none
+      integer,intent(in)              :: ensembleSize
+      type(backgroundInfo),intent(in) :: background(ensembleSize)
+      type(domainInfo),intent(in)     :: domain(ensembleSize)
+      type(domainInfo),intent(in)     :: domain_mean
+      type(obsParent),intent(inout)   :: ascat
+    end subroutine convertBackgroundToASCAT
+
     subroutine setSoundingError(sounding)
       use derivedType
       use basicUtility
@@ -227,6 +240,13 @@ interface
       implicit none
       type(obsParent),intent(inout)   :: quikscat
     end subroutine setQuikSCATError
+
+    subroutine setASCATError(ascat)
+      use derivedType
+      use basicUtility
+      implicit none
+      type(obsParent),intent(inout)   :: ascat
+    end subroutine setASCATError
 
     subroutine mergeObs(allObs,obsToBeMerged)
       use derivedType

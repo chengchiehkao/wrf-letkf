@@ -22,6 +22,7 @@ use_amv   = .false.
 use_gpsro = .false.
 use_airs  = .false.
 use_quikscat = .false.
+use_ascat    = .false.
 /
 
 &varList_observation
@@ -32,6 +33,7 @@ varList_amv   = 'U','V'
 varList_gpsro = 'REF','BANGLE','ImpctParam'
 varList_airs  = 'U','V','T','QVAPOR'
 varList_quikscat = 'U10','V10'
+varList_ascat    = 'U10','V10'
 /
 
 &use_varList_observation
@@ -42,4 +44,5 @@ use_varList_amv   = .false.,.false.
 use_varList_gpsro = .false.,.false.,.false.
 use_varList_airs  = .false.,.false.,.false.,.false.
 use_varList_quikscat = .false.,.false.
+use_varList_ascat    = .false.,.false.
 /
