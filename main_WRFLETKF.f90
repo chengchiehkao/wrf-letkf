@@ -163,6 +163,17 @@ print*,'Done.'
 print*,'cpu time(background to T) =',ct1-ct0,'sec'
 print*,'walltime(background to T) =',wt1-wt0,'sec'
 
+print*,repeat('=',20)
+print*,'Converting background to relative humidity...'
+wt0 = omp_get_wtime()
+call cpu_time(ct0)
+call convertBackgroundToRH(background(:),ensembleSize,domain(:))
+call cpu_time(ct1)
+wt1 = omp_get_wtime()
+print*,'Done.'
+print*,'cpu time(background to RH) =',ct1-ct0,'sec'
+print*,'walltime(background to RH) =',wt1-wt0,'sec'
+
 
 if ( systemParameters % use_sound ) then
     print*,repeat('=',20)

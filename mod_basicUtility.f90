@@ -9,6 +9,7 @@ include 'basicUtility/sub_quickSortWithIndex.f90'
 include 'basicUtility/func_greatCircleDistance.f90'
 include 'basicUtility/func_greatCircleDistance_preCalc.f90'
 include 'basicUtility/func_convertThetaAndPToTemperature.f90'
+include 'basicUtility/func_convertTAndPAndQvToRH.f90'
 
 
 module basicUtility
@@ -100,6 +101,13 @@ interface
       real,intent(in) :: theta  ! potential temperature (unit: K)
       real,intent(in) :: p      ! pressure (unit: Pa)
     end function convertThetaAndPToTemperature
+
+    real function convertTAndPAndQvToRH( t_k , p , qv )
+      implicit none
+      real,intent(in) :: t_k  ! normal temperature (unit: K)
+      real,intent(in) :: p    ! pressure (unit: Pa)
+      real,intent(in) :: qv   ! water vapor mixing ratio (unit: kg/kg)
+    end function convertTAndPAndQvToRH
 
 
 end interface

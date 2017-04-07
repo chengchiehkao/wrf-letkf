@@ -12,6 +12,7 @@ include 'systemUtility/sub_mapObsToEachUGrid.f90'
 include 'systemUtility/sub_mapObsToEachVGrid.f90'
 include 'systemUtility/sub_mapObsToEachWGrid.f90'
 include 'systemUtility/sub_convertBackgroundToTemperature.f90'
+include 'systemUtility/sub_convertBackgroundToRH.f90'
 include 'systemUtility/sub_convertBackgroundToSounding.f90'
 include 'systemUtility/sub_convertBackgroundToAirep.f90'
 include 'systemUtility/sub_convertBackgroundToAMV.f90'
@@ -143,6 +144,15 @@ interface
       type(backgroundInfo),intent(in) :: background(ensembleSize)
       type(domainInfo),intent(in)     :: domain(ensembleSize)
     end subroutine convertBackgroundToTemperature
+
+    subroutine convertBackgroundToRH(background,ensembleSize,domain)
+      use derivedType
+      use basicUtility
+      implicit none
+      integer,intent(in)              :: ensembleSize
+      type(backgroundInfo),intent(in) :: background(ensembleSize)
+      type(domainInfo),intent(in)     :: domain(ensembleSize)
+    end subroutine convertBackgroundToRH
 
     subroutine convertBackgroundToSounding(background,ensembleSize,domain,sounding)
       use derivedType
