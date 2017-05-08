@@ -15,10 +15,10 @@ end type domainInfo
 
 type systemParameter
     integer :: ensembleSize
-    logical :: use_sound , use_airep , use_synop , use_amv , use_gpsro , use_airs , use_quikscat , use_ascat , use_iasi
-    integer :: varListSize_sound , varListSize_airep , varListSize_synop , varListSize_amv , varListSize_gpsro , varListSize_airs , varListSize_quikscat , varListSize_ascat , varListSize_iasi
-    character(len=10),pointer,dimension(:) :: varList_sound=>null() , varList_airep=>null() , varList_synop=>null() , varList_amv=>null() , varList_gpsro=>null() , varList_airs=>null() , varList_quikscat=>null() , varList_ascat=>null() , varList_iasi=>null()
-    logical,pointer,dimension(:) :: use_varList_sound=>null() , use_varList_airep=>null() , use_varList_synop=>null() , use_varList_amv=>null() , use_varList_gpsro=>null() , use_varList_airs=>null() , use_varList_quikscat=>null() , use_varList_ascat=>null() , use_varList_iasi=>null()
+    logical :: use_sound , use_airep , use_synop , use_amv , use_gpsro , use_airs , use_quikscat , use_ascat , use_iasi , use_oscat
+    integer :: varListSize_sound , varListSize_airep , varListSize_synop , varListSize_amv , varListSize_gpsro , varListSize_airs , varListSize_quikscat , varListSize_ascat , varListSize_iasi , varListSize_oscat
+    character(len=10),pointer,dimension(:) :: varList_sound=>null() , varList_airep=>null() , varList_synop=>null() , varList_amv=>null() , varList_gpsro=>null() , varList_airs=>null() , varList_quikscat=>null() , varList_ascat=>null() , varList_iasi=>null() , varList_oscat=>null()
+    logical,pointer,dimension(:) :: use_varList_sound=>null() , use_varList_airep=>null() , use_varList_synop=>null() , use_varList_amv=>null() , use_varList_gpsro=>null() , use_varList_airs=>null() , use_varList_quikscat=>null() , use_varList_ascat=>null() , use_varList_iasi=>null() , use_varList_oscat=>null()
     real(kind=8) :: rd   , rc    ! Decorrelated & highly correlated distance on horizontal space.
     real(kind=8) :: rd_z , rc_z  ! Decorrelated & highly correlated distance on vertical space.
     real(kind=8) :: inflationFactor

@@ -11,19 +11,19 @@ implicit none
 type(systemParameter),intent(out) :: systemParameters
 
 integer :: ensembleSize
-logical :: use_sound , use_airep , use_synop , use_amv , use_gpsro , use_airs , use_quikscat , use_ascat , use_iasi
+logical :: use_sound , use_airep , use_synop , use_amv , use_gpsro , use_airs , use_quikscat , use_ascat , use_iasi , use_oscat
 integer,parameter :: defaultVarListSize=10
-character(len=10),dimension(defaultVarListSize) :: varList_sound , varList_airep , varList_synop , varList_amv , varList_gpsro , varList_airs , varList_quikscat , varList_ascat , varList_iasi
-logical,dimension(defaultVarListSize) :: use_varList_sound , use_varList_airep , use_varList_synop , use_varList_amv , use_varList_gpsro , use_varList_airs , use_varList_quikscat , use_varList_ascat , use_varList_iasi
-integer :: varListSize_sound , varListSize_airep , varListSize_synop , varListSize_amv , varListSize_gpsro , varListSize_airs , varListSize_quikscat , varListSize_ascat , varListSize_iasi
+character(len=10),dimension(defaultVarListSize) :: varList_sound , varList_airep , varList_synop , varList_amv , varList_gpsro , varList_airs , varList_quikscat , varList_ascat , varList_iasi , varList_oscat
+logical,dimension(defaultVarListSize) :: use_varList_sound , use_varList_airep , use_varList_synop , use_varList_amv , use_varList_gpsro , use_varList_airs , use_varList_quikscat , use_varList_ascat , use_varList_iasi , use_varList_oscat
+integer :: varListSize_sound , varListSize_airep , varListSize_synop , varListSize_amv , varListSize_gpsro , varListSize_airs , varListSize_quikscat , varListSize_ascat , varListSize_iasi , varListSize_oscat
 real(kind=8) :: rd   , rc    ! Decorrelated & highly correlated distance on horizontal space.
 real(kind=8) :: rd_z , rc_z  ! Decorrelated & highly correlated distance on vertical space.
 real(kind=8) :: inflationFactor
 
 namelist /sizeOfEnsemble/ ensembleSize
-namelist /use_observation/ use_sound,use_airep,use_synop,use_amv,use_gpsro,use_airs,use_quikscat,use_ascat,use_iasi
-namelist /varList_observation/ varList_sound,varList_airep,varList_synop,varList_amv,varList_gpsro,varList_airs,varList_quikscat,varList_ascat,varList_iasi
-namelist /use_varList_observation/ use_varList_sound,use_varList_airep,use_varList_synop,use_varList_amv,use_varList_gpsro,use_varList_airs,use_varList_quikscat,use_varList_ascat,use_varList_iasi
+namelist /use_observation/ use_sound,use_airep,use_synop,use_amv,use_gpsro,use_airs,use_quikscat,use_ascat,use_iasi,use_oscat
+namelist /varList_observation/ varList_sound,varList_airep,varList_synop,varList_amv,varList_gpsro,varList_airs,varList_quikscat,varList_ascat,varList_iasi,varList_oscat
+namelist /use_varList_observation/ use_varList_sound,use_varList_airep,use_varList_synop,use_varList_amv,use_varList_gpsro,use_varList_airs,use_varList_quikscat,use_varList_ascat,use_varList_iasi,use_varList_oscat
 namelist /correlativeDistance/ rd,rc,rd_z,rc_z
 namelist /inflation/ inflationFactor
 
@@ -42,6 +42,7 @@ use_airs     = .false.
 use_quikscat = .false.
 use_ascat    = .false.
 use_iasi     = .false.
+use_oscat    = .false.
 use_varList_sound(:)    = .true.
 use_varList_airep(:)    = .true.
 use_varList_synop(:)    = .true.
@@ -51,6 +52,7 @@ use_varList_airs(:)     = .true.
 use_varList_quikscat(:) = .true.
 use_varList_ascat(:)    = .true.
 use_varList_iasi(:)     = .true.
+use_varList_oscat(:)    = .true.
 inflationFactor = 1.d0
 varList_sound(:)    = repeat(' ',len(varList_sound(1)))
 varList_airep(:)    = repeat(' ',len(varList_airep(1)))
@@ -61,6 +63,7 @@ varList_airs(:)     = repeat(' ',len(varList_airs(1)))
 varList_quikscat(:) = repeat(' ',len(varList_quikscat(1)))
 varList_ascat(:)    = repeat(' ',len(varList_ascat(1)))
 varList_iasi(:)     = repeat(' ',len(varList_iasi(1)))
+varList_oscat(:)    = repeat(' ',len(varList_oscat(1)))
 ! End of assignment
 
 
@@ -89,6 +92,7 @@ varListSize_airs      = count( len_trim(varList_airs)  .gt. 0 )
 varListSize_quikscat  = count( len_trim(varList_quikscat)  .gt. 0 )
 varListSize_ascat     = count( len_trim(varList_ascat) .gt. 0 )
 varListSize_iasi      = count( len_trim(varList_iasi)  .gt. 0 )
+varListSize_oscat     = count( len_trim(varList_oscat) .gt. 0 )
 
 if ( use_sound .and. varListSize_sound.eq.0 ) then
     print*,'Variable list of SOUNDING is empty, SOUNDING will be set as disabled.'
@@ -126,6 +130,10 @@ if ( use_iasi .and. varListSize_iasi.eq.0 ) then
     print*,'Variable list of IASI is empty, IASI will be set as disabled.'
     use_iasi = .false.
 endif
+if ( use_oscat .and. varListSize_oscat.eq.0 ) then
+    print*,'Variable list of OSCAT is empty, OSCAT will be set as disabled.'
+    use_oscat = .false.
+endif
 
 
 if ( rd .le. 0.d0 ) then
@@ -160,6 +168,7 @@ if ( use_airs     )  allocate( systemParameters % varList_airs(varListSize_airs)
 if ( use_quikscat )  allocate( systemParameters % varList_quikscat(varListSize_quikscat) )
 if ( use_ascat    )  allocate( systemParameters % varList_ascat(varListSize_ascat) )
 if ( use_iasi     )  allocate( systemParameters % varList_iasi(varListSize_iasi) )
+if ( use_oscat    )  allocate( systemParameters % varList_oscat(varListSize_oscat) )
 
 if ( use_sound    )  allocate( systemParameters % use_varList_sound(varListSize_sound) )
 if ( use_airep    )  allocate( systemParameters % use_varList_airep(varListSize_airep) )
@@ -170,6 +179,7 @@ if ( use_airs     )  allocate( systemParameters % use_varList_airs(varListSize_a
 if ( use_quikscat )  allocate( systemParameters % use_varList_quikscat(varListSize_quikscat) )
 if ( use_ascat    )  allocate( systemParameters % use_varList_ascat(varListSize_ascat) )
 if ( use_iasi     )  allocate( systemParameters % use_varList_iasi(varListSize_iasi) )
+if ( use_oscat    )  allocate( systemParameters % use_varList_oscat(varListSize_oscat) )
 
 if ( use_sound    )  systemParameters % varList_sound(:)    = repeat(' ',len(varList_sound(1)))
 if ( use_airep    )  systemParameters % varList_airep(:)    = repeat(' ',len(varList_airep(1)))
@@ -180,6 +190,7 @@ if ( use_airs     )  systemParameters % varList_airs(:)     = repeat(' ',len(var
 if ( use_quikscat )  systemParameters % varList_quikscat(:) = repeat(' ',len(varList_quikscat(1)))
 if ( use_ascat    )  systemParameters % varList_ascat(:)    = repeat(' ',len(varList_ascat(1)))
 if ( use_iasi     )  systemParameters % varList_iasi(:)     = repeat(' ',len(varList_iasi(1)))
+if ( use_oscat    )  systemParameters % varList_oscat(:)    = repeat(' ',len(varList_oscat(1)))
 
 
 systemParameters % ensembleSize = ensembleSize
@@ -192,6 +203,7 @@ systemParameters % use_airs     = use_airs
 systemParameters % use_quikscat = use_quikscat
 systemParameters % use_ascat    = use_ascat
 systemParameters % use_iasi     = use_iasi
+systemParameters % use_oscat    = use_oscat
 systemParameters % varListSize_sound    = varListSize_sound
 systemParameters % varListSize_airep    = varListSize_airep
 systemParameters % varListSize_synop    = varListSize_synop
@@ -201,6 +213,7 @@ systemParameters % varListSize_airs     = varListSize_airs
 systemParameters % varListSize_quikscat = varListSize_quikscat
 systemParameters % varListSize_ascat    = varListSize_ascat
 systemParameters % varListSize_iasi     = varListSize_iasi
+systemParameters % varListSize_oscat    = varListSize_oscat
 if ( use_sound    )  systemParameters % varList_sound(:)    = varList_sound(1:varListSize_sound)
 if ( use_airep    )  systemParameters % varList_airep(:)    = varList_airep(1:varListSize_airep)
 if ( use_synop    )  systemParameters % varList_synop(:)    = varList_synop(1:varListSize_synop)
@@ -210,6 +223,7 @@ if ( use_airs     )  systemParameters % varList_airs(:)     = varList_airs(1:var
 if ( use_quikscat )  systemParameters % varList_quikscat(:) = varList_quikscat(1:varListSize_quikscat)
 if ( use_ascat    )  systemParameters % varList_ascat(:)    = varList_ascat(1:varListSize_ascat)
 if ( use_iasi     )  systemParameters % varList_iasi(:)     = varList_iasi(1:varListSize_iasi)
+if ( use_oscat    )  systemParameters % varList_oscat(:)    = varList_oscat(1:varListSize_oscat)
 
 if ( use_sound    )  systemParameters % use_varList_sound(:)    = use_varList_sound(1:varListSize_sound)
 if ( use_airep    )  systemParameters % use_varList_airep(:)    = use_varList_airep(1:varListSize_airep)
@@ -218,8 +232,9 @@ if ( use_amv      )  systemParameters % use_varList_amv(:)      = use_varList_am
 if ( use_gpsro    )  systemParameters % use_varList_gpsro(:)    = use_varList_gpsro(1:varListSize_gpsro)
 if ( use_airs     )  systemParameters % use_varList_airs(:)     = use_varList_airs(1:varListSize_airs)
 if ( use_quikscat )  systemParameters % use_varList_quikscat(:) = use_varList_quikscat(1:varListSize_quikscat)
-if ( use_ascat    )  systemParameters % use_varList_ascat(:) = use_varList_ascat(1:varListSize_ascat)
+if ( use_ascat    )  systemParameters % use_varList_ascat(:)    = use_varList_ascat(1:varListSize_ascat)
 if ( use_iasi     )  systemParameters % use_varList_iasi(:)     = use_varList_iasi(1:varListSize_iasi)
+if ( use_oscat    )  systemParameters % use_varList_oscat(:)    = use_varList_oscat(1:varListSize_oscat)
 systemParameters % rd = rd
 systemParameters % rc = rc
 systemParameters % rd_z = rd_z
