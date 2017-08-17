@@ -26,7 +26,9 @@ integer io  ! loop counter
 !================================================
 
 
+#ifndef PGI
 !$omp parallel do default(private) shared(airep,windErrorProfile_value,windErrorProfile_pressure,tErrorProfile_value,tErrorProfile_pressure) schedule(dynamic,100)
+#endif
 do io = 1 , airep%obsNum
 
     if ( airep%obs(io)%available ) then
@@ -76,7 +78,9 @@ do io = 1 , airep%obsNum
     endif
 
 enddo
+#ifndef PGI
 !$omp end parallel do
+#endif
 
 
 !================================================

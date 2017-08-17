@@ -24,18 +24,18 @@ real(realKind),dimension(k,k) :: pa_tilde
 
 real(realKind) :: inflationFactor , rho
 
-integer i  ! loop index
+integer iObs  ! loop index
 !================================================
 
-rho = 1d0/inflationFactor
+rho = 1.d0/inflationFactor
 
-do i=1,n
-    yb_mean(i,1)=sum(yb(i,:))/real(k,8)
-    yb_pert(i,:)=yb(i,:)-yb_mean(i,1)
+do iObs=1,n
+    yb_mean(iObs,1)=sum(yb(iObs,:))/real(k,8)
+    yb_pert(iObs,:)=yb(iObs,:)-yb_mean(iObs,1)
 enddo
 
 pa_tilde = inv( dble(k-1)*identityMat(k)*rho + &
-                matmul_ext( matmul_latterDiag(transpose(yb_pert(:,:)),1d0/R(:),k,n),yb_pert(:,:) , k,n,k ) &
+                matmul_ext( matmul_latterDiag(transpose(yb_pert(:,:)),1.d0/R(:),k,n),yb_pert(:,:) , k,n,k ) &
                 ,k )
 
 xa_mean = xb_mean + &
@@ -47,7 +47,7 @@ xa_mean = xb_mean + &
           ), &
             transpose(yb_pert(:,:)) , m,k,n  &
           ), &
-            1d0/R(:) , m , n &
+            1.d0/R(:) , m , n &
           ), &
             (yo(:,:)-yb_mean(:,:)) , m,n,1 &
           )

@@ -1,0 +1,58 @@
+This README file includes the following parts:
+
+#1 What is WRF-LETKF?
+#2 Where can I get WRF-LETKF?
+#3 How to compile WRF-LETKF?
+
+=================================================
+
+=============================
+#1 What is WRF-LETKF?
+=============================
+
+WRF-LETKF is a data assimilation system implemented LETKF(Local Ensemble Transform Kalman Filter) and weakly coupled with WRF(Weather Research and Forecasting Model). This DA system is fully designed, implemented and maintained by Cheng-Chieh Kao (chengchiehkao@gmail.com).
+
+
+=============================
+#2 Where can I get WRF-LETKF?
+=============================
+
+The source code of WRF-LETKF is now available through certain git host. If you have a bitbucket account (https://bitbucket.org) and already installed any git client, just type:
+
+          git clone ssh://git@bitbucket.org/chengchiehkao/wrf-letkf.git
+
+then the package will be downloaded.
+
+
+=============================
+#3 How to compile WRF-LETKF?
+=============================
+
+#3-1 Prerequisites
+
+#a Fortran Compiler
+A Fortran95-standard-compliant(95 or newer) and OpenMP2.5-compliant(V2.5 or newer) Fortran compiler is necessary. The following compilers were tested so far:
+     Intel Fortran v15.0.1
+     GNU Fortran v4.4.7
+     PGI Fortran v12.10
+
+#b make
+make utility is necessary for building WRF-LETKF.
+
+#c NetDF Library
+NetCDF is a library for scientific data I/O and is necessary for compiling WRF-LETKF. At least NetCDF Fortran API should be installed.
+
+#d LAPACK and BLAS Library
+LAPACK and BLAS are libraries for linear algebra and is necessary for WRF-LETKF. Please make sure that the libraries you use are THREAD-SAFE, or the DA system might run into race condition when executing (which means the output will be messed up or the sytem will crash).
+
+#3-2 Compile
+Pick a makefile you would like to use and alter the options as the building environment is, then type:
+
+     make -f makefile.[theCompilerYouChoosed]
+
+then a executable named wrfletkf.exe should be generated within few minutes if everything goes fine (actual duration depends on software and hardware condition).
+
+
+=============================
+The End of this README
+=============================

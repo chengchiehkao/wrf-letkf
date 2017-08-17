@@ -31,17 +31,14 @@ do iens =1,ensembleSize
 
 enddo
 
-!write(*,'(a)',advance='no') 'Output analysis:'
-write(*,'(a,$)') 'Output analysis:'
+write(*,'(a)',advance='no') 'Output analysis:'
 
 
 do iens = 1 , ensembleSize
 
     write(domainSeiralNumInString,'(i2.2)') iens
-    !if ( iens.ne.ensembleSize ) write(*,'(1x,a2)',advance='no' ) domainSeiralNumInString
-    !if ( iens.eq.ensembleSize ) write(*,'(1x,a2)',advance='yes') domainSeiralNumInString
-    if ( iens.ne.ensembleSize ) write(*,'(1x,a2,$)') domainSeiralNumInString
-    if ( iens.eq.ensembleSize ) write(*,'(1x,a2)') domainSeiralNumInString
+    if ( iens.ne.ensembleSize ) write(*,'(1x,a2)',advance='no' ) domainSeiralNumInString
+    if ( iens.eq.ensembleSize ) write(*,'(1x,a2)',advance='yes') domainSeiralNumInString
     analysisSrc = repeat(' ',len(analysisSrc))
     analysisSrc = 'output/analysis_'//domainSeiralNumInString;
     backgroundSrc = repeat(' ',len(backgroundSrc))

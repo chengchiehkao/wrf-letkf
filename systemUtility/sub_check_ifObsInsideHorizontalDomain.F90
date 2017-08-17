@@ -14,7 +14,9 @@ integer io
 !logical,external :: inPolygon
 !================================================
 
+#ifndef PGI
 !$omp parallel do default(shared) private(io) schedule(dynamic,100)
+#endif
 do io=1,obs%obsNum
 
     if ( .not. obs%obs(io)%available ) cycle
@@ -31,7 +33,9 @@ do io=1,obs%obsNum
                                          obs%obs(io)%lon,obs%obs(io)%lat )
 
 enddo
+#ifndef PGI
 !$omp end parallel do
+#endif
 
 !================================================
 return

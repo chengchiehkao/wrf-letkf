@@ -36,7 +36,9 @@ integer io  ! loop counter
 !================================================
 
 
+#ifndef PGI
 !$omp parallel do default(private) shared(sounding,windErrorProfile_value,windErrorProfile_pressure,tErrorProfile_value,tErrorProfile_pressure,qvErrorProfile_value,qvErrorProfile_pressure) schedule(dynamic,100)
+#endif
 do io = 1 , sounding%obsNum
 
     if ( sounding%obs(io)%available ) then
@@ -93,7 +95,9 @@ do io = 1 , sounding%obsNum
     endif
 
 enddo
+#ifndef PGI
 !$omp end parallel do
+#endif
 
 
 !================================================

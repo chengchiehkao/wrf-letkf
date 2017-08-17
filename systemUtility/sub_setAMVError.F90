@@ -15,7 +15,9 @@ integer io  ! loop counter
 !================================================
 
 
+#ifndef PGI
 !$omp parallel do default(private) shared(amv) schedule(dynamic,100)
+#endif
 do io = 1 , amv%obsNum
 
     if ( amv%obs(io)%available ) then
@@ -36,7 +38,9 @@ do io = 1 , amv%obsNum
     endif
 
 enddo
+#ifndef PGI
 !$omp end parallel do
+#endif
 
 
 !================================================

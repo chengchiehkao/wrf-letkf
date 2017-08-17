@@ -1,11 +1,7 @@
 
-!include 'sub_build_pressureU.f90'
-!include 'sub_build_pressureV.f90'
-
 subroutine getDomain(domain,domainSize)
 
 use derivedType
-use systemUtility
 
 implicit none
 include 'netcdf.inc'
@@ -136,9 +132,6 @@ do id=1,domainSize
     deallocate( pressure_dummy , GPH_dummy , psfc_dummy )
 
 enddo
-
-call build_pressureU(domain(:),domainSize)
-call build_pressureV(domain(:),domainSize)
 
 !================================================
 return

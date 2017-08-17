@@ -24,7 +24,9 @@ integer id,iwe,isn,iz  ! loop conuter
 !
 !  Assume horizontal coordinates of domain(1) & others are the same.
 !
+#ifndef PGI
 !$omp parallel do default(private) shared(domain,domainSize) schedule(dynamic,5)
+#endif
 do isn = 1+boundaryOffset,domain(1)%size_southToNorth-boundaryOffset
 do iwe = 1+boundaryOffset,domain(1)%size_westToEast_stag-boundaryOffset
 
@@ -53,7 +55,9 @@ do iwe = 1+boundaryOffset,domain(1)%size_westToEast_stag-boundaryOffset
 
 enddo
 enddo
+#ifndef PGI
 !$omp end parallel do
+#endif
 
 
 !================================================

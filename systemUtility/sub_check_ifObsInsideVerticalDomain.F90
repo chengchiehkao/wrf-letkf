@@ -23,7 +23,9 @@ integer io , id  ! loop counter
 
 ! Shall aware of unit conversion.
 
+#ifndef PGI
 !$omp parallel do default(private) shared(domainSize,domain,obs) schedule(dynamic,100)
+#endif
 do io=1,obs%obsNum
 
     if ( .not. obs%obs(io)%available ) cycle
@@ -88,7 +90,9 @@ do io=1,obs%obsNum
 
     enddo
 enddo
+#ifndef PGI
 !$omp end parallel do
+#endif
 
 !================================================
 return

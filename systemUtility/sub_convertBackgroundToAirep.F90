@@ -25,24 +25,21 @@ real(kind=8),parameter :: invalidValue = -9.d6
 integer io,iens,iz  ! loop counter
 !================================================
 
+#ifndef PGI
 !$omp parallel do default(none) &
 !$omp private(io,iens,iz,obsVarIndexRankOne,obsVarIndexRankTwo,obsZIndexRankOne,obsZIndexRankTwo,obsVarBuffer,obsZBuffer) &
 !$omp shared(airep,domain,background,ensembleSize) &
 !$omp schedule(dynamic,100)
+#endif
 do io = 1 , airep%obsNum
 
 
     if ( airep%obs(io)%available ) then  ! SHALL AWARE OF PSFC
 
         allocate( airep%obs(io)%background(ensembleSize) )
-        airep%obs(io)%background(:) = 0.d0  ! MAY REMOVED AFTER BUG SOLVED
+        airep%obs(io)%background(:) = 0.d0
 
-        if ( .not. associated( airep%obs(io)%background ) ) then
-            print*,'found abnormal alllocation status.'
-        endif
-
-        !select case ( trim(adjustl(airep%obs(io)%varName)) )
-        select case ( airep%obs(io)%varName(1:1) )
+        select case ( trim(adjustl(airep%obs(io)%varName)) )
         case ( 'U' )
             call locateAsIndex2d( domain(1)%lon_u(:,:)        , domain(1)%lat_u(:,:) , &
                                   domain(1)%size_westToEast_stag , domain(1)%size_southToNorth , &
@@ -83,8 +80,7 @@ do io = 1 , airep%obsNum
             endif
             obsZIndexRankOne = obsVarIndexRankOne
             obsZIndexRankTwo = obsVarIndexRankTwo
-        case ( 'Q' )
-        !case ( 'QVAPOR' )
+        case ( 'QVAPOR' )
             call locateAsIndex2d( domain(1)%lon(:,:)        , domain(1)%lat(:,:) , &
                                   domain(1)%size_westToEast , domain(1)%size_southToNorth , &
                                   airep%obs(io)%lon , airep%obs(io)%lat , &
@@ -92,7 +88,7 @@ do io = 1 , airep%obsNum
             if ( obsVarIndexRankOne.eq.0 .or. obsVarIndexRankTwo.eq.0 ) then
                 deallocate( airep%obs(io)%background )
                 airep%obs(io)%available = .false.
-               cycle
+                cycle
             endif
             obsZIndexRankOne = obsVarIndexRankOne
             obsZIndexRankTwo = obsVarIndexRankTwo 
@@ -102,8 +98,7 @@ do io = 1 , airep%obsNum
         do iens = 1 , ensembleSize
             do iz = 1 , domain(1)%size_bottomToTop  ! if obs%zName is P; shall be domain(1)%size_bottomToTop_stag for GPH
 
-                select case ( airep%obs(io)%varName(1:1) )
-                !select case ( trim(adjustl(airep%obs(io)%varName)) )
+                select case ( trim(adjustl(airep%obs(io)%varName)) )
                 case ( 'U' )
                     call interp2d( domain(1)%lon_u(obsVarIndexRankOne:obsVarIndexRankOne+1,obsVarIndexRankTwo:obsVarIndexRankTwo+1) , &
                                    domain(1)%lat_u(obsVarIndexRankOne:obsVarIndexRankOne+1,obsVarIndexRankTwo:obsVarIndexRankTwo+1) , &
@@ -143,8 +138,7 @@ do io = 1 , airep%obsNum
                                    2 , 2 , &
                                    (/airep%obs(io)%lon/) , (/airep%obs(io)%lat/) , obsZBuffer(iz:iz) , 1, &
                                    1 , invalidValue )
-                case ( 'Q' )
-                !case ( 'QVAPOR' )
+                case ( 'QVAPOR' )
                     call interp2d( domain(1)%lon(obsVarIndexRankOne:obsVarIndexRankOne+1,obsVarIndexRankTwo:obsVarIndexRankTwo+1) , &
                                    domain(1)%lat(obsVarIndexRankOne:obsVarIndexRankOne+1,obsVarIndexRankTwo:obsVarIndexRankTwo+1) , &
                                    background(iens)%qvapor(obsVarIndexRankOne:obsVarIndexRankOne+1,obsVarIndexRankTwo:obsVarIndexRankTwo+1,iz) , &
@@ -161,8 +155,7 @@ do io = 1 , airep%obsNum
 
             enddo
 
-            !select case ( trim(adjustl(airep%obs(io)%zName)) )
-            select case ( airep%obs(io)%zName(1:1) )
+            select case ( trim(adjustl(airep%obs(io)%zName)) )
             case ( 'P' )
                 call interp1d( dlog(obsZBuffer(domain(1)%size_bottomToTop:1:-1)) , obsVarBuffer(domain(1)%size_bottomToTop:1:-1) , &
                                domain(1)%size_bottomToTop , &
@@ -178,7 +171,9 @@ do io = 1 , airep%obsNum
     endif
 
 enddo
+#ifndef PGI
 !$omp end parallel do
+#endif
 
 
 

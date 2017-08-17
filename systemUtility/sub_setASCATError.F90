@@ -15,7 +15,9 @@ integer io  ! loop counter
 !================================================
 
 
+#ifndef PGI
 !$omp parallel do default(private) shared(ascat) schedule(dynamic,100)
+#endif
 do io = 1 , ascat%obsNum
 
     if ( ascat%obs(io)%available ) then
@@ -36,7 +38,9 @@ do io = 1 , ascat%obsNum
     endif
 
 enddo
+#ifndef PGI
 !$omp end parallel do
+#endif
 
 
 !================================================

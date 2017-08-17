@@ -25,24 +25,21 @@ real(kind=8),parameter :: invalidValue = -9.d6
 integer io,iens,iz  ! loop counter
 !================================================
 
+#ifndef PGI
 !$omp parallel do default(none) &
 !$omp private(io,iens,iz,obsVarIndexRankOne,obsVarIndexRankTwo,obsZIndexRankOne,obsZIndexRankTwo,obsVarBuffer,obsZBuffer) &
 !$omp shared(amv,domain,background,ensembleSize) &
 !$omp schedule(dynamic,100)
+#endif
 do io = 1 , amv%obsNum
 
 
     if ( amv%obs(io)%available ) then  ! SHALL AWARE OF PSFC
 
         allocate( amv%obs(io)%background(ensembleSize) )
-        amv%obs(io)%background(:) = 0.d0  ! MAY REMOVED AFTER BUG SOLVED
+        amv%obs(io)%background(:) = 0.d0
 
-        if ( .not. associated( amv%obs(io)%background ) ) then
-            print*,'found abnormal alllocation status.'
-        endif
-
-        !select case ( trim(adjustl(amv%obs(io)%varName)) )
-        select case ( amv%obs(io)%varName(1:1) )
+        select case ( trim(adjustl(amv%obs(io)%varName)) )
         case ( 'U' )
             call locateAsIndex2d( domain(1)%lon_u(:,:)        , domain(1)%lat_u(:,:) , &
                                   domain(1)%size_westToEast_stag , domain(1)%size_southToNorth , &
@@ -77,8 +74,7 @@ do io = 1 , amv%obsNum
         do iens = 1 , ensembleSize
             do iz = 1 , domain(1)%size_bottomToTop  ! if obs%zName is P; shall be domain(1)%size_bottomToTop_stag for GPH
 
-                select case ( amv%obs(io)%varName(1:1) )
-                !select case ( trim(adjustl(amv%obs(io)%varName)) )
+                select case ( trim(adjustl(amv%obs(io)%varName)) )
                 case ( 'U' )
                     call interp2d( domain(1)%lon_u(obsVarIndexRankOne:obsVarIndexRankOne+1,obsVarIndexRankTwo:obsVarIndexRankTwo+1) , &
                                    domain(1)%lat_u(obsVarIndexRankOne:obsVarIndexRankOne+1,obsVarIndexRankTwo:obsVarIndexRankTwo+1) , &
@@ -109,8 +105,7 @@ do io = 1 , amv%obsNum
 
             enddo
 
-            !select case ( trim(adjustl(amv%obs(io)%zName)) )
-            select case ( amv%obs(io)%zName(1:1) )
+            select case ( trim(adjustl(amv%obs(io)%zName)) )
             case ( 'P' )
                 call interp1d( dlog(obsZBuffer(domain(1)%size_bottomToTop:1:-1)) , obsVarBuffer(domain(1)%size_bottomToTop:1:-1) , &
                                domain(1)%size_bottomToTop , &
@@ -126,7 +121,9 @@ do io = 1 , amv%obsNum
     endif
 
 enddo
+#ifndef PGI
 !$omp end parallel do
+#endif
 
 
 

@@ -10,7 +10,6 @@ real(realKind),dimension(k,k),intent(in) :: inArray
 real(realKind),dimension(k,k)            :: outArray
 real(realKind),dimension(k)              :: S
 integer i  ! loop index
-!real(realKind),external :: matmul_latterDiag
 interface
     function matmul_latterDiag(matrixFormer,matrixLatter,dim1,dim2) result(outArray)
       implicit none
@@ -58,7 +57,6 @@ IL=1
 IU=k
 ABSTOL=0d0
 LDZ=k
-!goto 0001  ! shall delete after efficiency test
 LWORK=3*k-1
 LIWORK=LWORK
 
@@ -66,43 +64,28 @@ allocate(WORK(LWORK))
 allocate(IWORK(LWORK))
 INFO=-1
 
-call dsyevr( JOBZ, RANGE, UPLO, N, A, LDA, VL, VU, IL, IU, &
-             ABSTOL, M, W, Z, LDZ, ISUPPZ, WORK, -1, &
-             IWORK, -1, INFO )
+call dsyevr( JOBZ, RANGE, UPLO, N, A, LDA, VL, VU, IL, IU, ABSTOL, M, W, Z, LDZ, ISUPPZ, WORK, -1, IWORK, -1, INFO )
+
 if ( INFO.eq.0 ) then
     LWORK=nint(WORK(1))
     LIWORK=IWORK(1)
     deallocate(WORK,IWORK)
-!0001 continue  ! shall delete after efficiency test
-    !LWORK=k
-    !LIWORK=12
     allocate(WORK(LWORK))
     allocate(IWORK(LWORK))
     A(:,:)=inArray(:,:)
-    call dsyevr( JOBZ, RANGE, UPLO, N, A, LDA, VL, VU, IL, IU, &
-                 ABSTOL, M, W, Z, LDZ, ISUPPZ, WORK, LWORK, &
-                 IWORK, LIWORK, INFO )
-    !print*,real(LWORK)/real(k)
-    !print*,real(LIWORK)/real(k)
-    !read(*,*)
+    call dsyevr( JOBZ, RANGE, UPLO, N, A, LDA, VL, VU, IL, IU, ABSTOL, M, W, Z, LDZ, ISUPPZ, WORK, LWORK, IWORK, LIWORK, INFO )
 else
-    if ( INFO .ne. 0 ) print*,'func_matSqrt failed! INFO=',INFO
+    print*,'func_matSqrt failed, INFO=',INFO
+    print*,'program stopped.'
+    stop
 endif
 deallocate(WORK)
 deallocate(IWORK)
 
-!S(:,:)=0d0
 do i=1,k
     S(i)=dsqrt(W(i))
-    !if( S(i,i).lt.1d-10 ) then
-    !    print*,'!!!Warning for rank deficiency!!!'
-    !    S(i,i)=0.0d0
-    !    INFO=-1
-    !    exit
-    !endif
 enddo
 
-!outArray = matmul(matmul(Z,S),transpose(Z))
 outArray = matmul_ext(matmul_latterDiag(Z,S,k,k),transpose(Z),k,k,k)
 
 !================================================

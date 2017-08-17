@@ -25,21 +25,19 @@ real(kind=8),parameter :: invalidValue = -9.d6
 integer io,iens,iz  ! loop counter
 !================================================
 
+#ifndef PGI
 !$omp parallel do default(none) &
 !$omp private(io,iens,iz,obsVarIndexRankOne,obsVarIndexRankTwo,obsZIndexRankOne,obsZIndexRankTwo,obsVarBuffer,obsZBuffer) &
 !$omp shared(iasi,domain,background,ensembleSize) &
 !$omp schedule(dynamic,100)
+#endif
 do io = 1 , iasi%obsNum
 
 
     if ( iasi%obs(io)%available ) then  ! SHALL AWARE OF PSFC
 
         allocate( iasi%obs(io)%background(ensembleSize) )
-        iasi%obs(io)%background(:) = 0.d0  ! MAY REMOVED AFTER BUG SOLVED
-
-        if ( .not. associated( iasi%obs(io)%background ) ) then
-            print*,'found abnormal alllocation status.'
-        endif
+        iasi%obs(io)%background(:) = 0.d0
 
         select case ( trim(adjustl(iasi%obs(io)%varName)) )
         case ( 'T' )
@@ -144,7 +142,9 @@ do io = 1 , iasi%obsNum
     endif
 
 enddo
+#ifndef PGI
 !$omp end parallel do
+#endif
 
 
 

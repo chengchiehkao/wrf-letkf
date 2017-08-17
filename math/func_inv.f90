@@ -27,7 +27,6 @@ call dgetri(n,outArray,n,ipiv,work,lwork,info)
 if ( info.lt.0 ) print*,'inv failed, the i-th argument had an illegal value.'
 if ( info.gt.0 ) print*,'inv failed, U(i,i) is exactly zero.'
 
-!if (info.ne.0) print*,'inv failed!'
 !================================================
 return
 stop

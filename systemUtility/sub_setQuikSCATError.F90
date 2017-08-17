@@ -15,7 +15,9 @@ integer io  ! loop counter
 !================================================
 
 
+#ifndef PGI
 !$omp parallel do default(private) shared(quikscat) schedule(dynamic,100)
+#endif
 do io = 1 , quikscat%obsNum
 
     if ( quikscat%obs(io)%available ) then
@@ -36,7 +38,9 @@ do io = 1 , quikscat%obsNum
     endif
 
 enddo
+#ifndef PGI
 !$omp end parallel do
+#endif
 
 
 !================================================

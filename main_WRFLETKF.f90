@@ -1,13 +1,13 @@
 
-include 'mod_derivedType.f90'
+!include 'mod_derivedType.f90'
 !include 'mod_basicUtility.f90'  ! compiled individually for default real as 8-byte.
-include 'mod_systemUtility.f90'
-include 'mod_IOUtility.f90'
-include 'mod_math.f90'
-include 'mod_assimilationUtility.f90'
+!include 'mod_systemUtility.f90'
+!include 'mod_IOUtility.f90'
+!include 'mod_math.f90'
+!include 'mod_assimilationUtility.f90'
 
 use derivedType
-use basicUtility
+!use basicUtility
 use IOUtility
 use systemUtility
 use assimilationUtility
@@ -49,6 +49,8 @@ print*,'Getting Domain...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
 call getDomain(domain(:),ensembleSize)
+call build_pressureU(domain(:),ensembleSize)
+call build_pressureV(domain(:),ensembleSize)
 call build_meanDomain(domain(:),ensembleSize,domain_mean)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()

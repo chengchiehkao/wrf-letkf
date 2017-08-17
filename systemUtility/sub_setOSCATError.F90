@@ -15,7 +15,9 @@ integer io  ! loop counter
 !================================================
 
 
+#ifndef PGI
 !$omp parallel do default(private) shared(oscat) schedule(dynamic,100)
+#endif
 do io = 1 , oscat%obsNum
 
     if ( oscat%obs(io)%available ) then
@@ -30,7 +32,9 @@ do io = 1 , oscat%obsNum
     endif
 
 enddo
+#ifndef PGI
 !$omp end parallel do
+#endif
 
 
 !================================================
