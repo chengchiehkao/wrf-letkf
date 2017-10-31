@@ -21,6 +21,7 @@ include 'systemUtility/sub_convertBackgroundToQuikSCAT.f90'
 include 'systemUtility/sub_convertBackgroundToASCAT.f90'
 include 'systemUtility/sub_convertBackgroundToIASI.f90'
 include 'systemUtility/sub_convertBackgroundToOSCAT.f90'
+include 'systemUtility/sub_convertBackgroundToWindSat.f90'
 include 'systemUtility/sub_setSoundingError.f90'
 include 'systemUtility/sub_setAirepError.f90'
 include 'systemUtility/sub_setAMVError.f90'
@@ -29,6 +30,7 @@ include 'systemUtility/sub_setQuikSCATError.f90'
 include 'systemUtility/sub_setASCATError.f90'
 include 'systemUtility/sub_setIASIError.f90'
 include 'systemUtility/sub_setOSCATError.f90'
+include 'systemUtility/sub_setWindSatError.f90'
 include 'systemUtility/sub_mergeObs.f90'
 include 'systemUtility/func_errorFactor.f90'
 include 'systemUtility/sub_deallocate_obsListOfEachGrid.f90'
@@ -241,6 +243,17 @@ interface
       type(obsParent),intent(inout)   :: oscat
     end subroutine convertBackgroundToOSCAT
 
+    subroutine convertBackgroundToWindSat(background,ensembleSize,domain,domain_mean,windsat)
+      use derivedType
+      use basicUtility
+      implicit none
+      integer,intent(in)              :: ensembleSize
+      type(backgroundInfo),intent(in) :: background(ensembleSize)
+      type(domainInfo),intent(in)     :: domain(ensembleSize)
+      type(domainInfo),intent(in)     :: domain_mean
+      type(obsParent),intent(inout)   :: windsat
+    end subroutine convertBackgroundToWindSat
+
     subroutine setSoundingError(sounding)
       use derivedType
       use basicUtility
@@ -296,6 +309,13 @@ interface
       implicit none
       type(obsParent),intent(inout)   :: oscat
     end subroutine setOSCATError
+
+    subroutine setWindSatError(windsat)
+      use derivedType
+      use basicUtility
+      implicit none
+      type(obsParent),intent(inout)   :: windsat
+    end subroutine setWindSatError
 
     subroutine mergeObs(allObs,obsToBeMerged)
       use derivedType

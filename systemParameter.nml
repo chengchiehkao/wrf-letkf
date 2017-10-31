@@ -24,6 +24,8 @@ use_airs  = .false.
 use_quikscat = .false.
 use_ascat    = .false.
 use_iasi     = .false.
+use_oscat    = .false.
+use_windsat  = .false.
 /
 
 &varList_observation
@@ -36,6 +38,8 @@ varList_airs  = 'U','V','T','QVAPOR'
 varList_quikscat = 'U10','V10'
 varList_ascat    = 'U10','V10'
 varList_iasi     = 'T','RH'
+varList_oscat    = 'U10','V10'
+varList_windsat   = 'U10','V10'
 /
 
 &use_varList_observation
@@ -48,4 +52,6 @@ use_varList_airs  = .false.,.false.,.false.,.false.
 use_varList_quikscat = .false.,.false.
 use_varList_ascat    = .false.,.false.
 use_varList_iasi     = .false.,.false.
+use_varList_oscat    = .false.,.false.
+use_varList_windsat  = .false.,.false.
 /

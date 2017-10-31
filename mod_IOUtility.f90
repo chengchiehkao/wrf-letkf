@@ -14,6 +14,7 @@ include 'IOUtility/sub_getQuikSCAT.f90'
 include 'IOUtility/sub_getSounding.f90'
 include 'IOUtility/sub_getSynop.f90'
 include 'IOUtility/sub_getSystemParameter.f90'
+include 'IOUtility/sub_getWindSat.f90'
 include 'IOUtility/sub_outputAnalysis.f90'
 
 module IOUtility
@@ -137,6 +138,15 @@ interface
       implicit none
       type(systemParameter),intent(out) :: systemParameters
     end subroutine getSystemParameter
+
+    subroutine getWindSat(windsat,varList,varListSize,use_varList)
+      use derivedType
+      implicit none
+      type(obsParent),intent(out) :: windsat
+      integer,intent(in)                                   :: varListSize
+      character(len=10),dimension(varListSize),intent(in)  :: varList
+      logical,dimension(varListSize),intent(in)            :: use_varList
+    end subroutine getWindSat
 
     subroutine outputAnalysis(analysis,ensembleSize,domain)
       use derivedType
