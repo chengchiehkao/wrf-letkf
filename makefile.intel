@@ -10,9 +10,13 @@ netcdf_flag = -I$(netcdf_path)/include/ -L$(netcdf_path)/lib/  -lnetcdf -lnetcdf
 lapack_path = /SAS002/zerocustom/LAPACK/V3.4.2/build_REAS/ifort_v8/liblapack.a /SAS002/zerocustom/BLAS/OpenBLAS/V0.2.14/build_REAS/ifort_v1/lib/libopenblas.a
 
 
-wrfletkf.exe: mod_derivedtype.o mod_basicutility.o mod_ioutility.o mod_systemutility.o mod_math.o mod_assimilationutility.o 
-	$(FC) $(optimization_flag) $(openmp_flag) $(netcdf_flag) *.o main_WRFLETKF.f90 $(lapack_path) \
+wrfletkf.exe: mod_derivedtype.o mod_basicutility.o mod_ioutility.o mod_systemutility.o mod_math.o mod_assimilationutility.o main_wrfletkf.o
+	$(FC) $(optimization_flag) $(openmp_flag) $(netcdf_flag) *.o $(lapack_path) \
 		-o wrfletkf.exe
+
+main_wrfletkf.o: main_WRFLETKF.f90
+	$(FC) $(optimization_flag) $(openmp_flag) -c main_WRFLETKF.f90 \
+		-o main_wrfletkf.o
 
 mod_assimilationutility.o: mod_derivedtype.o mod_basicutility.o mod_systemutility.o mod_math.o mod_assimilationUtility.f90 assimilationUtility/*.f90
 	$(FC) $(optimization_flag) $(openmp_flag) -c mod_assimilationUtility.f90 \
