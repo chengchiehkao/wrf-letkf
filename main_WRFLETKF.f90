@@ -1,17 +1,9 @@
 
-!include 'mod_derivedType.f90'
-!include 'mod_basicUtility.f90'  ! compiled individually for default real as 8-byte.
-!include 'mod_systemUtility.f90'
-!include 'mod_IOUtility.f90'
-!include 'mod_math.f90'
-!include 'mod_assimilationUtility.f90'
-
 use derivedType
-!use basicUtility
 use IOUtility
 use systemUtility
 use assimilationUtility
-use omp_lib  ! for OpenMP (internal)
+use omp_lib  ! OpenMP's library
 
 implicit none
 

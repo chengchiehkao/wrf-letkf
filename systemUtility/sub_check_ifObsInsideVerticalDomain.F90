@@ -42,12 +42,6 @@ do io=1,obs%obsNum
         if ( obs%obs(io)%available .and. &
              ( trim(obs%obs(io)%zName) .eq. 'P' .or. trim(obs%obs(io)%zName) .eq. 'GPH' ) ) then
 
-            !call locateAsIndex2d( domain(id)%lon(:,:)        , domain(id)%lat(:,:) , &
-            !                      domain(id)%size_westToEast , domain(id)%size_southToNorth , &
-            !                      obs%obs(io)%lon , obs%obs(io)%lat , &
-            !                      obsIndexRankOne , obsIndexRankTwo )
-            if ( obsIndexRankOne .eq. 0 .or. obsIndexRankTwo .eq. 0 ) cycle
-
             if ( trim(obs%obs(io)%zName) .eq. 'P' )  then 
                 call interp2d( domain(id)%lon(obsIndexRankOne:obsIndexRankOne+1,obsIndexRankTwo:obsIndexRankTwo+1) , &
                                domain(id)%lat(obsIndexRankOne:obsIndexRankOne+1,obsIndexRankTwo:obsIndexRankTwo+1) , &

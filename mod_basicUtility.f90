@@ -75,11 +75,11 @@ interface
       integer,intent(out)                     :: rankOneIndexReturned,rankTwoIndexReturned
     end subroutine locateAsIndex2d
 
-    recursive subroutine quickSortWithIndex(dataToBeSort,dataSize,indexOfData)
+    recursive subroutine quickSortWithIndex(dataToBeSorted,sizeOfData,indexOfData)
       implicit none
-      integer,intent(in) :: dataSize
-      real,intent(inout) :: dataToBeSort(dataSize)
-      integer indexOfData(dataSize)
+      integer,intent(in)    :: sizeOfData
+      real,intent(inout)    :: dataToBeSorted(sizeOfData)
+      integer,intent(inout) :: indexOfData(sizeOfData)
     end subroutine quickSortWithIndex
 
     real function greatCircleDistance(point1,point2)

@@ -14,8 +14,6 @@ integer io,ib  ! loop counter
 !================================================
 
 bufferSize = allObs%obsNum + obsToBeMerged%obsNum
-!if ( allObs%obsNum .eq. 0 ) print*,'allObs%obsNum,obsToBeMerged%obsNum=',allObs%obsNum,obsToBeMerged%obsNum,'-',count(.not.obsToBeMerged%obs(:)%available)
-!if ( allObs%obsNum .ne. 0 ) print*,'allObs%obsNum,obsToBeMerged%obsNum=',allObs%obsNum,obsToBeMerged%obsNum,count(.not.allObs%obs(:)%available),count(.not.obsToBeMerged%obs(:)%available)
 allocate( buffer(bufferSize) )
 
 do io = 1,allObs%obsNum
@@ -37,9 +35,7 @@ do io = 1,allObs%obsNum
         deallocate(allObs%obs(io)%background)
     endif
 enddo
-!print*,'b1',count(.not.buffer(1:allObs%obsNum)%available)
 
-!print*,'obsToBeMerged before b2',count(.not.obsToBeMerged%obs(:)%available),'/',obsToBeMerged%obsNum
 do io = 1,obsToBeMerged%obsNum
     ib = io + allObs%obsNum
     buffer(ib)%available  = obsToBeMerged%obs(io)%available
@@ -59,7 +55,6 @@ do io = 1,obsToBeMerged%obsNum
         buffer(ib)%background(:) = obsToBeMerged%obs(io)%background(:)
     endif
 enddo
-!print*,'b2',count(.not.buffer(allObs%obsNum+1:)%available)
 
 if ( associated(allObs%obs) ) then
     deallocate(allObs%obs)

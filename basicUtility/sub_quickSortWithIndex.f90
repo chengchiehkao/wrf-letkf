@@ -1,58 +1,62 @@
 
 !-----Quick Sort (recursive Ver.)
 
-recursive subroutine quickSortWithIndex(a,n,arrayIndex)
+recursive subroutine quickSortWithIndex(dataToBeSorted,sizeOfData,IndexOfData)
 
 implicit none
-integer,intent(in) :: n  ! array length
-real,intent(inout) :: a(n)
-integer,intent(inout) :: arrayIndex(n)
-real aMin,aMax  ! input & output array, minimum/maximum of a
-real,allocatable :: aTemp(:)
-integer i  ! array index
-real axis
-integer UNum,LNum
-integer axisIndex
-integer,allocatable :: arrayIndexTemp(:)
+
+integer,intent(in)    :: sizeOfData  ! size of data array
+real,intent(inout)    :: dataToBeSorted(sizeOfData)
+integer,intent(inout) :: IndexOfData(sizeOfData)
+
+real                   dataMin,dataMax  ! input & output array, minimum/maximum of a
+real,allocatable ::    data_temp(:)
+integer                iD  ! loop counter
+real                   axis
+integer                UpperPartCount,lowerPartCount
+integer                indexOfAxis
+integer,allocatable :: IndexOfData_temp(:)
 !================================================
-aMin=minval(a)
-aMax=maxval(a)
-if ((aMax-aMin).eq.0.) return
 
-allocate(aTemp(n),arrayIndexTemp(n))
+dataMin = minval(dataToBeSorted)
+dataMax = maxval(dataToBeSorted)
 
-axis=a(1)
-axisIndex=arrayIndex(1)
+if ( dataMax-dataMin .eq. 0. ) return
 
-LNum=0
-UNum=n+1
-do i=2,n
-  if (a(i).lt.axis) then
-    LNum=LNum+1
-    aTemp(LNum)=a(i)
-    arrayIndexTemp(LNum)=arrayIndex(i)
-  else
-    UNum=UNum-1
-    aTemp(UNum)=a(i)
-    arrayIndexTemp(UNum)=arrayIndex(i)
-  endif
+allocate( data_temp(sizeOfData) , IndexOfData_temp(sizeOfData) )
+
+axis        = dataToBeSorted(1)
+indexOfAxis = IndexOfData(1)
+
+lowerPartCount = 0            ! initial value
+UpperPartCount = sizeOfData+1 ! initial value
+do iD = 2,sizeOfData
+    if ( dataToBeSorted(iD) .lt. axis ) then
+        lowerPartCount = lowerPartCount+1
+        data_temp(lowerPartCount)        = dataToBeSorted(iD)
+        IndexOfData_temp(lowerPartCount) = IndexOfData(iD)
+    else
+        UpperPartCount = UpperPartCount-1
+        data_temp(UpperPartCount)        = dataToBeSorted(iD)
+        IndexOfData_temp(UpperPartCount) = IndexOfData(iD)
+    endif
 enddo
 
-if (LNum.ne.(n-1)) then
-  UNum=n-(LNum+1)
+if ( lowerPartCount .ne. (sizeOfData-1) ) then
+    UpperPartCount = sizeOfData-(lowerPartCount+1)
 else
-  UNum=0
+    UpperPartCount = 0
 endif
-aTemp(LNum+1)=axis
-arrayIndexTemp(LNum+1)=axisIndex
+data_temp(lowerPartCount+1)        = axis
+IndexOfData_temp(lowerPartCount+1) = indexOfAxis
 
-a=aTemp
-arrayIndex=arrayIndexTemp
+dataToBeSorted = data_temp
+IndexOfData    = IndexOfData_temp
 
-deallocate(aTemp,arrayIndexTemp)
+deallocate(data_temp,IndexOfData_temp)
 
-if (LNum.gt.1) call quickSortWithIndex(a(1:LNum),LNum,arrayIndex(1:LNum))
-if (UNum.gt.1) call quickSortWithIndex(a(LNum+2:n),UNum,arrayIndex(LNum+2:n))
+if (lowerPartCount.gt.1) call quickSortWithIndex( dataToBeSorted(1:lowerPartCount) , lowerPartCount , IndexOfData(1:lowerPartCount) )
+if (UpperPartCount.gt.1) call quickSortWithIndex( dataToBeSorted(lowerPartCount+2:sizeOfData) , UpperPartCount , IndexOfData(lowerPartCount+2:sizeOfData) )
 
 !================================================
 return
