@@ -39,11 +39,11 @@ A Fortran95-standard-compliant(95 or newer) and OpenMP2.5-compliant(V2.5 or newe
 #b make
 make utility is necessary for building WRF-LETKF.
 
-#c NetDF Library
+#c NetCDF Library
 NetCDF is a library for scientific data I/O and is necessary for compiling WRF-LETKF. At least NetCDF Fortran API should be installed.
 
 #d LAPACK and BLAS Library
-LAPACK and BLAS are libraries for linear algebra and is necessary for WRF-LETKF. Please make sure that the libraries you use are THREAD-SAFE, or the DA system might run into race condition when executing (which means the output will be messed up or the sytem will crash).
+LAPACK and BLAS are libraries for linear algebra, which are necessary for WRF-LETKF. Please make sure that the libraries you use are THREAD-SAFE, or the DA system might run into race condition when executing (which means the output will be messed up or the sytem will crash).
 
 #3-2 Compile
 Pick a makefile you would like to use and alter the options as the building environment is, then type:

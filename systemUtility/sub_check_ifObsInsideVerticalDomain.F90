@@ -40,9 +40,10 @@ do io=1,obs%obsNum
     do id=1,domainSize
 
         if ( obs%obs(io)%available .and. &
-             ( trim(obs%obs(io)%zName) .eq. 'P' .or. trim(obs%obs(io)%zName) .eq. 'GPH' ) ) then
+             ( trim(obs%obs(io)%zName) .eq. 'P' .or. trim(obs%obs(io)%zName) .eq. 'GPH' .or. trim(obs%obs(io)%zName) .eq. 'GMH' ) ) then
 
             if ( trim(obs%obs(io)%zName) .eq. 'P' )  then 
+
                 call interp2d( domain(id)%lon(obsIndexRankOne:obsIndexRankOne+1,obsIndexRankTwo:obsIndexRankTwo+1) , &
                                domain(id)%lat(obsIndexRankOne:obsIndexRankOne+1,obsIndexRankTwo:obsIndexRankTwo+1) , &
                                domain(id)%pressure(obsIndexRankOne:obsIndexRankOne+1,obsIndexRankTwo:obsIndexRankTwo+1,1) , &
@@ -60,7 +61,9 @@ do io=1,obs%obsNum
                 if ( obs%obs(io)%z > zBottom(1) .or. obs%obs(io)%z < zTop(1) ) then
                     obs%obs(io)%available = .false.
                 endif
+
             elseif ( trim(obs%obs(io)%zName) .eq. 'GPH' )  then 
+
                 call interp2d( domain(id)%lon(obsIndexRankOne:obsIndexRankOne+1,obsIndexRankTwo:obsIndexRankTwo+1) , &
                                domain(id)%lat(obsIndexRankOne:obsIndexRankOne+1,obsIndexRankTwo:obsIndexRankTwo+1) , &
                                domain(id)%GPH(obsIndexRankOne:obsIndexRankOne+1,obsIndexRankTwo:obsIndexRankTwo+1,1) , &
@@ -78,6 +81,27 @@ do io=1,obs%obsNum
                 if ( obs%obs(io)%z < zBottom(1) .or. obs%obs(io)%z > zTop(1) ) then
                     obs%obs(io)%available = .false.
                 endif
+
+            elseif ( trim(obs%obs(io)%zName) .eq. 'GMH' )  then
+
+                call interp2d( domain(id)%lon(obsIndexRankOne:obsIndexRankOne+1,obsIndexRankTwo:obsIndexRankTwo+1) , &
+                               domain(id)%lat(obsIndexRankOne:obsIndexRankOne+1,obsIndexRankTwo:obsIndexRankTwo+1) , &
+                               domain(id)%GMH_unstag(obsIndexRankOne:obsIndexRankOne+1,obsIndexRankTwo:obsIndexRankTwo+1,1) , &
+                               2 , 2 , &
+                               obs%obs(io:io)%lon , obs%obs(io:io)%lat , zBottom(1:1) , 1 , &
+                               1 , invalidValue )
+
+                call interp2d( domain(id)%lon(obsIndexRankOne:obsIndexRankOne+1,obsIndexRankTwo:obsIndexRankTwo+1) , &
+                               domain(id)%lat(obsIndexRankOne:obsIndexRankOne+1,obsIndexRankTwo:obsIndexRankTwo+1) , &
+                               domain(id)%GMH_unstag(obsIndexRankOne:obsIndexRankOne+1,obsIndexRankTwo:obsIndexRankTwo+1,domain(id)%size_bottomToTop) , &
+                               2 , 2 , &
+                               obs%obs(io:io)%lon , obs%obs(io:io)%lat , zTop(1:1) , 1 , &
+                               1 , invalidValue )
+
+                if ( obs%obs(io)%z < zBottom(1) .or. obs%obs(io)%z > zTop(1) ) then
+                    obs%obs(io)%available = .false.
+                endif
+
             endif
 
         endif

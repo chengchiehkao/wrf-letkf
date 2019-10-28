@@ -29,6 +29,8 @@ allocate( domain_mean % lon_v( domain_mean%size_westToEast , domain_mean%size_so
 allocate( domain_mean % lat_v( domain_mean%size_westToEast , domain_mean%size_southToNorth_stag ) )
 allocate( domain_mean % pressure ( domain_mean%size_westToEast , domain_mean%size_southToNorth , domain_mean%size_bottomToTop      ) )
 allocate( domain_mean % GPH      ( domain_mean%size_westToEast , domain_mean%size_southToNorth , domain_mean%size_bottomToTop_stag ) )
+!allocate( domain_mean % GMH         ( domain_mean%size_westToEast , domain_mean%size_southToNorth , domain_mean%size_bottomToTop_stag ) )
+allocate( domain_mean % GMH_unstag  ( domain_mean%size_westToEast , domain_mean%size_southToNorth , domain_mean%size_bottomToTop      ) )
 allocate( domain_mean % pressure_u ( domain_mean%size_westToEast_stag , domain_mean%size_southToNorth , domain_mean%size_bottomToTop ) )
 allocate( domain_mean % pressure_v ( domain_mean%size_westToEast , domain_mean%size_southToNorth_stag , domain_mean%size_bottomToTop ) )
 allocate( domain_mean % pressure_w ( domain_mean%size_westToEast , domain_mean%size_southToNorth , domain_mean%size_bottomToTop_stag ) )
@@ -47,6 +49,8 @@ domain_mean % lat_v(:,:) = domain(1) % lat_v(:,:)
 
 domain_mean % pressure(:,:,:)   = 0.d0
 domain_mean % GPH(:,:,:)        = 0.d0
+!domain_mean % GMH(:,:,:)        = 0.d0
+domain_mean % GMH_unstag(:,:,:) = 0.d0
 domain_mean % pressure_u(:,:,:) = 0.d0
 domain_mean % pressure_v(:,:,:) = 0.d0
 domain_mean % pressure_w(:,:,:) = 0.d0
@@ -54,6 +58,8 @@ domain_mean % pressure_w(:,:,:) = 0.d0
 do iens = 1,ensembleSize
     domain_mean % pressure(:,:,:)   = domain_mean % pressure(:,:,:)   + domain(iens) % pressure(:,:,:)
     domain_mean % GPH(:,:,:)        = domain_mean % GPH(:,:,:)        + domain(iens) % GPH(:,:,:)
+    !domain_mean % GMH(:,:,:)        = domain_mean % GMH(:,:,:)        + domain(iens) % GMH(:,:,:)
+    domain_mean % GMH_unstag(:,:,:) = domain_mean % GMH_unstag(:,:,:) + domain(iens) % GMH_unstag(:,:,:)
     domain_mean % pressure_u(:,:,:) = domain_mean % pressure_u(:,:,:) + domain(iens) % pressure_u(:,:,:)
     domain_mean % pressure_v(:,:,:) = domain_mean % pressure_v(:,:,:) + domain(iens) % pressure_v(:,:,:)
     domain_mean % pressure_w(:,:,:) = domain_mean % pressure_w(:,:,:) + domain(iens) % pressure_w(:,:,:)
@@ -61,6 +67,8 @@ enddo
 
 domain_mean % pressure(:,:,:)   = (1d0/real(ensembleSize,8)) * domain_mean % pressure(:,:,:)
 domain_mean % GPH(:,:,:)        = (1d0/real(ensembleSize,8)) * domain_mean % GPH(:,:,:)
+!domain_mean % GMH(:,:,:)        = (1d0/real(ensembleSize,8)) * domain_mean % GMH(:,:,:)
+domain_mean % GMH_unstag(:,:,:) = (1d0/real(ensembleSize,8)) * domain_mean % GMH_unstag(:,:,:)
 domain_mean % pressure_u(:,:,:) = (1d0/real(ensembleSize,8)) * domain_mean % pressure_u(:,:,:)
 domain_mean % pressure_v(:,:,:) = (1d0/real(ensembleSize,8)) * domain_mean % pressure_v(:,:,:)
 domain_mean % pressure_w(:,:,:) = (1d0/real(ensembleSize,8)) * domain_mean % pressure_w(:,:,:)

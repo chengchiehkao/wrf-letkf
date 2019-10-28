@@ -28,7 +28,7 @@ fileID = availableFileID()  ! get an available file id.
 
 ! First, find out the number of observation.
 print*,'reading observation: GPSRO'
-open(fileID,file='input/obs_input.cosmic',status='old')
+open(fileID,file='input/obs_input.gpsro',status='old')
 do 
     read(fileID,*,iostat=ioStatus) dummyArg(1:3) , levNum
     if ( ioStatus .lt. 0 ) then

@@ -10,6 +10,11 @@ include 'basicUtility/func_greatCircleDistance.f90'
 include 'basicUtility/func_greatCircleDistance_preCalc.f90'
 include 'basicUtility/func_convertThetaAndPToTemperature.f90'
 include 'basicUtility/func_convertTAndPAndQvToRH.f90'
+include 'basicUtility/func_convertTAndPAndQvToRefractivity.f90'
+include 'basicUtility/func_getGravityAtSpecificLatitude.f90'
+include 'basicUtility/func_getVerticalGravityGradientAtSpecificLatitude.f90'
+include 'basicUtility/func_getAdjustedEarthRadiusAtSpecificLatitude.f90'
+include 'basicUtility/func_convertGPHToGMHAtSpecificLatitude.f90'
 
 
 module basicUtility
@@ -108,6 +113,34 @@ interface
       real,intent(in) :: p    ! pressure (unit: Pa)
       real,intent(in) :: qv   ! water vapor mixing ratio (unit: kg/kg)
     end function convertTAndPAndQvToRH
+
+    real function convertTAndPAndQvToRefractivity( t_k , p , qv )
+      implicit none
+      real,intent(in) :: t_k  ! normal temperature (unit: K)
+      real,intent(in) :: p    ! pressure (unit: Pa)
+      real,intent(in) :: qv   ! water vapor mixing ratio (unit: kg/kg)
+    end function convertTAndPAndQvToRefractivity
+
+    real function getGravityAtSpecificLatitude(latitude)
+      implicit none
+      real,intent(in) :: latitude  ! unit: degree
+    end function getGravityAtSpecificLatitude
+
+    real function getVerticalGravityGradientAtSpecificLatitude(latitude)
+      implicit none
+      real, intent(in) :: latitude  ! unit: degree
+    end function getVerticalGravityGradientAtSpecificLatitude
+
+    real function getAdjustedEarthRadiusAtSpecificLatitude(latitude)
+      implicit none
+      real, intent(in) :: latitude  ! unit: degree
+    end function getAdjustedEarthRadiusAtSpecificLatitude
+
+    real function convertGPHToGMHAtSpecificLatitude(gph,latitude)
+      implicit none
+      real, intent(in) :: gph  ! unit: meter
+      real, intent(in) :: latitude  ! unit: degree
+    end function convertGPHToGMHAtSpecificLatitude
 
 
 end interface

@@ -17,7 +17,7 @@ subroutine interp1d( xRef    , yRef    , refSize   , &
 !     extrap(rank-0, logical, input only).
 !     invalidValue(rank-0, default real, input only).
 ! output:
-!     yRef(rank-1, default real, output only).
+!     yTarget(rank-1, default real, output only).
 
 ! Wrote by Cheng-Chieh Kao. (2013-12-23)
 !====End of the description====

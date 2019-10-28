@@ -274,6 +274,46 @@ if ( systemParameters % use_amv ) then
 endif
 
 
+if ( systemParameters % use_gpsro ) then
+    print*,repeat('=',20)
+    print*,'Converting background to GPSRO...'
+    wt0 = omp_get_wtime()
+    call cpu_time(ct0)
+    call convertBackgroundToRefractivity(background(:),ensembleSize,domain(:))
+    call convertBackgroundToGPSRO(background(:),ensembleSize,domain(:),gpsro)
+    call cpu_time(ct1)
+    wt1 = omp_get_wtime()
+    print*,'Done.'
+    print*,'cpu time(H of GPSRO) =',ct1-ct0,'sec'
+    print*,'walltime(H of GPSRO) =',wt1-wt0,'sec'
+
+
+    print*,repeat('=',20)
+    print*,'Setting error of GPSRO...'
+    wt0 = omp_get_wtime()
+    call cpu_time(ct0)
+    call setGPSROError(gpsro)
+    call cpu_time(ct1)
+    wt1 = omp_get_wtime()
+    print*,'Done.'
+    print*,'cpu time(set GPSRO error) =',ct1-ct0,'sec'
+    print*,'walltime(set GPSRO error) =',wt1-wt0,'sec'
+    print*,'There are ',count(.not.gpsro%obs(:)%available),'/',gpsro%obsNum,'GPSRO(s) unavailable.'
+
+    print*,repeat('=',20)
+    print*,'Mapping GPSRO from GMH to P...'
+    wt0 = omp_get_wtime()
+    call cpu_time(ct0)
+    call mapGPSROFromGMHToP(domain_mean,gpsro)
+    call cpu_time(ct1)
+    wt1 = omp_get_wtime()
+    print*,'Done.'
+    print*,'cpu time(map GPSRO) =',ct1-ct0,'sec'
+    print*,'walltime(map GPSRO) =',wt1-wt0,'sec'
+endif
+
+
+
 if ( systemParameters % use_airs ) then
     print*,repeat('=',20)
     print*,'Converting background to AIRS...'
