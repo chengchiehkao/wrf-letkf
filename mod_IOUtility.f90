@@ -6,6 +6,7 @@ include 'IOUtility/sub_getAIRS.f90'
 include 'IOUtility/sub_getAMV.f90'
 include 'IOUtility/sub_getASCAT.f90'
 include 'IOUtility/sub_getBackground.f90'
+include 'IOUtility/sub_getCYGNSS.f90'
 include 'IOUtility/sub_getDomain.f90'
 include 'IOUtility/sub_getGPSRO.f90'
 include 'IOUtility/sub_getIASI.f90'
@@ -70,6 +71,15 @@ interface
       type(backgroundInfo),intent(inout) :: background(ensembleSize)
       type(domainInfo),intent(in)        :: domain(ensembleSize)
     end subroutine getBackground
+
+    subroutine getCYGNSS(cygnss,varList,varListSize,use_varList)
+      use derivedType
+      implicit none
+      type(obsParent),intent(out) :: cygnss
+      integer,intent(in)                                   :: varListSize
+      character(len=10),dimension(varListSize),intent(in)  :: varList
+      logical,dimension(varListSize),intent(in)            :: use_varList
+    end subroutine getCYGNSS
 
     subroutine getDomain(domain,domainSize)
       use derivedType

@@ -26,6 +26,7 @@ use_ascat    = .false.
 use_iasi     = .false.
 use_oscat    = .false.
 use_windsat  = .false.
+use_cygnss   = .false.
 /
 
 &varList_observation
@@ -40,6 +41,7 @@ varList_ascat    = 'U10','V10'
 varList_iasi     = 'T','RH'
 varList_oscat    = 'U10','V10'
 varList_windsat   = 'U10','V10'
+varList_cygnss   = 'WS10','uncertainty'
 /
 
 &use_varList_observation
@@ -54,4 +56,5 @@ use_varList_ascat    = .false.,.false.
 use_varList_iasi     = .false.,.false.
 use_varList_oscat    = .false.,.false.
 use_varList_windsat  = .false.,.false.
+use_varList_cygnss   = .true.,.false.
 /

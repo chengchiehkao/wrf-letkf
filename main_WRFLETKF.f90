@@ -10,7 +10,7 @@ implicit none
 type(systemParameter)            :: systemParameters
 type(domainInfo),allocatable     :: domain(:)
 type(domainInfo)                 :: domain_mean
-type(obsParent)                  :: sounding,airep,synop,amv,gpsro,airs,quikscat,ascat,iasi,oscat,windsat
+type(obsParent)                  :: sounding,airep,synop,amv,gpsro,airs,quikscat,ascat,iasi,oscat,windsat,cygnss
 type(obsParent)                  :: allObs
 type(backgroundInfo),allocatable :: background(:)
 type(backgroundInfo),allocatable :: analysis(:)
@@ -64,6 +64,7 @@ if ( systemParameters % use_ascat    )  call getASCAT(ascat, systemParameters%va
 if ( systemParameters % use_iasi     )  call getIASI(iasi, systemParameters%varList_iasi(:) , systemParameters%varListSize_iasi , systemParameters%use_varList_iasi )
 if ( systemParameters % use_oscat    )  call getOSCAT(oscat, systemParameters%varList_oscat(:) , systemParameters%varListSize_oscat , systemParameters%use_varList_oscat )
 if ( systemParameters % use_windsat  )  call getWindSat(windsat, systemParameters%varList_windsat(:) , systemParameters%varListSize_windsat , systemParameters%use_varList_windsat )
+if ( systemParameters % use_cygnss   )  call getCYGNSS(cygnss, systemParameters%varList_cygnss(:) , systemParameters%varListSize_cygnss , systemParameters%use_varList_cygnss )
 print*,'Done.'
 if ( systemParameters % use_sound    )  print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) set to be unavailable by default.'
 if ( systemParameters % use_airep    )  print*,'There are ',count(.not.airep%obs(:)%available),'/',airep%obsNum,'airep(s) set to be unavailable by default.'
@@ -76,6 +77,7 @@ if ( systemParameters % use_ascat    )  print*,'There are ',count(.not.ascat%obs
 if ( systemParameters % use_iasi     )  print*,'There are ',count(.not.iasi%obs(:)%available),'/',iasi%obsNum,'iasi(s) set to be unavailable by default.'
 if ( systemParameters % use_oscat    )  print*,'There are ',count(.not.oscat%obs(:)%available),'/',oscat%obsNum,'oscat(s) set to be unavailable by default.'
 if ( systemParameters % use_windsat  )  print*,'There are ',count(.not.windsat%obs(:)%available),'/',windsat%obsNum,'windsat(s) set to be unavailable by default.'
+if ( systemParameters % use_cygnss   )  print*,'There are ',count(.not.cygnss%obs(:)%available),'/',cygnss%obsNum,'cygnss(s) set to be unavailable by default.'
 
 
 wt0 = omp_get_wtime()
@@ -94,6 +96,7 @@ if ( systemParameters % use_ascat    )  call check_ifObsInsideHorizontalDomain(d
 if ( systemParameters % use_iasi     )  call check_ifObsInsideHorizontalDomain(domain(1),iasi)
 if ( systemParameters % use_oscat    )  call check_ifObsInsideHorizontalDomain(domain(1),oscat)
 if ( systemParameters % use_windsat  )  call check_ifObsInsideHorizontalDomain(domain(1),windsat)
+if ( systemParameters % use_cygnss   )  call check_ifObsInsideHorizontalDomain(domain(1),cygnss)
 
 if ( systemParameters % use_sound    )  print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) unavailable.'
 if ( systemParameters % use_airep    )  print*,'There are ',count(.not.airep%obs(:)%available),'/',airep%obsNum,'airep(s) unavailable.'
@@ -106,6 +109,7 @@ if ( systemParameters % use_ascat    )  print*,'There are ',count(.not.ascat%obs
 if ( systemParameters % use_iasi     )  print*,'There are ',count(.not.iasi%obs(:)%available),'/',iasi%obsNum,'iasi(s) unavailable.'
 if ( systemParameters % use_oscat    )  print*,'There are ',count(.not.oscat%obs(:)%available),'/',oscat%obsNum,'oscat(s) unavailable.'
 if ( systemParameters % use_windsat  )  print*,'There are ',count(.not.windsat%obs(:)%available),'/',windsat%obsNum,'windsat(s) unavailable.'
+if ( systemParameters % use_cygnss   )  print*,'There are ',count(.not.cygnss%obs(:)%available),'/',cygnss%obsNum,'cygnss(s) unavailable.'
 
 
 print*,repeat('=',20)
@@ -120,6 +124,7 @@ if ( systemParameters % use_ascat    )  call turnObsWithInvalidValueIntoUnavaila
 if ( systemParameters % use_iasi     )  call turnObsWithInvalidValueIntoUnavailable(iasi)
 if ( systemParameters % use_oscat    )  call turnObsWithInvalidValueIntoUnavailable(oscat)
 if ( systemParameters % use_windsat  )  call turnObsWithInvalidValueIntoUnavailable(windsat)
+if ( systemParameters % use_cygnss   )  call turnObsWithInvalidValueIntoUnavailable(cygnss)
 
 if ( systemParameters % use_sound    )  print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) unavailable.'
 if ( systemParameters % use_airep    )  print*,'There are ',count(.not.airep%obs(:)%available),'/',airep%obsNum,'airep(s) unavailable.'
@@ -131,6 +136,7 @@ if ( systemParameters % use_ascat    )  print*,'There are ',count(.not.ascat%obs
 if ( systemParameters % use_iasi     )  print*,'There are ',count(.not.iasi%obs(:)%available),'/',iasi%obsNum,'iasi(s) unavailable.'
 if ( systemParameters % use_oscat    )  print*,'There are ',count(.not.oscat%obs(:)%available),'/',oscat%obsNum,'oscat(s) unavailable.'
 if ( systemParameters % use_windsat  )  print*,'There are ',count(.not.windsat%obs(:)%available),'/',windsat%obsNum,'windsat(s) unavailable.'
+if ( systemParameters % use_cygnss   )  print*,'There are ',count(.not.cygnss%obs(:)%available),'/',cygnss%obsNum,'cygnss(s) unavailable.'
 
 
 print*,repeat('=',20)
@@ -145,6 +151,7 @@ if ( systemParameters % use_iasi )   call check_ifObsInsideVerticalDomain(domain
 !  ASCAT    does NOT have to do vertical check because it's always 10-m higher than surface.
 !  OSCAT    does NOT have to do vertical check because it's always 10-m higher than surface.
 !  WindSat  does NOT have to do vertical check because it's always 10-m higher than surface.
+!  CYGNSS   does NOT have to do vertical check because it's always 10-m higher than surfcae.
 
 if ( systemParameters % use_sound    )  print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) unavailable.'
 if ( systemParameters % use_airep    )  print*,'There are ',count(.not.airep%obs(:)%available),'/',airep%obsNum,'airep(s) unavailable.'
@@ -156,6 +163,7 @@ if ( systemParameters % use_ascat    )  print*,'There are ',count(.not.ascat%obs
 if ( systemParameters % use_iasi     )  print*,'There are ',count(.not.iasi%obs(:)%available),'/',iasi%obsNum,'iasi(s) unavailable.'
 if ( systemParameters % use_oscat    )  print*,'There are ',count(.not.oscat%obs(:)%available),'/',oscat%obsNum,'oscat(s) unavailable.'
 if ( systemParameters % use_windsat  )  print*,'There are ',count(.not.windsat%obs(:)%available),'/',windsat%obsNum,'windsat(s) unavailable.'
+if ( systemParameters % use_cygnss    )  print*,'There are ',count(.not.cygnss%obs(:)%available),'/',cygnss%obsNum,'cygnss(s) unavailable.'
 
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
@@ -476,6 +484,33 @@ if ( systemParameters % use_windsat ) then
 endif
 
 
+if ( systemParameters % use_cygnss ) then
+    print*,repeat('=',20)
+    print*,'Converting background to CYGNSS...'
+    wt0 = omp_get_wtime()
+    call cpu_time(ct0)
+    call convertBackgroundToCYGNSS(background(:),ensembleSize,domain(:),domain_mean,cygnss)
+    call cpu_time(ct1)
+    wt1 = omp_get_wtime()
+    print*,'Done.'
+    print*,'cpu time(H of CYGNSS) =',ct1-ct0,'sec'
+    print*,'walltime(H of CYGNSS) =',wt1-wt0,'sec'
+
+
+    print*,repeat('=',20)
+    print*,'Setting error of CYGNSS...'
+    wt0 = omp_get_wtime()
+    call cpu_time(ct0)
+    call setCYGNSSError(cygnss)
+    call cpu_time(ct1)
+    wt1 = omp_get_wtime()
+    print*,'Done.'
+    print*,'cpu time(set CYGNSS error) =',ct1-ct0,'sec'
+    print*,'walltime(set CYGNSS error) =',wt1-wt0,'sec'
+    print*,'There are ',count(.not.cygnss%obs(:)%available),'/',cygnss%obsNum,'CYGNSS(s) unavailable.'
+endif
+
+
 print*,repeat('=',20)
 print*,'Merging observation(s)...'
 wt0 = omp_get_wtime()
@@ -489,6 +524,7 @@ if ( systemParameters % use_ascat    )  call mergeObs(allObs,ascat)
 if ( systemParameters % use_iasi     )  call mergeObs(allObs,iasi)
 if ( systemParameters % use_oscat    )  call mergeObs(allObs,oscat)
 if ( systemParameters % use_windsat  )  call mergeObs(allObs,windsat)
+if ( systemParameters % use_cygnss   )  call mergeObs(allObs,cygnss)
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 print*,'Done.'
