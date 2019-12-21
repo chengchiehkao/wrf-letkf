@@ -24,6 +24,7 @@ type systemParameter
     real(kind=8) :: rd   , rc    ! Decorrelated & highly correlated distance on horizontal space.
     real(kind=8) :: rd_z , rc_z  ! Decorrelated & highly correlated distance on vertical space.
     real(kind=8) :: inflationFactor
+    integer :: boundaryWidth
 end type systemParameter
 
 type obsChild

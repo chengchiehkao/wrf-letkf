@@ -38,10 +38,10 @@ real(kind=8) wt0,wt1
 
 do iz  = 1,domain_mean%size_bottomToTop
 wt0 = omp_get_wtime()
-do isn = 1+relaxationZone,domain_mean%size_southToNorth_stag-relaxationZone
+do isn = 1+systemParameters%boundaryWidth,domain_mean%size_southToNorth_stag-systemParameters%boundaryWidth
 !$omp parallel do default(private) shared(iz,isn,domain_mean,obsListOfEachGrid,ensembleSize,analysis,background,obs,systemParameters) &
 !$omp schedule(dynamic,1)
-do iwe = 1+relaxationZone,domain_mean%size_westToEast-relaxationZone
+do iwe = 1+systemParameters%boundaryWidth,domain_mean%size_westToEast-systemParameters%boundaryWidth
 
     if ( obsListOfEachGrid(iwe,isn,iz)%vectorSize .eq. 0 ) then  ! no observation means won't update.
         forall(iens=1:ensembleSize) analysis(iens)%v(iwe,isn,iz) = background(iens)%v(iwe,isn,iz)

@@ -3,6 +3,10 @@
 ensembleSize=36
 /
 
+&domain
+boundaryWidth = 5
+/
+
 &correlativeDistance
 rd = 3.d5
 rc = 1.d5
