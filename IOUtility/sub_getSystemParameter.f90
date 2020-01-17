@@ -22,6 +22,7 @@ real(kind=8) :: rd   , rc    ! Decorrelated & highly correlated distance on hori
 real(kind=8) :: rd_z , rc_z  ! Decorrelated & highly correlated distance on vertical space.
 real(kind=8) :: inflationFactor
 integer :: boundaryWidth
+logical :: rotateUAndVOfObsBasedOnWRFMapProjection
 
 namelist /sizeOfEnsemble/ ensembleSize
 namelist /domain/ boundaryWidth
@@ -30,6 +31,7 @@ namelist /varList_observation/ varList_sound,varList_airep,varList_synop,varList
 namelist /use_varList_observation/ use_varList_sound,use_varList_airep,use_varList_synop,use_varList_amv,use_varList_gpsro,use_varList_airs,use_varList_quikscat,use_varList_ascat,use_varList_iasi,use_varList_oscat,use_varList_windsat,use_varList_cygnss
 namelist /correlativeDistance/ rd,rc,rd_z,rc_z
 namelist /inflation/ inflationFactor
+namelist /preprocessing/ rotateUAndVOfObsBasedOnWRFMapProjection
 
 integer :: fileID
 
@@ -63,6 +65,7 @@ use_varList_oscat(:)    = .true.
 use_varList_windsat(:)  = .true.
 use_varList_cygnss(:)   = .true.
 inflationFactor = 1.d0
+rotateUAndVOfObsBasedOnWRFMapProjection = .false.
 varList_sound(:)    = repeat(' ',len(varList_sound(1)))
 varList_airep(:)    = repeat(' ',len(varList_airep(1)))
 varList_synop(:)    = repeat(' ',len(varList_synop(1)))
@@ -84,6 +87,7 @@ read(fileID,nml = sizeOfEnsemble)
 read(fileID,nml = domain)
 read(fileID,nml = correlativeDistance)
 read(fileID,nml = inflation)
+read(fileID,nml = preprocessing)
 read(fileID,nml = use_observation)
 read(fileID,nml = varList_observation)
 read(fileID,nml = use_varList_observation)
@@ -282,6 +286,7 @@ systemParameters % rc = rc
 systemParameters % rd_z = rd_z
 systemParameters % rc_z = rc_z
 systemParameters % inflationFactor = inflationFactor
+systemParameters % rotateUAndVOfObsBasedOnWRFMapProjection = rotateUAndVOfObsBasedOnWRFMapProjection
 
 
 !================================================

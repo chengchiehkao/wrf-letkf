@@ -18,6 +18,10 @@ rc_z = 0.2d0
 inflationFactor = 1.15d0
 /
 
+&preprocessing
+rotateUAndVOfObsBasedOnWRFMapProjection = .true.
+/
+
 &use_observation
 use_sound = .true.
 use_airep = .false.

@@ -3,7 +3,7 @@
 !include 'sub_interp1d.f90'
 !include 'sub_interp2d.f90'
 
-subroutine convertBackgroundToASCAT(background,ensembleSize,domain,domain_mean,ascat)
+subroutine convertBackgroundToASCAT(background,ensembleSize,domain,domain_mean,ascat,systemParameters)
 
 use derivedType
 use basicUtility
@@ -15,16 +15,52 @@ type(backgroundInfo),intent(in) :: background(ensembleSize)
 type(domainInfo),intent(in)     :: domain(ensembleSize)
 type(domainInfo),intent(in)     :: domain_mean
 type(obsParent),intent(inout)   :: ascat
+type(systemParameter),intent(in) :: systemParameters
 
 integer obsVarIndexRankOne , obsVarIndexRankTwo
 integer obsZIndexRankOne   , obsZIndexRankTwo
 
 real(kind=8),dimension(1) :: obsVarBuffer , obsZBuffer  ! SHALL AWARE OF DIFFERENCES BETWEEN P & GPH
+real(kind=8) :: u_rotated , v_rotated
+real(kind=8),dimension(1) :: sinalpha_interpolated
 
 real(kind=8),parameter :: invalidValue = -9.d6
 
 integer io,iens,iz  ! loop counter
 !================================================
+
+
+if ( systemParameters%rotateUAndVOfObsBasedOnWRFMapProjection ) then
+
+    do io = 1 , ascat%obsNum
+
+        if ( ascat%obs(io)%available ) then
+
+            call locateAsIndex2d( domain(1)%lon(:,:)        , domain(1)%lat(:,:) , &
+                                  domain(1)%size_westToEast , domain(1)%size_southToNorth , &
+                                  ascat%obs(io)%lon , ascat%obs(io)%lat , &
+                                  obsZIndexRankOne , obsZIndexRankTwo )
+
+            select case ( trim(adjustl(ascat%obs(io)%varName)) )
+            case ( 'V10' )
+                call interp2d( domain(1)%lon(obsZIndexRankOne:obsZIndexRankOne+1,obsZIndexRankTwo:obsZIndexRankTwo+1) , &
+                               domain(1)%lat(obsZIndexRankOne:obsZIndexRankOne+1,obsZIndexRankTwo:obsZIndexRankTwo+1) , &
+                               domain(1)%sinalpha(obsZIndexRankOne:obsZIndexRankOne+1,obsZIndexRankTwo:obsZIndexRankTwo+1) , &
+                               2 , 2 , &
+                               (/ascat%obs(io)%lon/) , (/ascat%obs(io)%lat/) , sinalpha_interpolated(1:1) , 1, &
+                               1 , invalidValue )
+
+                call rotateUAndVofObsBasedOnSinAlpha( ascat%obs(io-1)%value , ascat%obs(io)%value , sinalpha_interpolated(1) , u_rotated , v_rotated )
+                ascat%obs(io-1)%value = u_rotated
+                ascat%obs(io  )%value = v_rotated
+            end select
+
+        endif
+
+    enddo
+
+endif
+
 
 #ifndef PGI
 !$omp parallel do default(none) &

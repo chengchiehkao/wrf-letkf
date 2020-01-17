@@ -8,6 +8,7 @@ type domainInfo
     real(kind=8),pointer,dimension(:,:)   :: lon=>null() , lat=>null()
     real(kind=8),pointer,dimension(:,:)   :: lon_u=>null() , lat_u=>null()
     real(kind=8),pointer,dimension(:,:)   :: lon_v=>null() , lat_v=>null()
+    real(kind=8),pointer,dimension(:,:)   :: sinalpha=>null()
     real(kind=8),pointer,dimension(:,:,:) :: pressure=>null() , GPH=>null() , GPH_unstag=>null() , GMH=>null() , GMH_unstag=>null() , pressure_u=>null() , pressure_v=>null() , pressure_w=>null()
     integer                               :: size_westToEast      , size_southToNorth      , size_bottomToTop
     integer                               :: size_westToEast_stag , size_southToNorth_stag , size_bottomToTop_stag
@@ -25,6 +26,7 @@ type systemParameter
     real(kind=8) :: rd_z , rc_z  ! Decorrelated & highly correlated distance on vertical space.
     real(kind=8) :: inflationFactor
     integer :: boundaryWidth
+    logical :: rotateUAndVOfObsBasedOnWRFMapProjection
 end type systemParameter
 
 type obsChild

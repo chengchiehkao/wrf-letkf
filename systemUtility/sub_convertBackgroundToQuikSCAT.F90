@@ -3,7 +3,7 @@
 !include 'sub_interp1d.f90'
 !include 'sub_interp2d.f90'
 
-subroutine convertBackgroundToQuikSCAT(background,ensembleSize,domain,domain_mean,quikscat)
+subroutine convertBackgroundToQuikSCAT(background,ensembleSize,domain,domain_mean,quikscat,systemParameters)
 
 use derivedType
 use basicUtility
@@ -15,16 +15,52 @@ type(backgroundInfo),intent(in) :: background(ensembleSize)
 type(domainInfo),intent(in)     :: domain(ensembleSize)
 type(domainInfo),intent(in)     :: domain_mean
 type(obsParent),intent(inout)   :: quikscat
+type(systemParameter),intent(in) :: systemParameters
 
 integer obsVarIndexRankOne , obsVarIndexRankTwo
 integer obsZIndexRankOne   , obsZIndexRankTwo
 
 real(kind=8),dimension(1) :: obsVarBuffer , obsZBuffer  ! SHALL AWARE OF DIFFERENCES BETWEEN P & GPH
+real(kind=8) :: u_rotated , v_rotated
+real(kind=8),dimension(1) :: sinalpha_interpolated
 
 real(kind=8),parameter :: invalidValue = -9.d6
 
 integer io,iens,iz  ! loop counter
 !================================================
+
+
+if ( systemParameters%rotateUAndVOfObsBasedOnWRFMapProjection ) then
+
+    do io = 1 , quikscat%obsNum
+
+        if ( quikscat%obs(io)%available ) then
+
+            call locateAsIndex2d( domain(1)%lon(:,:)        , domain(1)%lat(:,:) , &
+                                  domain(1)%size_westToEast , domain(1)%size_southToNorth , &
+                                  quikscat%obs(io)%lon , quikscat%obs(io)%lat , &
+                                  obsZIndexRankOne , obsZIndexRankTwo )
+
+            select case ( trim(adjustl(quikscat%obs(io)%varName)) )
+            case ( 'V10' )
+                call interp2d( domain(1)%lon(obsZIndexRankOne:obsZIndexRankOne+1,obsZIndexRankTwo:obsZIndexRankTwo+1) , &
+                               domain(1)%lat(obsZIndexRankOne:obsZIndexRankOne+1,obsZIndexRankTwo:obsZIndexRankTwo+1) , &
+                               domain(1)%sinalpha(obsZIndexRankOne:obsZIndexRankOne+1,obsZIndexRankTwo:obsZIndexRankTwo+1) , &
+                               2 , 2 , &
+                               (/quikscat%obs(io)%lon/) , (/quikscat%obs(io)%lat/) , sinalpha_interpolated(1:1) , 1, &
+                               1 , invalidValue )
+
+                call rotateUAndVofObsBasedOnSinAlpha( quikscat%obs(io-1)%value , quikscat%obs(io)%value , sinalpha_interpolated(1) , u_rotated , v_rotated )
+                quikscat%obs(io-1)%value = u_rotated
+                quikscat%obs(io  )%value = v_rotated
+            end select
+
+        endif
+
+    enddo
+
+endif
+
 
 #ifndef PGI
 !$omp parallel do default(none) &

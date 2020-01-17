@@ -207,7 +207,7 @@ if ( systemParameters % use_sound ) then
     print*,'Converting background to sounding...'
     wt0 = omp_get_wtime()
     call cpu_time(ct0)
-    call convertBackgroundToSounding(background(:),ensembleSize,domain(:),sounding)
+    call convertBackgroundToSounding(background(:),ensembleSize,domain(:),sounding,systemParameters)
     call cpu_time(ct1)
     wt1 = omp_get_wtime()
     print*,'Done.'
@@ -234,7 +234,7 @@ if ( systemParameters % use_airep ) then
     print*,'Converting background to airep...'
     wt0 = omp_get_wtime()
     call cpu_time(ct0)
-    call convertBackgroundToAirep(background(:),ensembleSize,domain(:),airep)
+    call convertBackgroundToAirep(background(:),ensembleSize,domain(:),airep,systemParameters)
     call cpu_time(ct1)
     wt1 = omp_get_wtime()
     print*,'Done.'
@@ -261,7 +261,7 @@ if ( systemParameters % use_amv ) then
     print*,'Converting background to AMV...'
     wt0 = omp_get_wtime()
     call cpu_time(ct0)
-    call convertBackgroundToAMV(background(:),ensembleSize,domain(:),amv)
+    call convertBackgroundToAMV(background(:),ensembleSize,domain(:),amv,systemParameters)
     call cpu_time(ct1)
     wt1 = omp_get_wtime()
     print*,'Done.'
@@ -355,7 +355,7 @@ if ( systemParameters % use_quikscat ) then
     print*,'Converting background to QuikSCAT...'
     wt0 = omp_get_wtime()
     call cpu_time(ct0)
-    call convertBackgroundToQuikSCAT(background(:),ensembleSize,domain(:),domain_mean,quikscat)
+    call convertBackgroundToQuikSCAT(background(:),ensembleSize,domain(:),domain_mean,quikscat,systemParameters)
     call cpu_time(ct1)
     wt1 = omp_get_wtime()
     print*,'Done.'
@@ -382,7 +382,7 @@ if ( systemParameters % use_ascat ) then
     print*,'Converting background to ASCAT...'
     wt0 = omp_get_wtime()
     call cpu_time(ct0)
-    call convertBackgroundToASCAT(background(:),ensembleSize,domain(:),domain_mean,ascat)
+    call convertBackgroundToASCAT(background(:),ensembleSize,domain(:),domain_mean,ascat,systemParameters)
     call cpu_time(ct1)
     wt1 = omp_get_wtime()
     print*,'Done.'
@@ -436,7 +436,7 @@ if ( systemParameters % use_oscat ) then
     print*,'Converting background to OSCAT...'
     wt0 = omp_get_wtime()
     call cpu_time(ct0)
-    call convertBackgroundToOSCAT(background(:),ensembleSize,domain(:),domain_mean,oscat)
+    call convertBackgroundToOSCAT(background(:),ensembleSize,domain(:),domain_mean,oscat,systemParameters)
     call cpu_time(ct1)
     wt1 = omp_get_wtime()
     print*,'Done.'
@@ -463,7 +463,7 @@ if ( systemParameters % use_windsat ) then
     print*,'Converting background to WindSat...'
     wt0 = omp_get_wtime()
     call cpu_time(ct0)
-    call convertBackgroundToWindSat(background(:),ensembleSize,domain(:),domain_mean,windsat)
+    call convertBackgroundToWindSat(background(:),ensembleSize,domain(:),domain_mean,windsat,systemParameters)
     call cpu_time(ct1)
     wt1 = omp_get_wtime()
     print*,'Done.'

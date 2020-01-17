@@ -3,7 +3,7 @@
 !include 'sub_interp1d.f90'
 !include 'sub_interp2d.f90'
 
-subroutine convertBackgroundToAirep(background,ensembleSize,domain,airep)
+subroutine convertBackgroundToAirep(background,ensembleSize,domain,airep,systemParameters)
 
 use derivedType
 use basicUtility
@@ -14,16 +14,52 @@ integer,intent(in)              :: ensembleSize
 type(backgroundInfo),intent(in) :: background(ensembleSize)
 type(domainInfo),intent(in)     :: domain(ensembleSize)
 type(obsParent),intent(inout)   :: airep
+type(systemParameter),intent(in) :: systemParameters
 
 integer obsVarIndexRankOne , obsVarIndexRankTwo
 integer obsZIndexRankOne   , obsZIndexRankTwo
 
 real(kind=8),dimension(domain(1)%size_bottomToTop) :: obsVarBuffer , obsZBuffer  ! SHALL AWARE OF DIFFERENCES BETWEEN P & GPH
+real(kind=8) :: u_rotated , v_rotated
+real(kind=8),dimension(1) :: sinalpha_interpolated
 
 real(kind=8),parameter :: invalidValue = -9.d6
 
 integer io,iens,iz  ! loop counter
 !================================================
+
+
+if ( systemParameters%rotateUAndVOfObsBasedOnWRFMapProjection ) then
+
+    do io = 1 , airep%obsNum
+
+        if ( airep%obs(io)%available ) then
+
+            call locateAsIndex2d( domain(1)%lon(:,:)        , domain(1)%lat(:,:) , &
+                                  domain(1)%size_westToEast , domain(1)%size_southToNorth , &
+                                  airep%obs(io)%lon , airep%obs(io)%lat , &
+                                  obsZIndexRankOne , obsZIndexRankTwo )
+
+            select case ( trim(adjustl(airep%obs(io)%varName)) )
+            case ( 'V' )
+                call interp2d( domain(1)%lon(obsZIndexRankOne:obsZIndexRankOne+1,obsZIndexRankTwo:obsZIndexRankTwo+1) , &
+                               domain(1)%lat(obsZIndexRankOne:obsZIndexRankOne+1,obsZIndexRankTwo:obsZIndexRankTwo+1) , &
+                               domain(1)%sinalpha(obsZIndexRankOne:obsZIndexRankOne+1,obsZIndexRankTwo:obsZIndexRankTwo+1) , &
+                               2 , 2 , &
+                               (/airep%obs(io)%lon/) , (/airep%obs(io)%lat/) , sinalpha_interpolated(1:1) , 1, &
+                               1 , invalidValue )
+
+                call rotateUAndVofObsBasedOnSinAlpha( airep%obs(io-1)%value , airep%obs(io  )%value , sinalpha_interpolated(1) , u_rotated , v_rotated )
+                airep%obs(io-1)%value = u_rotated
+                airep%obs(io  )%value = v_rotated
+            end select
+
+        endif
+
+    enddo
+
+endif
+
 
 #ifndef PGI
 !$omp parallel do default(none) &

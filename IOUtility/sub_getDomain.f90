@@ -14,7 +14,7 @@ character(len=2)  domainSeiralNumInString
 integer ncStatus,ncID
 integer dimID_bottomToTop      , dimID_southToNorth      , dimID_westToEast
 integer dimID_bottomToTop_stag , dimID_southToNorth_stag , dimID_westToEast_stag
-integer varID_lon , varID_lat , varID_lon_u , varID_lat_u , varID_lon_v , varID_lat_v
+integer varID_lon , varID_lat , varID_lon_u , varID_lat_u , varID_lon_v , varID_lat_v ,varID_sinalpha
 integer varID_pressure , varID_GPH , varID_psfc , varID_p_top
 
 real(kind=8),allocatable,dimension(:,:,:) :: pressure_dummy , GPH_dummy
@@ -60,6 +60,7 @@ do id=1,domainSize
     allocate( domain(id) % lat_u( domain(id)%size_westToEast_stag , domain(id)%size_southToNorth ) )
     allocate( domain(id) % lon_v( domain(id)%size_westToEast , domain(id)%size_southToNorth_stag ) )
     allocate( domain(id) % lat_v( domain(id)%size_westToEast , domain(id)%size_southToNorth_stag ) )
+    allocate( domain(id) % sinalpha ( domain(id)%size_westToEast , domain(id)%size_southToNorth ) )
     allocate( domain(id) % pressure ( domain(id)%size_westToEast , domain(id)%size_southToNorth , domain(id)%size_bottomToTop      ) )
     allocate( domain(id) % GPH      ( domain(id)%size_westToEast , domain(id)%size_southToNorth , domain(id)%size_bottomToTop_stag ) )
     allocate( domain(id) % pressure_u ( domain(id)%size_westToEast_stag , domain(id)%size_southToNorth , domain(id)%size_bottomToTop ) )
@@ -75,6 +76,7 @@ do id=1,domainSize
     domain(id)%lat_u(:,:)        = 0.d0
     domain(id)%lon_v(:,:)        = 0.d0
     domain(id)%lat_v(:,:)        = 0.d0
+    domain(id)%sinalpha(:,:)     = 0.d0
     domain(id)%pressure(:,:,:)   = 0.d0
     domain(id)%GPH(:,:,:)        = 0.d0
     domain(id)%pressure_u(:,:,:) = 0.d0
@@ -97,6 +99,9 @@ do id=1,domainSize
     ncStatus = nf_inq_varID( ncID , 'XLAT_V'  , varID_lat_v )
     ncStatus = nf_get_vara_double( ncID , varID_lon_v , (/1,1,1/) , (/domain(id)%size_westToEast,domain(id)%size_southToNorth_stag,1/) , domain(id)%lon_v(:,:) )
     ncStatus = nf_get_vara_double( ncID , varID_lat_v , (/1,1,1/) , (/domain(id)%size_westToEast,domain(id)%size_southToNorth_stag,1/) , domain(id)%lat_v(:,:) )
+
+    ncStatus = nf_inq_varID( ncID , 'SINALPHA'  , varID_sinalpha )
+    ncStatus = nf_get_vara_double( ncID , varID_sinalpha , (/1,1,1/) , (/domain(id)%size_westToEast,domain(id)%size_southToNorth,1/) , domain(id)%sinalpha(:,:) )
 
     ncStatus = nf_inq_varID( ncID , 'P'  , varID_pressure )
     ncStatus = nf_get_vara_double( ncID , varID_pressure , (/1,1,1,1/) , (/domain(id)%size_westToEast,domain(id)%size_southToNorth,domain(id)%size_bottomToTop,1/) , pressure_dummy(:,:,:) )
