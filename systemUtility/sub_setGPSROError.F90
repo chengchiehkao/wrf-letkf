@@ -10,9 +10,9 @@ implicit none
 
 type(obsParent),intent(inout)   :: gpsro
 
-integer,parameter :: refractivityErrorProfileLevelNum = 2
-real(kind=8),dimension(refractivityErrorProfileLevelNum) :: refractivityErrorProfile_value = (/2.d0,2.d0/)
-real(kind=8),dimension(refractivityErrorProfileLevelNum) :: refractivityErrorProfile_gmh   = (/0.d0,100000d0/)
+integer,parameter :: refractivityErrorProfileLevelNum = 3
+real(kind=8),dimension(refractivityErrorProfileLevelNum) :: refractivityErrorProfile_value = (/0.03d0,0.005d0,0.005d0/)  ! in ratio (based on Chen et al, 2014)
+real(kind=8),dimension(refractivityErrorProfileLevelNum) :: refractivityErrorProfile_gmh   = (/0.d0,10d3,20d3/)
 
 real(kind=8) :: dummyArg_gpsroError(1)
 real(kind=8),parameter :: dummyInvalidValue = -888888.d0
@@ -39,7 +39,7 @@ do io = 1 , gpsro%obsNum
             call interp1d( refractivityErrorProfile_gmh(:) , refractivityErrorProfile_value(:) , refractivityErrorProfileLevelNum , &
                            (/gpsro%obs(io)%z/) , dummyArg_gpsroError(1:1) , 1 , &
                            2 , .false. , dummyInvalidValue )
-            gpsro%obs(io)%error = dummyArg_gpsroError(1)
+            gpsro%obs(io)%error =  gpsro%obs(io)%value * dummyArg_gpsroError(1)
         end select
 
 

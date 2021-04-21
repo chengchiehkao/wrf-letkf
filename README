@@ -19,7 +19,8 @@ WRF-LETKF is a data assimilation system implemented LETKF(Local Ensemble Transfo
 
 The source code of WRF-LETKF is now available through certain git host. If you have a bitbucket account (https://bitbucket.org) and already installed any git client, just type:
 
-          git clone ssh://git@bitbucket.org/chengchiehkao/wrf-letkf.git
+          git clone git@github.com:chengchiehkao/wrf-letkf
+       or git clone ssh://git@bitbucket.org/chengchiehkao/wrf-letkf.git
 
 then the package will be downloaded.
 
