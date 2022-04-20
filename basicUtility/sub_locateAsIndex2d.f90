@@ -26,7 +26,7 @@ subroutine locateAsIndex2d(xRef,yRef,refRankOneSize,refRankTwoSize, &
 !     Return zeros means the target point does not lie in the grids.
 
 ! Wrote by Cheng-Chieh Kao. (2014-01-03)
-! Buf Fixed @ 2014-08-15: (1) Exception handling for minimum side length of 2.
+! Bug Fixed @ 2014-08-15: (1) Exception handling for minimum side length of 2.
 !                         (2) Indices of vertor subscript shall not be constant.
 
 !====End of the description====
@@ -80,7 +80,7 @@ blockRankTwoLowerBound = 1
 blockRankTwoUpperBound = refRankTwoSize
 
 ! Locate the target point and return the index of grids which it lies.
-do  ! End looping when indices is retrived.
+do  ! End looping when indices were retrived.
 
     if ( (blockRankOneUpperBound-blockRankOneLowerBound).gt.1 ) then
         blockRankOneMedian = (blockRankOneLowerBound+blockRankOneUpperBound)/2

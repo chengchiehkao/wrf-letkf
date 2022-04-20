@@ -13,17 +13,20 @@ integer,allocatable,dimension(:) :: indexOfObs
 integer io
 !================================================
 
-allocate( dummy_z( obs%obsNum ) )
-allocate( indexOfObs( obs%obsNum ) )
+if ( obs%obsNum .gt. 0 ) then
 
-dummy_z(:) = obs%obs(:)%z
-forall(io=1:size(indexOfObs)) indexOfObs(io) = io
+    allocate( dummy_z( obs%obsNum ) )
+    allocate( indexOfObs( obs%obsNum ) )
+
+    dummy_z(:) = obs%obs(:)%z
+    forall(io=1:size(indexOfObs)) indexOfObs(io) = io
 
 
-call quickSortWithIndex( dummy_z(:) , size(dummy_z(:)) , indexOfObs(:) )
+    call quickSortWithIndex( dummy_z(:) , size(dummy_z(:)) , indexOfObs(:) )
 
-obs%obs(:) = obs%obs( indexOfObs(obs%obsNum:1:-1) )  ! reverse for pressure coordinate
+    obs%obs(:) = obs%obs( indexOfObs(obs%obsNum:1:-1) )  ! reverse for pressure coordinate
 
+endif
 
 !================================================
 return
