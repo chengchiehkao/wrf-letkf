@@ -1,5 +1,5 @@
 
-subroutine getDomain(domain,domainSize)
+subroutine getDomain(domain,domainSize,domainID)
 
 use derivedType
 
@@ -7,9 +7,11 @@ implicit none
 include 'netcdf.inc'
 integer,intent(in)           :: domainSize
 type(domainInfo),intent(out) :: domain(domainSize)
+integer,intent(in)           :: domainID
 
 character(len=255) domainSrc
 character(len=2)  domainSeiralNumInString 
+character(len=2)  domainIDInString 
 
 integer ncStatus,ncID
 integer dimID_bottomToTop      , dimID_southToNorth      , dimID_westToEast
@@ -24,21 +26,25 @@ real(kind=8)                              :: p_top_dummy
 integer id  ! loop conuter
 !================================================
 
-write(*,'(a)',advance='no') 'Reading domain:'
+write(*,'("D",i2.2,": ",a)',advance='no') domainID,'Reading domain:'
 
 do id=1,domainSize
 
     write(domainSeiralNumInString,'(i2.2)') id
     if ( id.ne.domainSize ) write(*,'(1x,a2)',advance='no' ) domainSeiralNumInString
     if ( id.eq.domainSize ) write(*,'(1x,a2)',advance='yes') domainSeiralNumInString
+
+    write(domainIDInString,'(i2.2)') domainID
     domainSrc = repeat(' ',len(domainSrc))
-    domainSrc = 'input/wrfinput_nc_'//domainSeiralNumInString;
+    domainSrc = 'input/background_d'//domainIDInString//'_'//domainSeiralNumInString;
 
     ncStatus = nf_open( domainSrc , nf_noWrite , ncID )
     if ( ncStatus .ne. nf_noErr ) then
         print*,nf_strError( ncStatus )
         stop
     endif
+
+    if ( id.ne.domainSize ) write(*,'(",")',advance='no' )
 
     ncStatus = nf_inq_dimID( ncID , 'bottom_top'       , dimID_bottomToTop       )
     ncStatus = nf_inq_dimID( ncID , 'bottom_top_stag'  , dimID_bottomToTop_stag  )

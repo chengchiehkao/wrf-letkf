@@ -3,7 +3,7 @@
 !include 'sub_interp1d.f90'
 !include 'sub_interp2d.f90'
 
-subroutine convertBackgroundToAirep(background,ensembleSize,domain,airep,systemParameters)
+subroutine convertBackgroundToAirep(background,ensembleSize,domain,airep,systemParameters,domainID)
 
 use derivedType
 use basicUtility
@@ -15,6 +15,7 @@ type(backgroundInfo),intent(in) :: background(ensembleSize)
 type(domainInfo),intent(in)     :: domain(ensembleSize)
 type(obsParent),intent(inout)   :: airep
 type(systemParameter),intent(in) :: systemParameters
+integer,intent(in)              :: domainID
 
 integer obsVarIndexRankOne , obsVarIndexRankTwo
 integer obsZIndexRankOne   , obsZIndexRankTwo
@@ -33,7 +34,7 @@ if ( systemParameters%rotateUAndVOfObsBasedOnWRFMapProjection ) then
 
     do io = 1 , airep%obsNum
 
-        if ( airep%obs(io)%available ) then
+        if ( airep%obs(io)%available .and. count(airep%obs(io)%insideHorizontalDomain(:)).eq.domainID ) then
 
             call locateAsIndex2d( domain(1)%lon(:,:)        , domain(1)%lat(:,:) , &
                                   domain(1)%size_westToEast , domain(1)%size_southToNorth , &
@@ -64,13 +65,13 @@ endif
 #ifndef PGI
 !$omp parallel do default(none) &
 !$omp private(io,iens,iz,obsVarIndexRankOne,obsVarIndexRankTwo,obsZIndexRankOne,obsZIndexRankTwo,obsVarBuffer,obsZBuffer) &
-!$omp shared(airep,domain,background,ensembleSize) &
+!$omp shared(airep,domain,background,ensembleSize,domainID) &
 !$omp schedule(dynamic,100)
 #endif
 do io = 1 , airep%obsNum
 
 
-    if ( airep%obs(io)%available ) then  ! SHALL AWARE OF PSFC
+    if ( airep%obs(io)%available .and. count(airep%obs(io)%insideHorizontalDomain(:)).eq.domainID ) then  ! SHALL AWARE OF PSFC
 
         allocate( airep%obs(io)%background(ensembleSize) )
         airep%obs(io)%background(:) = 0.d0

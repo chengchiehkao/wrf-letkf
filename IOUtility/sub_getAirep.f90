@@ -2,15 +2,13 @@
 !  include 'mod_derivedType.f90'
 !  include 'func_availableFileID.f90'
 
-subroutine getAirep(airep,varList,varListSize,use_varList)
+subroutine getAirep(airep,systemParameters)
 
 use derivedType
 
 implicit none
 type(obsParent),intent(out) :: airep
-integer,intent(in)                                   :: varListSize
-character(len=10),dimension(varListSize),intent(in)  :: varList
-logical,dimension(varListSize),intent(in)            :: use_varList
+type(systemParameter),intent(in) :: systemParameters
 
 real(kind=8) lon,lat
 integer levNum,serialNum
@@ -39,7 +37,7 @@ do
     endif
 
     read(header,*,iostat=ioStatus) dummyArg1,dummyArg2 , levNum
-    airep%obsNum = airep%obsNum + varListSize*levNum
+    airep%obsNum = airep%obsNum + systemParameters%varListSize_airep*levNum
     do i = 1,levNum
         read(fileID,*)  ! just read through lines which are not headers.
     enddo
@@ -60,6 +58,10 @@ airep%obs(:)%instrument = 'AIREP     '
 airep%obs(:)%zName      = ''
 airep%obs(:)%varName    = ''
 airep%obs(:)%available  = .true.
+do io = 1 , airep%obsNum
+    allocate( airep%obs(io)%insideHorizontalDomain(systemParameters%max_domain) )
+    airep%obs(io)%insideHorizontalDomain(:) = .false.
+enddo
 
 rewind(fileID)
 
@@ -73,15 +75,15 @@ do
 
     do i = 1,levNum
         serialNum = serialNum + 1
-        read(fileID,*) airep%obs(serialNum)%z,airep%obs(serialNum:serialNum+varListSize-1)%value
+        read(fileID,*) airep%obs(serialNum)%z,airep%obs(serialNum:serialNum+systemParameters%varListSize_airep-1)%value
 
-        airep%obs(serialNum:serialNum+varListSize-1)%instrument = 'AIREP     '
-        airep%obs(serialNum:serialNum+varListSize-1)%lon = lon
-        airep%obs(serialNum:serialNum+varListSize-1)%lat = lat
-        airep%obs(serialNum:serialNum+varListSize-1)%z   = airep%obs(serialNum)%z
-        airep%obs(serialNum:serialNum+varListSize-1)%zName = 'P         '
-        airep%obs(serialNum:serialNum+varListSize-1)%varName = varList(1:varListSize)
-        serialNum = serialNum + (varListSize-1)
+        airep%obs(serialNum:serialNum+systemParameters%varListSize_airep-1)%instrument = 'AIREP     '
+        airep%obs(serialNum:serialNum+systemParameters%varListSize_airep-1)%lon = lon
+        airep%obs(serialNum:serialNum+systemParameters%varListSize_airep-1)%lat = lat
+        airep%obs(serialNum:serialNum+systemParameters%varListSize_airep-1)%z   = airep%obs(serialNum)%z
+        airep%obs(serialNum:serialNum+systemParameters%varListSize_airep-1)%zName = 'P         '
+        airep%obs(serialNum:serialNum+systemParameters%varListSize_airep-1)%varName = systemParameters%varList_airep(1:systemParameters%varListSize_airep)
+        serialNum = serialNum + (systemParameters%varListSize_airep-1)
     enddo
 
 enddo
@@ -99,9 +101,9 @@ do io = 1 , airep%obsNum
     airep%obs(io)%z = 100.d0 * airep%obs(io)%z  !  convert hPa to Pa
 enddo
 
-do iObsVar = 1 , varListSize
-    where ( adjustl(airep%obs(:)%varName) .eq. adjustl(varList(iObsVar)) )
-        airep%obs%available = use_varList(iObsVar)
+do iObsVar = 1 , systemParameters%varListSize_airep
+    where ( adjustl(airep%obs(:)%varName) .eq. adjustl(systemParameters%varList_airep(iObsVar)) )
+        airep%obs%available = systemParameters%use_varList_airep(iObsVar)
     end where
 enddo
 

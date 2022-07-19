@@ -3,7 +3,7 @@
 !include 'sub_interp1d.f90'
 !include 'sub_interp2d.f90'
 
-subroutine convertBackgroundToAIRS(background,ensembleSize,domain,airs)
+subroutine convertBackgroundToAIRS(background,ensembleSize,domain,airs,domainID)
 
 use derivedType
 use basicUtility
@@ -14,6 +14,7 @@ integer,intent(in)              :: ensembleSize
 type(backgroundInfo),intent(in) :: background(ensembleSize)
 type(domainInfo),intent(in)     :: domain(ensembleSize)
 type(obsParent),intent(inout)   :: airs
+integer,intent(in)              :: domainID
 
 integer obsVarIndexRankOne , obsVarIndexRankTwo
 integer obsZIndexRankOne   , obsZIndexRankTwo
@@ -28,13 +29,13 @@ integer io,iens,iz  ! loop counter
 #ifndef PGI
 !$omp parallel do default(none) &
 !$omp private(io,iens,iz,obsVarIndexRankOne,obsVarIndexRankTwo,obsZIndexRankOne,obsZIndexRankTwo,obsVarBuffer,obsZBuffer) &
-!$omp shared(airs,domain,background,ensembleSize) &
+!$omp shared(airs,domain,background,ensembleSize,domainID) &
 !$omp schedule(dynamic,100)
 #endif
 do io = 1 , airs%obsNum
 
 
-    if ( airs%obs(io)%available ) then  ! SHALL AWARE OF PSFC
+    if ( airs%obs(io)%available .and. count(airs%obs(io)%insideHorizontalDomain(:)).eq.domainID ) then  ! SHALL AWARE OF PSFC
 
         allocate( airs%obs(io)%background(ensembleSize) )
         airs%obs(io)%background(:) = 0.d0

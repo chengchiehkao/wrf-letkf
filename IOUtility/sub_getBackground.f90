@@ -1,5 +1,5 @@
 
-subroutine getBackground(background,ensembleSize,domain)
+subroutine getBackground(background,ensembleSize,domain,domainID)
 
 use derivedType
 
@@ -9,9 +9,11 @@ include 'netcdf.inc'
 integer,intent(in)                 :: ensembleSize
 type(backgroundInfo),intent(inout) :: background(ensembleSize)
 type(domainInfo),intent(in)        :: domain(ensembleSize)
+integer,intent(in)                 :: domainID
 
 character(len=255) backgroundSrc
 character(len=2)  domainSeiralNumInString
+character(len=2)  domainIDInString
 
 integer ncStatus,ncID
 integer varID_mu , varID_t , varID_qvapor , varID_u , varID_v , varID_w , varID_ph , varID_znw , varID_u10 , varID_v10
@@ -21,7 +23,7 @@ real(kind=8),allocatable,dimension(:) :: temp_znw , temp_diffZNW
 integer iens , iz  ! loop counter
 !================================================
 
-write(*,'(a)',advance='no') 'Reading background:'
+write(*,'("D",i2.2,": ",a)',advance='no') domainID,'Reading background:'
 
 
 do iens = 1 , ensembleSize
@@ -29,14 +31,18 @@ do iens = 1 , ensembleSize
     write(domainSeiralNumInString,'(i2.2)') iens
     if ( iens.ne.ensembleSize ) write(*,'(1x,a2)',advance='no' ) domainSeiralNumInString
     if ( iens.eq.ensembleSize ) write(*,'(1x,a2)',advance='yes') domainSeiralNumInString
+
+    write(domainIDInString,'(i2.2)') domainID
     backgroundSrc = repeat(' ',len(backgroundSrc))
-    backgroundSrc = 'input/wrfinput_nc_'//domainSeiralNumInString;
+    backgroundSrc = 'input/background_d'//domainIDInString//'_'//domainSeiralNumInString;
 
     ncStatus = nf_open( backgroundSrc , nf_noWrite , ncID )
     if ( ncStatus .ne. nf_noErr ) then
         print*,nf_strError( ncStatus )
         stop
     endif
+
+    if ( iens.ne.ensembleSize ) write(*,'(",")',advance='no' )
 
     allocate( background(iens) % mu( domain(iens)%size_westToEast , domain(iens)%size_southToNorth ) )
     allocate( background(iens) % u10( domain(iens)%size_westToEast , domain(iens)%size_southToNorth ) )

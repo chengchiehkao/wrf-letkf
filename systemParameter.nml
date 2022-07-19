@@ -4,6 +4,7 @@ ensembleSize=36
 /
 
 &domain
+max_domain    = 1
 boundaryWidth = 5
 /
 

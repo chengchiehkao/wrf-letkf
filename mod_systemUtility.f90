@@ -80,21 +80,23 @@ interface
       type(domainInfo)            :: domain_mean
     end subroutine build_meanDomain
 
-    subroutine check_ifObsInsideHorizontalDomain(domain,obs)
+    subroutine check_ifObsInsideHorizontalDomain(domain,obs,domainID)
       use derivedType
       use basicUtility
       implicit none
       type(domainInfo),intent(in) :: domain
       type(obsParent),intent(inout) :: obs
+      integer,intent(in) :: domainID
     end subroutine check_ifObsInsideHorizontalDomain
 
-    subroutine check_ifObsInsideVerticalDomain(domain,domainSize,obs)
+    subroutine check_ifObsInsideVerticalDomain(domain,domainSize,obs,domainID)
       use derivedType
       use basicUtility
       implicit none
       integer,intent(in) :: domainSize
       type(domainInfo),intent(in) :: domain(domainSize)
       type(obsParent),intent(inout) :: obs
+      integer,intent(in) :: domainID
     end subroutine check_ifObsInsideVerticalDomain
 
     subroutine turnObsWithInvalidValueIntoUnavailable(obs)
@@ -192,7 +194,7 @@ interface
       type(domainInfo),intent(in)     :: domain(ensembleSize)
     end subroutine convertBackgroundToRefractivity
 
-    subroutine convertBackgroundToSounding(background,ensembleSize,domain,sounding,systemParameters)
+    subroutine convertBackgroundToSounding(background,ensembleSize,domain,sounding,systemParameters,domainID)
       use derivedType
       use basicUtility
       implicit none
@@ -201,9 +203,10 @@ interface
       type(domainInfo),intent(in)     :: domain(ensembleSize)
       type(obsParent),intent(inout)   :: sounding
       type(systemParameter),intent(in) :: systemParameters
+      integer,intent(in)              :: domainID
     end subroutine convertBackgroundToSounding
 
-    subroutine convertBackgroundToAirep(background,ensembleSize,domain,airep,systemParameters)
+    subroutine convertBackgroundToAirep(background,ensembleSize,domain,airep,systemParameters,domainID)
       use derivedType
       use basicUtility
       implicit none
@@ -212,9 +215,10 @@ interface
       type(domainInfo),intent(in)     :: domain(ensembleSize)
       type(obsParent),intent(inout)   :: airep
       type(systemParameter),intent(in) :: systemParameters
+      integer,intent(in)              :: domainID
     end subroutine convertBackgroundToAirep
 
-    subroutine convertBackgroundToAMV(background,ensembleSize,domain,amv,systemParameters)
+    subroutine convertBackgroundToAMV(background,ensembleSize,domain,amv,systemParameters,domainID)
       use derivedType
       use basicUtility
       implicit none
@@ -223,9 +227,10 @@ interface
       type(domainInfo),intent(in)     :: domain(ensembleSize)
       type(obsParent),intent(inout)   :: amv
       type(systemParameter),intent(in) :: systemParameters
+      integer,intent(in)              :: domainID
     end subroutine convertBackgroundToAMV
 
-    subroutine convertBackgroundToGPSRO(background,ensembleSize,domain,gpsro)
+    subroutine convertBackgroundToGPSRO(background,ensembleSize,domain,gpsro,domainID)
       use derivedType
       use basicUtility
       implicit none
@@ -233,9 +238,10 @@ interface
       type(backgroundInfo),intent(in) :: background(ensembleSize)
       type(domainInfo),intent(in)     :: domain(ensembleSize)
       type(obsParent),intent(inout)   :: gpsro
+      integer,intent(in)              :: domainID
     end subroutine convertBackgroundToGPSRO
 
-    subroutine convertBackgroundToAIRS(background,ensembleSize,domain,airs)
+    subroutine convertBackgroundToAIRS(background,ensembleSize,domain,airs,domainID)
       use derivedType
       use basicUtility
       implicit none
@@ -243,9 +249,10 @@ interface
       type(backgroundInfo),intent(in) :: background(ensembleSize)
       type(domainInfo),intent(in)     :: domain(ensembleSize)
       type(obsParent),intent(inout)   :: airs
+      integer,intent(in)              :: domainID
     end subroutine convertBackgroundToAIRS
 
-    subroutine convertBackgroundToQuikSCAT(background,ensembleSize,domain,domain_mean,quikscat,systemParameters)
+    subroutine convertBackgroundToQuikSCAT(background,ensembleSize,domain,domain_mean,quikscat,systemParameters,domainID)
       use derivedType
       use basicUtility
       implicit none
@@ -255,9 +262,10 @@ interface
       type(domainInfo),intent(in)     :: domain_mean
       type(obsParent),intent(inout)   :: quikscat
       type(systemParameter),intent(in) :: systemParameters
+      integer,intent(in)              :: domainID
     end subroutine convertBackgroundToQuikSCAT
 
-    subroutine convertBackgroundToASCAT(background,ensembleSize,domain,domain_mean,ascat,systemParameters)
+    subroutine convertBackgroundToASCAT(background,ensembleSize,domain,domain_mean,ascat,systemParameters,domainID)
       use derivedType
       use basicUtility
       implicit none
@@ -267,9 +275,10 @@ interface
       type(domainInfo),intent(in)     :: domain_mean
       type(obsParent),intent(inout)   :: ascat
       type(systemParameter),intent(in) :: systemParameters
+      integer,intent(in)              :: domainID
     end subroutine convertBackgroundToASCAT
 
-    subroutine convertBackgroundToIASI(background,ensembleSize,domain,iasi)
+    subroutine convertBackgroundToIASI(background,ensembleSize,domain,iasi,domainID)
       use derivedType
       use basicUtility
       implicit none
@@ -277,9 +286,10 @@ interface
       type(backgroundInfo),intent(in) :: background(ensembleSize)
       type(domainInfo),intent(in)     :: domain(ensembleSize)
       type(obsParent),intent(inout)   :: iasi
+      integer,intent(in)              :: domainID
     end subroutine convertBackgroundToIASI
 
-    subroutine convertBackgroundToOSCAT(background,ensembleSize,domain,domain_mean,oscat,systemParameters)
+    subroutine convertBackgroundToOSCAT(background,ensembleSize,domain,domain_mean,oscat,systemParameters,domainID)
       use derivedType
       use basicUtility
       implicit none
@@ -289,9 +299,10 @@ interface
       type(domainInfo),intent(in)     :: domain_mean
       type(obsParent),intent(inout)   :: oscat
       type(systemParameter),intent(in) :: systemParameters
+      integer,intent(in)              :: domainID
     end subroutine convertBackgroundToOSCAT
 
-    subroutine convertBackgroundToWindSat(background,ensembleSize,domain,domain_mean,windsat,systemParameters)
+    subroutine convertBackgroundToWindSat(background,ensembleSize,domain,domain_mean,windsat,systemParameters,domainID)
       use derivedType
       use basicUtility
       implicit none
@@ -301,9 +312,10 @@ interface
       type(domainInfo),intent(in)     :: domain_mean
       type(obsParent),intent(inout)   :: windsat
       type(systemParameter),intent(in) :: systemParameters
+      integer,intent(in)              :: domainID
     end subroutine convertBackgroundToWindSat
 
-    subroutine convertBackgroundToCYGNSS(background,ensembleSize,domain,domain_mean,cygnss)
+    subroutine convertBackgroundToCYGNSS(background,ensembleSize,domain,domain_mean,cygnss,domainID)
       use derivedType
       use basicUtility
       implicit none
@@ -312,6 +324,7 @@ interface
       type(domainInfo),intent(in)     :: domain(ensembleSize)
       type(domainInfo),intent(in)     :: domain_mean
       type(obsParent),intent(inout)   :: cygnss
+      integer,intent(in)              :: domainID
     end subroutine convertBackgroundToCYGNSS
 
     subroutine setSoundingError(sounding)
@@ -342,12 +355,13 @@ interface
       type(obsParent),intent(inout)   :: gpsro
     end subroutine setGPSROError
 
-    subroutine mapGPSROFromGMHToP(domain_mean,gpsro)
+    subroutine mapGPSROFromGMHToP(domain_mean,gpsro,domainID)
       use derivedType
       use basicUtility
       implicit none
       type(domainInfo),intent(in)     :: domain_mean
       type(obsParent),intent(inout)   :: gpsro
+      integer,intent(in) :: domainID
     end subroutine mapGPSROFromGMHToP
 
     subroutine setAIRSError(airs)

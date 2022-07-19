@@ -21,11 +21,11 @@ integer :: varListSize_sound , varListSize_airep , varListSize_synop , varListSi
 real(kind=8) :: rd   , rc    ! Decorrelated & highly correlated distance on horizontal space.
 real(kind=8) :: rd_z , rc_z  ! Decorrelated & highly correlated distance on vertical space.
 real(kind=8) :: inflationFactor
-integer :: boundaryWidth
+integer :: max_domain , boundaryWidth
 logical :: rotateUAndVOfObsBasedOnWRFMapProjection
 
 namelist /sizeOfEnsemble/ ensembleSize
-namelist /domain/ boundaryWidth
+namelist /domain/ max_domain , boundaryWidth
 namelist /use_observation/ use_sound,use_airep,use_synop,use_amv,use_gpsro,use_airs,use_quikscat,use_ascat,use_iasi,use_oscat,use_windsat,use_cygnss
 namelist /varList_observation/ varList_sound,varList_airep,varList_synop,varList_amv,varList_gpsro,varList_airs,varList_quikscat,varList_ascat,varList_iasi,varList_oscat,varList_windsat,varList_cygnss
 namelist /use_varList_observation/ use_varList_sound,use_varList_airep,use_varList_synop,use_varList_amv,use_varList_gpsro,use_varList_airs,use_varList_quikscat,use_varList_ascat,use_varList_iasi,use_varList_oscat,use_varList_windsat,use_varList_cygnss
@@ -39,6 +39,7 @@ integer,external :: availableFileID
 !================================================
 
 ! Set default value
+max_domain    = 1
 boundaryWidth = 5
 use_sound    = .false.
 use_airep    = .false.
@@ -95,6 +96,11 @@ close(fileID)
 
 if ( ensembleSize .lt. 2 ) then
     print*,'Ensemble size shall >= 2, program stopped.'
+    stop
+endif
+
+if ( max_domain .lt. 1 ) then
+    print*,'max_domain shall >= 1, program stopped.'
     stop
 endif
 
@@ -231,6 +237,7 @@ if ( use_cygnss   )  systemParameters % varList_cygnss(:)    = repeat(' ',len(va
 
 
 systemParameters % ensembleSize = ensembleSize
+systemParameters % max_domain    = max_domain
 systemParameters % boundaryWidth = boundaryWidth
 systemParameters % use_sound    = use_sound
 systemParameters % use_airep    = use_airep

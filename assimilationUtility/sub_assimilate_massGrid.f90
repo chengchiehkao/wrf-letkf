@@ -2,7 +2,7 @@
 
 !include 'sub_LETKF.f90'
 
-subroutine assimilate_massGrid(background,analysis,ensembleSize,domain_mean,obs,obsListOfEachGrid,systemParameters)
+subroutine assimilate_massGrid(background,analysis,ensembleSize,domain_mean,obs,obsListOfEachGrid,systemParameters,domainID)
 
 use derivedType
 use basicUtility
@@ -18,6 +18,7 @@ type(domainInfo),intent(in)      :: domain_mean
 type(obsParent) :: obs
 type(integerVector),pointer :: obsListOfEachGrid(:,:,:)
 type(systemParameter),intent(in) :: systemParameters
+integer,intent(in) :: domainID
 
 
 real(kind=8),allocatable,dimension(:,:) :: xb_mean,xa_mean
@@ -28,20 +29,26 @@ real(kind=8),allocatable,dimension(:)   :: R
 
 integer obsNumForAssimilation
 real(kind=8) :: dh,dz
-integer,parameter :: relaxationZone = 5
+integer :: systemParameters_boundaryWidth
 
 integer iens,iwe,isn,iz,io,iList  ! loop counter
 real ct0,ct1
 real(kind=8) wt0,wt1
 !================================================
 
+if ( domainID .eq. 1) then
+    systemParameters_boundaryWidth = systemParameters%boundaryWidth
+else
+    systemParameters_boundaryWidth = 0
+endif
+
 
 do iz  = 1,domain_mean%size_bottomToTop
 wt0 = omp_get_wtime()
-do isn = 1+systemParameters%boundaryWidth,domain_mean%size_southToNorth-systemParameters%boundaryWidth
-!$omp parallel do default(private) shared(iz,isn,domain_mean,obsListOfEachGrid,ensembleSize,analysis,background,obs,systemParameters) &
+do isn = 1+systemParameters_boundaryWidth,domain_mean%size_southToNorth-systemParameters_boundaryWidth
+!$omp parallel do default(private) shared(iz,isn,domain_mean,obsListOfEachGrid,ensembleSize,analysis,background,obs,systemParameters,systemParameters_boundaryWidth) &
 !$omp schedule(dynamic,1)
-do iwe = 1+systemParameters%boundaryWidth,domain_mean%size_westToEast-systemParameters%boundaryWidth
+do iwe = 1+systemParameters_boundaryWidth,domain_mean%size_westToEast-systemParameters_boundaryWidth
 
     if ( obsListOfEachGrid(iwe,isn,iz)%vectorSize .eq. 0 ) then  ! no observation means won't update.
         forall(iens=1:ensembleSize) analysis(iens)%t(iwe,isn,iz)      = background(iens)%t(iwe,isn,iz) -300.d0 ! re-substract the offset for wrf

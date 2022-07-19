@@ -3,6 +3,7 @@
 FC = pgf90
 preprocess_flag = -DPGI -Mfreeform -Mpreprocess -E
 optimization_flag = -fast -Mrecursive -Mreentrant
+#optimization_flag = -g -Mchkstk -Mchkfpstk -C -Mdwarf2 -Mpgicoff
 debug_flag = -g -Mchkstk -Mchkfpstk -C -Mdwarf2 -Mpgicoff
 openmp_flag = -mp
 netcdf_path = /opt/pgi-libs/

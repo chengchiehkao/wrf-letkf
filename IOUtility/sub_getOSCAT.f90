@@ -2,22 +2,20 @@
 !  include 'mod_derivedType.f90'
 !  include 'func_availableFileID.f90'
 
-subroutine getOSCAT(oscat,varList,varListSize,use_varList)
+subroutine getOSCAT(oscat,systemParameters)
 
 use derivedType
 
 implicit none
 type(obsParent),intent(out) :: oscat
-integer,intent(in)                                   :: varListSize
-character(len=10),dimension(varListSize),intent(in)  :: varList
-logical,dimension(varListSize),intent(in)            :: use_varList
+type(systemParameter),intent(in) :: systemParameters
 
 real(kind=8) lon,lat
 integer levNum,serialNum
 real :: dummyArg1,dummyArg2
 
 integer ioStatus,fileID
-integer i,iObsVar  ! loop counter
+integer i,io,iObsVar  ! loop counter
 
 integer,external :: availableFileID
 !================================================
@@ -34,7 +32,7 @@ do
     if ( ioStatus .lt. 0 ) then
         exit
     endif
-    oscat%obsNum = oscat%obsNum + varListSize*levNum
+    oscat%obsNum = oscat%obsNum + systemParameters%varListSize_oscat*levNum
     do i = 1,levNum
         read(fileID,*)  ! just read through lines which are not headers.
     enddo
@@ -53,6 +51,10 @@ oscat%obs(:)%instrument = 'OSCAT'
 oscat%obs(:)%zName      = 'P'
 oscat%obs(:)%varName    = ''
 oscat%obs(:)%available  = .true.
+do io = 1 , oscat%obsNum
+    allocate( oscat%obs(io)%insideHorizontalDomain(systemParameters%max_domain) )
+    oscat%obs(io)%insideHorizontalDomain(:) = .false.
+enddo
 
 rewind(fileID)
 
@@ -63,22 +65,22 @@ do
     if ( ioStatus .lt. 0 ) exit
     do i = 1,levNum
         serialNum = serialNum + 1
-        read(fileID,*) oscat%obs(serialNum)%z,oscat%obs(serialNum:serialNum+varListSize-1)%value
+        read(fileID,*) oscat%obs(serialNum)%z,oscat%obs(serialNum:serialNum+systemParameters%varListSize_oscat-1)%value
 
-        oscat%obs(serialNum:serialNum+varListSize-1)%lon = lon
-        oscat%obs(serialNum:serialNum+varListSize-1)%lat = lat
-        oscat%obs(serialNum:serialNum+varListSize-1)%z   = oscat%obs(serialNum)%z
-        oscat%obs(serialNum:serialNum+varListSize-1)%varName = varList(1:varListSize)
-        serialNum = serialNum + (varListSize-1)
+        oscat%obs(serialNum:serialNum+systemParameters%varListSize_oscat-1)%lon = lon
+        oscat%obs(serialNum:serialNum+systemParameters%varListSize_oscat-1)%lat = lat
+        oscat%obs(serialNum:serialNum+systemParameters%varListSize_oscat-1)%z   = oscat%obs(serialNum)%z
+        oscat%obs(serialNum:serialNum+systemParameters%varListSize_oscat-1)%varName = systemParameters%varList_oscat(1:systemParameters%varListSize_oscat)
+        serialNum = serialNum + (systemParameters%varListSize_oscat-1)
     enddo
 enddo
 
 
 oscat%obs(:)%z = 100.d0 * oscat%obs(:)%z  !  convert hPa to Pa
 
-do iObsVar = 1 , varListSize
-    where ( adjustl(oscat%obs(:)%varName) .eq. adjustl(varList(iObsVar)) )
-        oscat%obs%available = use_varList(iObsVar)
+do iObsVar = 1 , systemParameters%varListSize_oscat
+    where ( adjustl(oscat%obs(:)%varName) .eq. adjustl(systemParameters%varList_oscat(iObsVar)) )
+        oscat%obs%available = systemParameters%use_varList_oscat(iObsVar)
     end where
 enddo
 

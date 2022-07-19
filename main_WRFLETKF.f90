@@ -8,12 +8,12 @@ use omp_lib  ! OpenMP's library
 implicit none
 
 type(systemParameter)            :: systemParameters
-type(domainInfo),allocatable     :: domain(:)
-type(domainInfo)                 :: domain_mean
+type(domainInfo),allocatable     :: domain(:,:)
+type(domainInfo),allocatable     :: domain_mean(:)
 type(obsParent)                  :: sounding,airep,synop,amv,gpsro,airs,quikscat,ascat,iasi,oscat,windsat,cygnss
 type(obsParent)                  :: allObs
-type(backgroundInfo),allocatable :: background(:)
-type(backgroundInfo),allocatable :: analysis(:)
+type(backgroundInfo),allocatable :: background(:,:)
+type(backgroundInfo),allocatable :: analysis(:,:)
 integer                          :: ensembleSize
 
 type(integerVector),pointer,dimension(:,:,:) :: obsListOfEachMassGrid => null()
@@ -21,7 +21,7 @@ type(integerVector),pointer,dimension(:,:,:) :: obsListOfEachUGrid    => null()
 type(integerVector),pointer,dimension(:,:,:) :: obsListOfEachVGrid    => null()
 type(integerVector),pointer,dimension(:,:,:) :: obsListOfEachWGrid    => null()
 
-integer io,iwe,isn,iz
+integer io,iwe,isn,iz,domainID
 
 real         ct0,ct1
 real(kind=8) wt0,wt1,walltime_assimilation
@@ -35,16 +35,19 @@ print*,repeat('=',20)
 
 ensembleSize = systemParameters % ensembleSize
 
-allocate( domain(ensembleSize) )
+allocate( domain(ensembleSize,systemParameters%max_domain) )
+allocate( domain_mean(systemParameters%max_domain) )
 
 print*,'Getting Domain...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call getDomain(domain(:),ensembleSize)
-call build_pressureU(domain(:),ensembleSize)
-call build_pressureV(domain(:),ensembleSize)
-call convertGPHToGMH(domain(:),ensembleSize)
-call build_meanDomain(domain(:),ensembleSize,domain_mean)
+do domainID = 1 , systemParameters%max_domain
+    call getDomain(domain(:,domainID),ensembleSize,domainID)
+    call build_pressureU(domain(:,domainID),ensembleSize)
+    call build_pressureV(domain(:,domainID),ensembleSize)
+    call convertGPHToGMH(domain(:,domainID),ensembleSize)
+    call build_meanDomain(domain(:,domainID),ensembleSize,domain_mean(domainID))
+enddo
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 print*,'Done.'
@@ -54,18 +57,18 @@ print*,'walltime(Get domain) =',wt1-wt0,'sec'
 
 print*,repeat('=',20)
 print*,'Getting Observations...'
-if ( systemParameters % use_sound    )  call getSounding(sounding , systemParameters%varList_sound(:) , systemParameters%varListSize_sound , systemParameters%use_varList_sound )
-if ( systemParameters % use_airep    )  call getAirep(airep, systemParameters%varList_airep(:) , systemParameters%varListSize_airep , systemParameters%use_varList_airep )
-if ( systemParameters % use_synop    )  call getSynop(synop, systemParameters%varList_synop(:) , systemParameters%varListSize_synop , systemParameters%use_varList_synop )
-if ( systemParameters % use_amv      )  call getAMV(amv, systemParameters%varList_amv(:) , systemParameters%varListSize_amv , systemParameters%use_varList_amv )
-if ( systemParameters % use_gpsro    )  call getGPSRO(gpsro, systemParameters%varList_gpsro(:) , systemParameters%varListSize_gpsro , systemParameters%use_varList_gpsro )
-if ( systemParameters % use_airs     )  call getAIRS(airs, systemParameters%varList_airs(:) , systemParameters%varListSize_airs , systemParameters%use_varList_airs )
-if ( systemParameters % use_quikscat )  call getQuikSCAT(quikscat, systemParameters%varList_quikscat(:) , systemParameters%varListSize_quikscat , systemParameters%use_varList_quikscat )
-if ( systemParameters % use_ascat    )  call getASCAT(ascat, systemParameters%varList_ascat(:) , systemParameters%varListSize_ascat , systemParameters%use_varList_ascat )
-if ( systemParameters % use_iasi     )  call getIASI(iasi, systemParameters%varList_iasi(:) , systemParameters%varListSize_iasi , systemParameters%use_varList_iasi )
-if ( systemParameters % use_oscat    )  call getOSCAT(oscat, systemParameters%varList_oscat(:) , systemParameters%varListSize_oscat , systemParameters%use_varList_oscat )
-if ( systemParameters % use_windsat  )  call getWindSat(windsat, systemParameters%varList_windsat(:) , systemParameters%varListSize_windsat , systemParameters%use_varList_windsat )
-if ( systemParameters % use_cygnss   )  call getCYGNSS(cygnss, systemParameters%varList_cygnss(:) , systemParameters%varListSize_cygnss , systemParameters%use_varList_cygnss )
+if ( systemParameters % use_sound    )  call getSounding(sounding , systemParameters)
+if ( systemParameters % use_airep    )  call getAirep(airep , systemParameters)
+if ( systemParameters % use_synop    )  call getSynop(synop , systemParameters)
+if ( systemParameters % use_amv      )  call getAMV(amv , systemParameters)
+if ( systemParameters % use_gpsro    )  call getGPSRO(gpsro , systemParameters)
+if ( systemParameters % use_airs     )  call getAIRS(airs , systemParameters)
+if ( systemParameters % use_quikscat )  call getQuikSCAT(quikscat , systemParameters)
+if ( systemParameters % use_ascat    )  call getASCAT(ascat , systemParameters)
+if ( systemParameters % use_iasi     )  call getIASI(iasi , systemParameters)
+if ( systemParameters % use_oscat    )  call getOSCAT(oscat , systemParameters)
+if ( systemParameters % use_windsat  )  call getWindSat(windsat , systemParameters)
+if ( systemParameters % use_cygnss   )  call getCYGNSS(cygnss , systemParameters)
 print*,'Done.'
 if ( systemParameters % use_sound    )  print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) set to be unavailable by default.'
 if ( systemParameters % use_airep    )  print*,'There are ',count(.not.airep%obs(:)%available),'/',airep%obsNum,'airep(s) set to be unavailable by default.'
@@ -86,18 +89,20 @@ call cpu_time(ct0)
 
 print*,repeat('=',20)
 print*,'Checking if observations inside horizontal domain...'
-if ( systemParameters % use_sound    )  call check_ifObsInsideHorizontalDomain(domain(1),sounding)
-if ( systemParameters % use_airep    )  call check_ifObsInsideHorizontalDomain(domain(1),airep)
-if ( systemParameters % use_synop    )  call check_ifObsInsideHorizontalDomain(domain(1),synop)
-if ( systemParameters % use_amv      )  call check_ifObsInsideHorizontalDomain(domain(1),amv)
-if ( systemParameters % use_gpsro    )  call check_ifObsInsideHorizontalDomain(domain(1),gpsro)
-if ( systemParameters % use_airs     )  call check_ifObsInsideHorizontalDomain(domain(1),airs)
-if ( systemParameters % use_quikscat )  call check_ifObsInsideHorizontalDomain(domain(1),quikscat)
-if ( systemParameters % use_ascat    )  call check_ifObsInsideHorizontalDomain(domain(1),ascat)
-if ( systemParameters % use_iasi     )  call check_ifObsInsideHorizontalDomain(domain(1),iasi)
-if ( systemParameters % use_oscat    )  call check_ifObsInsideHorizontalDomain(domain(1),oscat)
-if ( systemParameters % use_windsat  )  call check_ifObsInsideHorizontalDomain(domain(1),windsat)
-if ( systemParameters % use_cygnss   )  call check_ifObsInsideHorizontalDomain(domain(1),cygnss)
+do domainID = 1 , systemParameters%max_domain
+    if ( systemParameters % use_sound    )  call check_ifObsInsideHorizontalDomain(domain(1,domainID),sounding,domainID)
+    if ( systemParameters % use_airep    )  call check_ifObsInsideHorizontalDomain(domain(1,domainID),airep   ,domainID)
+    if ( systemParameters % use_synop    )  call check_ifObsInsideHorizontalDomain(domain(1,domainID),synop   ,domainID)
+    if ( systemParameters % use_amv      )  call check_ifObsInsideHorizontalDomain(domain(1,domainID),amv     ,domainID)
+    if ( systemParameters % use_gpsro    )  call check_ifObsInsideHorizontalDomain(domain(1,domainID),gpsro   ,domainID)
+    if ( systemParameters % use_airs     )  call check_ifObsInsideHorizontalDomain(domain(1,domainID),airs    ,domainID)
+    if ( systemParameters % use_quikscat )  call check_ifObsInsideHorizontalDomain(domain(1,domainID),quikscat,domainID)
+    if ( systemParameters % use_ascat    )  call check_ifObsInsideHorizontalDomain(domain(1,domainID),ascat   ,domainID)
+    if ( systemParameters % use_iasi     )  call check_ifObsInsideHorizontalDomain(domain(1,domainID),iasi    ,domainID)
+    if ( systemParameters % use_oscat    )  call check_ifObsInsideHorizontalDomain(domain(1,domainID),oscat   ,domainID)
+    if ( systemParameters % use_windsat  )  call check_ifObsInsideHorizontalDomain(domain(1,domainID),windsat ,domainID)
+    if ( systemParameters % use_cygnss   )  call check_ifObsInsideHorizontalDomain(domain(1,domainID),cygnss  ,domainID)
+enddo
 
 if ( systemParameters % use_sound    )  print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) unavailable.'
 if ( systemParameters % use_airep    )  print*,'There are ',count(.not.airep%obs(:)%available),'/',airep%obsNum,'airep(s) unavailable.'
@@ -142,17 +147,19 @@ if ( systemParameters % use_cygnss   )  print*,'There are ',count(.not.cygnss%ob
 
 print*,repeat('=',20)
 print*,'Checking if observations inside vertical domain...'
-if ( systemParameters % use_sound )  call check_ifObsInsideVerticalDomain(domain(:),ensembleSize,sounding)
-if ( systemParameters % use_airep )  call check_ifObsInsideVerticalDomain(domain(:),ensembleSize,airep)
-if ( systemParameters % use_amv )    call check_ifObsInsideVerticalDomain(domain(:),ensembleSize,amv)
-if ( systemParameters % use_gpsro )  call check_ifObsInsideVerticalDomain(domain(:),ensembleSize,gpsro)
-if ( systemParameters % use_airs )   call check_ifObsInsideVerticalDomain(domain(:),ensembleSize,airs)
-if ( systemParameters % use_iasi )   call check_ifObsInsideVerticalDomain(domain(:),ensembleSize,iasi)
-!  QuikSCAT does NOT have to do vertical check because it's always 10-m higher than surface.
-!  ASCAT    does NOT have to do vertical check because it's always 10-m higher than surface.
-!  OSCAT    does NOT have to do vertical check because it's always 10-m higher than surface.
-!  WindSat  does NOT have to do vertical check because it's always 10-m higher than surface.
-!  CYGNSS   does NOT have to do vertical check because it's always 10-m higher than surfcae.
+do domainID = 1 , systemParameters%max_domain
+    if ( systemParameters % use_sound )  call check_ifObsInsideVerticalDomain(domain(:,domainID),ensembleSize,sounding,domainID)
+    if ( systemParameters % use_airep )  call check_ifObsInsideVerticalDomain(domain(:,domainID),ensembleSize,airep   ,domainID)
+    if ( systemParameters % use_amv )    call check_ifObsInsideVerticalDomain(domain(:,domainID),ensembleSize,amv     ,domainID)
+    if ( systemParameters % use_gpsro )  call check_ifObsInsideVerticalDomain(domain(:,domainID),ensembleSize,gpsro   ,domainID)
+    if ( systemParameters % use_airs )   call check_ifObsInsideVerticalDomain(domain(:,domainID),ensembleSize,airs    ,domainID)
+    if ( systemParameters % use_iasi )   call check_ifObsInsideVerticalDomain(domain(:,domainID),ensembleSize,iasi    ,domainID)
+    !  QuikSCAT does NOT have to do vertical check because it's always 10-m higher than surface.
+    !  ASCAT    does NOT have to do vertical check because it's always 10-m higher than surface.
+    !  OSCAT    does NOT have to do vertical check because it's always 10-m higher than surface.
+    !  WindSat  does NOT have to do vertical check because it's always 10-m higher than surface.
+    !  CYGNSS   does NOT have to do vertical check because it's always 10-m higher than surfcae.
+enddo
 
 if ( systemParameters % use_sound    )  print*,'There are ',count(.not.sounding%obs(:)%available),'/',sounding%obsNum,'sounding(s) unavailable.'
 if ( systemParameters % use_airep    )  print*,'There are ',count(.not.airep%obs(:)%available),'/',airep%obsNum,'airep(s) unavailable.'
@@ -174,8 +181,10 @@ print*,'walltime (Check observations)=',wt1-wt0,'sec'
 
 print*,repeat('=',20)
 wt0 = omp_get_wtime()
-allocate( background(ensembleSize) )
-call getBackground(background(:),ensembleSize,domain(:))
+allocate( background(ensembleSize,systemParameters%max_domain) )
+do domainID = 1 , systemParameters%max_domain
+    call getBackground(background(:,domainID),ensembleSize,domain(:,domainID),domainID)
+enddo
 wt1 = omp_get_wtime()
 print*,'walltime(get background) =',wt1-wt0,'sec'
 
@@ -183,7 +192,9 @@ print*,repeat('=',20)
 print*,'Converting background to tempertature...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call convertBackgroundToTemperature(background(:),ensembleSize,domain(:))
+do domainID = 1 , systemParameters%max_domain
+    call convertBackgroundToTemperature(background(:,domainID),ensembleSize,domain(:,domainID))
+enddo
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 print*,'Done.'
@@ -194,7 +205,9 @@ print*,repeat('=',20)
 print*,'Converting background to relative humidity...'
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call convertBackgroundToRH(background(:),ensembleSize,domain(:))
+do domainID = 1 , systemParameters%max_domain
+     call convertBackgroundToRH(background(:,domainID),ensembleSize,domain(:,domainID))
+enddo
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 print*,'Done.'
@@ -207,7 +220,9 @@ if ( systemParameters % use_sound ) then
     print*,'Converting background to sounding...'
     wt0 = omp_get_wtime()
     call cpu_time(ct0)
-    call convertBackgroundToSounding(background(:),ensembleSize,domain(:),sounding,systemParameters)
+    do domainID = 1,systemParameters%max_domain
+        call convertBackgroundToSounding(background(:,domainID),ensembleSize,domain(:,domainID),sounding,systemParameters,domainID)
+    enddo
     call cpu_time(ct1)
     wt1 = omp_get_wtime()
     print*,'Done.'
@@ -234,7 +249,9 @@ if ( systemParameters % use_airep ) then
     print*,'Converting background to airep...'
     wt0 = omp_get_wtime()
     call cpu_time(ct0)
-    call convertBackgroundToAirep(background(:),ensembleSize,domain(:),airep,systemParameters)
+    do domainID = 1,systemParameters%max_domain
+        call convertBackgroundToAirep(background(:,domainID),ensembleSize,domain(:,domainID),airep,systemParameters,domainID)
+    enddo
     call cpu_time(ct1)
     wt1 = omp_get_wtime()
     print*,'Done.'
@@ -261,7 +278,9 @@ if ( systemParameters % use_amv ) then
     print*,'Converting background to AMV...'
     wt0 = omp_get_wtime()
     call cpu_time(ct0)
-    call convertBackgroundToAMV(background(:),ensembleSize,domain(:),amv,systemParameters)
+    do domainID = 1,systemParameters%max_domain
+        call convertBackgroundToAMV(background(:,domainID),ensembleSize,domain(:,domainID),amv,systemParameters,domainID)
+    enddo
     call cpu_time(ct1)
     wt1 = omp_get_wtime()
     print*,'Done.'
@@ -288,8 +307,10 @@ if ( systemParameters % use_gpsro ) then
     print*,'Converting background to GPSRO...'
     wt0 = omp_get_wtime()
     call cpu_time(ct0)
-    call convertBackgroundToRefractivity(background(:),ensembleSize,domain(:))
-    call convertBackgroundToGPSRO(background(:),ensembleSize,domain(:),gpsro)
+    do domainID = 1,systemParameters%max_domain
+        call convertBackgroundToRefractivity(background(:,domainID),ensembleSize,domain(:,domainID))
+        call convertBackgroundToGPSRO(background(:,domainID),ensembleSize,domain(:,domainID),gpsro,domainID)
+    enddo
     call cpu_time(ct1)
     wt1 = omp_get_wtime()
     print*,'Done.'
@@ -313,7 +334,9 @@ if ( systemParameters % use_gpsro ) then
     print*,'Mapping GPSRO from GMH to P...'
     wt0 = omp_get_wtime()
     call cpu_time(ct0)
-    call mapGPSROFromGMHToP(domain_mean,gpsro)
+    do domainID = 1,systemParameters%max_domain
+        call mapGPSROFromGMHToP(domain_mean(domainID),gpsro,domainID)
+    enddo
     call cpu_time(ct1)
     wt1 = omp_get_wtime()
     print*,'Done.'
@@ -328,7 +351,9 @@ if ( systemParameters % use_airs ) then
     print*,'Converting background to AIRS...'
     wt0 = omp_get_wtime()
     call cpu_time(ct0)
-    call convertBackgroundToAIRS(background(:),ensembleSize,domain(:),airs)
+    do domainID = 1,systemParameters%max_domain
+        call convertBackgroundToAIRS(background(:,domainID),ensembleSize,domain(:,domainID),airs,domainID)
+    enddo
     call cpu_time(ct1)
     wt1 = omp_get_wtime()
     print*,'Done.'
@@ -355,7 +380,9 @@ if ( systemParameters % use_quikscat ) then
     print*,'Converting background to QuikSCAT...'
     wt0 = omp_get_wtime()
     call cpu_time(ct0)
-    call convertBackgroundToQuikSCAT(background(:),ensembleSize,domain(:),domain_mean,quikscat,systemParameters)
+    do domainID = 1,systemParameters%max_domain
+        call convertBackgroundToQuikSCAT(background(:,domainID),ensembleSize,domain(:,domainID),domain_mean(domainID),quikscat,systemParameters,domainID)
+    enddo
     call cpu_time(ct1)
     wt1 = omp_get_wtime()
     print*,'Done.'
@@ -382,7 +409,9 @@ if ( systemParameters % use_ascat ) then
     print*,'Converting background to ASCAT...'
     wt0 = omp_get_wtime()
     call cpu_time(ct0)
-    call convertBackgroundToASCAT(background(:),ensembleSize,domain(:),domain_mean,ascat,systemParameters)
+    do domainID = 1,systemParameters%max_domain
+        call convertBackgroundToASCAT(background(:,domainID),ensembleSize,domain(:,domainID),domain_mean(domainID),ascat,systemParameters,domainID)
+    enddo
     call cpu_time(ct1)
     wt1 = omp_get_wtime()
     print*,'Done.'
@@ -409,7 +438,9 @@ if ( systemParameters % use_iasi ) then
     print*,'Converting background to IASI...'
     wt0 = omp_get_wtime()
     call cpu_time(ct0)
-    call convertBackgroundToIASI(background(:),ensembleSize,domain(:),iasi)
+    do domainID = 1,systemParameters%max_domain
+        call convertBackgroundToIASI(background(:,domainID),ensembleSize,domain(:,domainID),iasi,domainID)
+    enddo
     call cpu_time(ct1)
     wt1 = omp_get_wtime()
     print*,'Done.'
@@ -436,7 +467,9 @@ if ( systemParameters % use_oscat ) then
     print*,'Converting background to OSCAT...'
     wt0 = omp_get_wtime()
     call cpu_time(ct0)
-    call convertBackgroundToOSCAT(background(:),ensembleSize,domain(:),domain_mean,oscat,systemParameters)
+    do domainID = 1,systemParameters%max_domain
+        call convertBackgroundToOSCAT(background(:,domainID),ensembleSize,domain(:,domainID),domain_mean(domainID),oscat,systemParameters,domainID)
+    enddo
     call cpu_time(ct1)
     wt1 = omp_get_wtime()
     print*,'Done.'
@@ -463,7 +496,9 @@ if ( systemParameters % use_windsat ) then
     print*,'Converting background to WindSat...'
     wt0 = omp_get_wtime()
     call cpu_time(ct0)
-    call convertBackgroundToWindSat(background(:),ensembleSize,domain(:),domain_mean,windsat,systemParameters)
+    do domainID = 1,systemParameters%max_domain
+        call convertBackgroundToWindSat(background(:,domainID),ensembleSize,domain(:,domainID),domain_mean(domainID),windsat,systemParameters,domainID)
+    enddo
     call cpu_time(ct1)
     wt1 = omp_get_wtime()
     print*,'Done.'
@@ -490,7 +525,9 @@ if ( systemParameters % use_cygnss ) then
     print*,'Converting background to CYGNSS...'
     wt0 = omp_get_wtime()
     call cpu_time(ct0)
-    call convertBackgroundToCYGNSS(background(:),ensembleSize,domain(:),domain_mean,cygnss)
+    do domainID = 1,systemParameters%max_domain
+        call convertBackgroundToCYGNSS(background(:,domainID),ensembleSize,domain(:,domainID),domain_mean(domainID),cygnss,domainID)
+    enddo
     call cpu_time(ct1)
     wt1 = omp_get_wtime()
     print*,'Done.'
@@ -547,8 +584,10 @@ print*,'walltime(rearrange observation) =',wt1-wt0,'sec'
 print*,repeat('=',20)
 print*,'Initilizing the analysis...'
 wt0 = omp_get_wtime()
-allocate( analysis(ensembleSize) )
-call initializeAnalysis(background,analysis,ensembleSize,domain)
+allocate( analysis(ensembleSize,systemParameters%max_domain) )
+do domainID = 1,systemParameters%max_domain 
+    call initializeAnalysis(background(:,domainID),analysis(:,domainID),ensembleSize,domain(:,domainID))
+enddo
 wt1 = omp_get_wtime()
 print*,'Done.'
 print*,'walltime(initialize analysis) =',wt1-wt0,'sec'
@@ -557,129 +596,146 @@ print*,'walltime(initialize analysis) =',wt1-wt0,'sec'
 !
 !  Assimilation on mass grid.
 !
+
 print*,repeat('=',20)
-print*,'Mapping observations to each mass grid...'
-wt0 = omp_get_wtime()
-call cpu_time(ct0)
-call mapObsToEachMassGrid(obsListOfEachMassGrid,allObs,domain_mean,systemParameters)
-call cpu_time(ct1)
-wt1 = omp_get_wtime()
-print*,'Done.'
-print*,'cpu time (mapObsToEachMassGrid)=',ct1-ct0,'sec'
-print*,'walltime (mapObsToEachMassGrid)=',wt1-wt0,'sec'
-print*,'There are',count(obsListOfEachMassGrid(:,:,:)%vectorSize>0),'grids may need to be updated.'
-print*,'Max obs per grid=',maxval(obsListOfEachMassGrid(:,:,:)%vectorSize)
-print*,'Total obs for all grids=',sum(obsListOfEachMassGrid(:,:,:)%vectorSize)
+do domainID = 1,systemParameters%max_domain
+    write(*,'("D",i2.2,": ")',advance='no' ) domainID
+    print*,'Mapping observations to each mass grid...'
+    wt0 = omp_get_wtime()
+    call cpu_time(ct0)
+    call mapObsToEachMassGrid(obsListOfEachMassGrid,allObs,domain_mean(domainID),systemParameters)
+    call cpu_time(ct1)
+    wt1 = omp_get_wtime()
+    print*,'Done.'
+    print*,'cpu time (mapObsToEachMassGrid)=',ct1-ct0,'sec'
+    print*,'walltime (mapObsToEachMassGrid)=',wt1-wt0,'sec'
+    print*,'There are',count(obsListOfEachMassGrid(:,:,:)%vectorSize>0),'grids may need to be updated.'
+    print*,'Max obs per grid=',maxval(obsListOfEachMassGrid(:,:,:)%vectorSize)
+    print*,'Total obs for all grids=',sum(obsListOfEachMassGrid(:,:,:)%vectorSize)
 
 
-print*,'Starting assimilation...'
-wt0 = omp_get_wtime()
-call cpu_time(ct0)
-call assimilate_massGrid(background(:),analysis(:),ensembleSize,domain_mean,allObs,obsListOfEachMassGrid,systemParameters)
-call cpu_time(ct1)
-wt1 = omp_get_wtime()
-walltime_assimilation = walltime_assimilation + (wt1-wt0)
-print*,'Done.'
-print*,'cpu time(assimilation on mass grid) =',ct1-ct0,'sec'
-print*,'walltime(assimilation on mass grid) =',wt1-wt0,'sec'
+    write(*,'("D",i2.2,": ")',advance='no' ) domainID
+    print*,'Starting assimilation...'
+    wt0 = omp_get_wtime()
+    call cpu_time(ct0)
+    call assimilate_massGrid(background(:,domainID),analysis(:,domainID),ensembleSize,domain_mean(domainID),allObs,obsListOfEachMassGrid,systemParameters,domainID)
+    call cpu_time(ct1)
+    wt1 = omp_get_wtime()
+    walltime_assimilation = walltime_assimilation + (wt1-wt0)
+    print*,'Done.'
+    print*,'cpu time(assimilation on mass grid) =',ct1-ct0,'sec'
+    print*,'walltime(assimilation on mass grid) =',wt1-wt0,'sec'
 
-call deallocate_obsListOfEachGrid(obsListOfEachMassGrid)
+    call deallocate_obsListOfEachGrid(obsListOfEachMassGrid)
+enddo
 
 
 !
 !  Assimilation on u grid.
 !
 print*,repeat('=',20)
-print*,'Mapping observations to each u grid...'
-wt0 = omp_get_wtime()
-call cpu_time(ct0)
-call mapObsToEachUGrid(obsListOfEachUGrid,allObs,domain_mean,systemParameters)
-call cpu_time(ct1)
-wt1 = omp_get_wtime()
-print*,'Done.'
-print*,'cpu time (mapObsToEachUGrid)=',ct1-ct0,'sec'
-print*,'walltime (mapObsToEachUGrid)=',wt1-wt0,'sec'
-print*,'There are',count(obsListOfEachUGrid(:,:,:)%vectorSize>0),'grids may need to be updated.'
-print*,'Max obs per grid=',maxval(obsListOfEachUGrid(:,:,:)%vectorSize)
-print*,'Total obs for all grids=',sum(obsListOfEachUGrid(:,:,:)%vectorSize)
+do domainID = 1,systemParameters%max_domain
+    write(*,'("D",i2.2,": ")',advance='no' ) domainID
+    print*,'Mapping observations to each u grid...'
+    wt0 = omp_get_wtime()
+    call cpu_time(ct0)
+    call mapObsToEachUGrid(obsListOfEachUGrid,allObs,domain_mean(domainID),systemParameters)
+    call cpu_time(ct1)
+    wt1 = omp_get_wtime()
+    print*,'Done.'
+    print*,'cpu time (mapObsToEachUGrid)=',ct1-ct0,'sec'
+    print*,'walltime (mapObsToEachUGrid)=',wt1-wt0,'sec'
+    print*,'There are',count(obsListOfEachUGrid(:,:,:)%vectorSize>0),'grids may need to be updated.'
+    print*,'Max obs per grid=',maxval(obsListOfEachUGrid(:,:,:)%vectorSize)
+    print*,'Total obs for all grids=',sum(obsListOfEachUGrid(:,:,:)%vectorSize)
 
 
-print*,'Starting assimilation...'
-wt0 = omp_get_wtime()
-call cpu_time(ct0)
-call assimilate_uGrid(background(:),analysis(:),ensembleSize,domain_mean,allObs,obsListOfEachUGrid,systemParameters)
-call cpu_time(ct1)
-wt1 = omp_get_wtime()
-walltime_assimilation = walltime_assimilation + (wt1-wt0)
-print*,'Done.'
-print*,'cpu time(assimilation on u grid) =',ct1-ct0,'sec'
-print*,'walltime(assimilation on u grid) =',wt1-wt0,'sec'
+    write(*,'("D",i2.2,": ")',advance='no' ) domainID
+    print*,'Starting assimilation...'
+    wt0 = omp_get_wtime()
+    call cpu_time(ct0)
+    call assimilate_uGrid(background(:,domainID),analysis(:,domainID),ensembleSize,domain_mean(domainID),allObs,obsListOfEachUGrid,systemParameters,domainID)
+    call cpu_time(ct1)
+    wt1 = omp_get_wtime()
+    walltime_assimilation = walltime_assimilation + (wt1-wt0)
+    print*,'Done.'
+    print*,'cpu time(assimilation on u grid) =',ct1-ct0,'sec'
+    print*,'walltime(assimilation on u grid) =',wt1-wt0,'sec'
 
-call deallocate_obsListOfEachGrid(obsListOfEachUGrid)
+    call deallocate_obsListOfEachGrid(obsListOfEachUGrid)
+enddo
 
 
 !
 !  Assimilation on v grid.
 !
 print*,repeat('=',20)
-print*,'Mapping observations to each v grid...'
-wt0 = omp_get_wtime()
-call cpu_time(ct0)
-call mapObsToEachVGrid(obsListOfEachVGrid,allObs,domain_mean,systemParameters)
-call cpu_time(ct1)
-wt1 = omp_get_wtime()
-print*,'Done.'
-print*,'cpu time (mapObsToEachVGrid)=',ct1-ct0,'sec'
-print*,'walltime (mapObsToEachVGrid)=',wt1-wt0,'sec'
-print*,'There are',count(obsListOfEachVGrid(:,:,:)%vectorSize>0),'grids may need to be updated.'
-print*,'Max obs per grid=',maxval(obsListOfEachVGrid(:,:,:)%vectorSize)
-print*,'Total obs for all grids=',sum(obsListOfEachVGrid(:,:,:)%vectorSize)
+do domainID = 1,systemParameters%max_domain
+    write(*,'("D",i2.2,": ")',advance='no' ) domainID
+    print*,'Mapping observations to each v grid...'
+    wt0 = omp_get_wtime()
+    call cpu_time(ct0)
+    call mapObsToEachVGrid(obsListOfEachVGrid,allObs,domain_mean(domainID),systemParameters)
+    call cpu_time(ct1)
+    wt1 = omp_get_wtime()
+    print*,'Done.'
+    print*,'cpu time (mapObsToEachVGrid)=',ct1-ct0,'sec'
+    print*,'walltime (mapObsToEachVGrid)=',wt1-wt0,'sec'
+    print*,'There are',count(obsListOfEachVGrid(:,:,:)%vectorSize>0),'grids may need to be updated.'
+    print*,'Max obs per grid=',maxval(obsListOfEachVGrid(:,:,:)%vectorSize)
+    print*,'Total obs for all grids=',sum(obsListOfEachVGrid(:,:,:)%vectorSize)
 
 
-print*,'Starting assimilation...'
-wt0 = omp_get_wtime()
-call cpu_time(ct0)
-call assimilate_vGrid(background(:),analysis(:),ensembleSize,domain_mean,allObs,obsListOfEachVGrid,systemParameters)
-call cpu_time(ct1)
-wt1 = omp_get_wtime()
-walltime_assimilation = walltime_assimilation + (wt1-wt0)
-print*,'Done.'
-print*,'cpu time(assimilation on v grid) =',ct1-ct0,'sec'
-print*,'walltime(assimilation on v grid) =',wt1-wt0,'sec'
+    write(*,'("D",i2.2,": ")',advance='no' ) domainID
+    print*,'Starting assimilation...'
+    wt0 = omp_get_wtime()
+    call cpu_time(ct0)
+    call assimilate_vGrid(background(:,domainID),analysis(:,domainID),ensembleSize,domain_mean(domainID),allObs,obsListOfEachVGrid,systemParameters,domainID)
+    call cpu_time(ct1)
+    wt1 = omp_get_wtime()
+    walltime_assimilation = walltime_assimilation + (wt1-wt0)
+    print*,'Done.'
+    print*,'cpu time(assimilation on v grid) =',ct1-ct0,'sec'
+    print*,'walltime(assimilation on v grid) =',wt1-wt0,'sec'
 
-call deallocate_obsListOfEachGrid(obsListOfEachVGrid)
+    call deallocate_obsListOfEachGrid(obsListOfEachVGrid)
+enddo
 
 
 !
 !  Assimilation on w grid.
 !
 print*,repeat('=',20)
-print*,'Mapping observations to each w grid...'
-wt0 = omp_get_wtime()
-call cpu_time(ct0)
-call mapObsToEachWGrid(obsListOfEachWGrid,allObs,domain_mean,systemParameters)
-call cpu_time(ct1)
-wt1 = omp_get_wtime()
-print*,'Done.'
-print*,'cpu time (mapObsToEachWGrid)=',ct1-ct0,'sec'
-print*,'walltime (mapObsToEachWGrid)=',wt1-wt0,'sec'
-print*,'There are',count(obsListOfEachWGrid(:,:,:)%vectorSize>0),'grids may need to be updated.'
-print*,'Max obs per grid=',maxval(obsListOfEachWGrid(:,:,:)%vectorSize)
-print*,'Total obs for all grids=',sum(obsListOfEachWGrid(:,:,:)%vectorSize)
+do domainID = 1,systemParameters%max_domain
+    write(*,'("D",i2.2,": ")',advance='no' ) domainID
+    print*,'Mapping observations to each w grid...'
+    wt0 = omp_get_wtime()
+    call cpu_time(ct0)
+    call mapObsToEachWGrid(obsListOfEachWGrid,allObs,domain_mean(domainID),systemParameters)
+    call cpu_time(ct1)
+    wt1 = omp_get_wtime()
+    print*,'Done.'
+    print*,'cpu time (mapObsToEachWGrid)=',ct1-ct0,'sec'
+    print*,'walltime (mapObsToEachWGrid)=',wt1-wt0,'sec'
+    print*,'There are',count(obsListOfEachWGrid(:,:,:)%vectorSize>0),'grids may need to be updated.'
+    print*,'Max obs per grid=',maxval(obsListOfEachWGrid(:,:,:)%vectorSize)
+    print*,'Total obs for all grids=',sum(obsListOfEachWGrid(:,:,:)%vectorSize)
 
 
-print*,'Starting assimilation...'
-wt0 = omp_get_wtime()
-call cpu_time(ct0)
-call assimilate_wGrid(background(:),analysis(:),ensembleSize,domain_mean,allObs,obsListOfEachWGrid,systemParameters)
-call cpu_time(ct1)
-wt1 = omp_get_wtime()
-walltime_assimilation = walltime_assimilation + (wt1-wt0)
-print*,'Done.'
-print*,'cpu time(assimilation on w grid) =',ct1-ct0,'sec'
-print*,'walltime(assimilation on w grid) =',wt1-wt0,'sec'
-
-call deallocate_obsListOfEachGrid(obsListOfEachWGrid)
+    write(*,'("D",i2.2,": ")',advance='no' ) domainID
+    print*,'Starting assimilation...'
+    wt0 = omp_get_wtime()
+    call cpu_time(ct0)
+    call assimilate_wGrid(background(:,domainID),analysis(:,domainID),ensembleSize,domain_mean(domainID),allObs,obsListOfEachWGrid,systemParameters,domainID)
+    call cpu_time(ct1)
+    wt1 = omp_get_wtime()
+    walltime_assimilation = walltime_assimilation + (wt1-wt0)
+    print*,'Done.'
+    print*,'cpu time(assimilation on w grid) =',ct1-ct0,'sec'
+    print*,'walltime(assimilation on w grid) =',wt1-wt0,'sec'
+    
+    call deallocate_obsListOfEachGrid(obsListOfEachWGrid)
+enddo
 
 
 print*,repeat('=',20)
@@ -690,7 +746,9 @@ print*,repeat('=',20)
 !
 wt0 = omp_get_wtime()
 call cpu_time(ct0)
-call outputAnalysis(analysis(:),ensembleSize,domain(:))
+do domainID = 1,systemParameters%max_domain
+    call outputAnalysis(analysis(:,domainID),ensembleSize,domain(:,domainID),domainID)
+enddo
 call cpu_time(ct1)
 wt1 = omp_get_wtime()
 print*,'cpu time(outputAnalysis) =',ct1-ct0,'sec'

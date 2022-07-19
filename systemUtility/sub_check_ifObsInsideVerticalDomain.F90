@@ -2,7 +2,7 @@
 !include 'sub_locateAsIndex2d.f90'
 !include 'sub_interp2d.f90'
 
-subroutine check_ifObsInsideVerticalDomain(domain,domainSize,obs)
+subroutine check_ifObsInsideVerticalDomain(domain,domainSize,obs,domainID)
 
 use derivedType
 use basicUtility
@@ -11,6 +11,7 @@ implicit none
 integer,intent(in) :: domainSize
 type(domainInfo),intent(in) :: domain(domainSize)
 type(obsParent),intent(inout) :: obs
+integer,intent(in) :: domainID
 
 real(kind=8) zBottom(1),zTop(1)
 real(kind=8),parameter :: invalidValue = -9.d6
@@ -24,11 +25,11 @@ integer io , id  ! loop counter
 ! Shall aware of unit conversion.
 
 #ifndef PGI
-!$omp parallel do default(private) shared(domainSize,domain,obs) schedule(dynamic,100)
+!$omp parallel do default(private) shared(domainSize,domain,obs,domainID) schedule(dynamic,100)
 #endif
 do io=1,obs%obsNum
 
-    if ( .not. obs%obs(io)%available ) cycle
+    if ( .not. obs%obs(io)%available .or. count(obs%obs(io)%insideHorizontalDomain(:)) .ne. domainID ) cycle
 
     call locateAsIndex2d( domain(1)%lon(:,:)        , domain(1)%lat(:,:) , &
                           domain(1)%size_westToEast , domain(1)%size_southToNorth , &

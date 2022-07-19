@@ -12,7 +12,7 @@ module assimilationUtility
 
 interface
 
-    subroutine assimilate_massGrid(background,analysis,ensembleSize,domain_mean,obs,obsListOfEachGrid,systemParameters)
+    subroutine assimilate_massGrid(background,analysis,ensembleSize,domain_mean,obs,obsListOfEachGrid,systemParameters,domainID)
       use derivedType
       use basicUtility
       use systemUtility
@@ -25,9 +25,10 @@ interface
       type(obsParent) :: obs
       type(integerVector),pointer :: obsListOfEachGrid(:,:,:)
       type(systemParameter),intent(in) :: systemParameters
+      integer,intent(in) :: domainID
     end subroutine assimilate_massGrid
 
-    subroutine assimilate_uGrid(background,analysis,ensembleSize,domain_mean,obs,obsListOfEachGrid,systemParameters)
+    subroutine assimilate_uGrid(background,analysis,ensembleSize,domain_mean,obs,obsListOfEachGrid,systemParameters,domainID)
       use derivedType
       use basicUtility
       use systemUtility
@@ -40,9 +41,10 @@ interface
       type(obsParent) :: obs
       type(integerVector),pointer :: obsListOfEachGrid(:,:,:)
       type(systemParameter),intent(in) :: systemParameters
+      integer,intent(in) :: domainID
     end subroutine assimilate_uGrid
 
-    subroutine assimilate_vGrid(background,analysis,ensembleSize,domain_mean,obs,obsListOfEachGrid,systemParameters)
+    subroutine assimilate_vGrid(background,analysis,ensembleSize,domain_mean,obs,obsListOfEachGrid,systemParameters,domainID)
       use derivedType
       use basicUtility
       use systemUtility
@@ -55,9 +57,10 @@ interface
       type(obsParent) :: obs
       type(integerVector),pointer :: obsListOfEachGrid(:,:,:)
       type(systemParameter),intent(in) :: systemParameters
+      integer,intent(in) :: domainID
     end subroutine assimilate_vGrid
 
-    subroutine assimilate_wGrid(background,analysis,ensembleSize,domain_mean,obs,obsListOfEachGrid,systemParameters)
+    subroutine assimilate_wGrid(background,analysis,ensembleSize,domain_mean,obs,obsListOfEachGrid,systemParameters,domainID)
       use derivedType
       use basicUtility
       use systemUtility
@@ -70,6 +73,7 @@ interface
       type(obsParent) :: obs
       type(integerVector),pointer :: obsListOfEachGrid(:,:,:)
       type(systemParameter),intent(in) :: systemParameters
+      integer,intent(in) :: domainID
     end subroutine assimilate_wGrid
 
     subroutine LETKF( xb_mean , xb_pert , &

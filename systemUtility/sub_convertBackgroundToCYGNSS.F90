@@ -3,7 +3,7 @@
 !include 'sub_interp1d.f90'
 !include 'sub_interp2d.f90'
 
-subroutine convertBackgroundToCYGNSS(background,ensembleSize,domain,domain_mean,cygnss)
+subroutine convertBackgroundToCYGNSS(background,ensembleSize,domain,domain_mean,cygnss,domainID)
 
 use derivedType
 use basicUtility
@@ -15,6 +15,7 @@ type(backgroundInfo),intent(in) :: background(ensembleSize)
 type(domainInfo),intent(in)     :: domain(ensembleSize)
 type(domainInfo),intent(in)     :: domain_mean
 type(obsParent),intent(inout)   :: cygnss
+integer,intent(in)              :: domainID
 
 integer obsVarIndexRankOne , obsVarIndexRankTwo
 integer obsZIndexRankOne   , obsZIndexRankTwo
@@ -29,13 +30,13 @@ integer io,iens,iz  ! loop counter
 #ifndef PGI
 !$omp parallel do default(none) &
 !$omp private(io,iens,iz,obsVarIndexRankOne,obsVarIndexRankTwo,obsZIndexRankOne,obsZIndexRankTwo,obsVarBuffer_u10,obsVarBuffer_v10,obsZBuffer) &
-!$omp shared(cygnss,domain,domain_mean,background,ensembleSize) &
+!$omp shared(cygnss,domain,domain_mean,background,ensembleSize,domainID) &
 !$omp schedule(dynamic,100)
 #endif
 do io = 1 , cygnss%obsNum
 
 
-    if ( cygnss%obs(io)%available ) then
+    if ( cygnss%obs(io)%available .and. count(cygnss%obs(io)%insideHorizontalDomain(:)).eq.domainID ) then
 
         allocate( cygnss%obs(io)%background(ensembleSize) )
         cygnss%obs(io)%background(:) = 0.d0  ! MAY REMOVED AFTER BUG SOLVED

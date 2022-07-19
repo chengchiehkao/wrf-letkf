@@ -2,15 +2,13 @@
 !  include 'mod_derivedType.f90'
 !  include 'func_availableFileID.f90'
 
-subroutine getSounding(sounding,varList,varListSize,use_varList)
+subroutine getSounding(sounding,systemParameters)
 
 use derivedType
 
 implicit none
 type(obsParent),intent(out) :: sounding
-integer,intent(in)                                   :: varListSize
-character(len=10),dimension(varListSize),intent(in)  :: varList
-logical,dimension(varListSize),intent(in)            :: use_varList
+type(systemParameter),intent(in) :: systemParameters
 
 real(kind=8) lon,lat
 integer levNum,serialNum
@@ -41,12 +39,12 @@ do
     read(header,*,iostat=ioStatus) dummyArg1,dummyArg2 , levNum
 
     if ( index(header,'AIREP') .eq. 0 ) then  ! means it's not AIREP
-        sounding%obsNum = sounding%obsNum + varListSize*levNum +1  ! +1 for PSFC
+        sounding%obsNum = sounding%obsNum + systemParameters%varListSize_sound*levNum +1  ! +1 for PSFC
         do i = 1,levNum+1  ! +1 for PSFC
             read(fileID,*)  ! just read through lines which are not headers.
         enddo
     elseif ( index(header,'AIREP') .ne. 0 ) then  ! means it's AIREP
-        sounding%obsNum = sounding%obsNum + varListSize*levNum
+        sounding%obsNum = sounding%obsNum + systemParameters%varListSize_sound*levNum
         do i = 1,levNum
             read(fileID,*)  ! just read through lines which are not headers.
         enddo
@@ -67,6 +65,10 @@ sounding%obs(:)%instrument = 'SOUNDING  '
 sounding%obs(:)%zName      = ''
 sounding%obs(:)%varName    = ''
 sounding%obs(:)%available  = .true.
+do io = 1 , sounding%obsNum
+    allocate( sounding%obs(io)%insideHorizontalDomain(systemParameters%max_domain) )
+    sounding%obs(io)%insideHorizontalDomain(:) = .false.
+enddo
 
 rewind(fileID)
 
@@ -87,27 +89,27 @@ do
         read(fileID,*) sounding%obs(serialNum)%value
         do i = 1,levNum
             serialNum = serialNum + 1
-            read(fileID,*) sounding%obs(serialNum)%z,sounding%obs(serialNum:serialNum+varListSize-1)%value
+            read(fileID,*) sounding%obs(serialNum)%z,sounding%obs(serialNum:serialNum+systemParameters%varListSize_sound-1)%value
 
-            sounding%obs(serialNum:serialNum+varListSize-1)%lon = lon
-            sounding%obs(serialNum:serialNum+varListSize-1)%lat = lat
-            sounding%obs(serialNum:serialNum+varListSize-1)%z   = sounding%obs(serialNum)%z
-            sounding%obs(serialNum:serialNum+varListSize-1)%zName = 'P         '
-            sounding%obs(serialNum:serialNum+varListSize-1)%varName = varList(1:varListSize)
-            serialNum = serialNum + (varListSize-1)
+            sounding%obs(serialNum:serialNum+systemParameters%varListSize_sound-1)%lon = lon
+            sounding%obs(serialNum:serialNum+systemParameters%varListSize_sound-1)%lat = lat
+            sounding%obs(serialNum:serialNum+systemParameters%varListSize_sound-1)%z   = sounding%obs(serialNum)%z
+            sounding%obs(serialNum:serialNum+systemParameters%varListSize_sound-1)%zName = 'P         '
+            sounding%obs(serialNum:serialNum+systemParameters%varListSize_sound-1)%varName = systemParameters%varList_sound(1:systemParameters%varListSize_sound)
+            serialNum = serialNum + (systemParameters%varListSize_sound-1)
         enddo
     elseif ( index(header,'AIREP') .ne. 0 ) then  ! means it's AIREP
         do i = 1,levNum
             serialNum = serialNum + 1
-            read(fileID,*) sounding%obs(serialNum)%z,sounding%obs(serialNum:serialNum+varListSize-1)%value
+            read(fileID,*) sounding%obs(serialNum)%z,sounding%obs(serialNum:serialNum+systemParameters%varListSize_sound-1)%value
 
-            sounding%obs(serialNum:serialNum+varListSize-1)%instrument = 'AIREP     '
-            sounding%obs(serialNum:serialNum+varListSize-1)%lon = lon
-            sounding%obs(serialNum:serialNum+varListSize-1)%lat = lat
-            sounding%obs(serialNum:serialNum+varListSize-1)%z   = sounding%obs(serialNum)%z
-            sounding%obs(serialNum:serialNum+varListSize-1)%zName = 'P         '
-            sounding%obs(serialNum:serialNum+varListSize-1)%varName = varList(1:varListSize)
-            serialNum = serialNum + (varListSize-1)
+            sounding%obs(serialNum:serialNum+systemParameters%varListSize_sound-1)%instrument = 'AIREP     '
+            sounding%obs(serialNum:serialNum+systemParameters%varListSize_sound-1)%lon = lon
+            sounding%obs(serialNum:serialNum+systemParameters%varListSize_sound-1)%lat = lat
+            sounding%obs(serialNum:serialNum+systemParameters%varListSize_sound-1)%z   = sounding%obs(serialNum)%z
+            sounding%obs(serialNum:serialNum+systemParameters%varListSize_sound-1)%zName = 'P         '
+            sounding%obs(serialNum:serialNum+systemParameters%varListSize_sound-1)%varName = systemParameters%varList_sound(1:systemParameters%varListSize_sound)
+            serialNum = serialNum + (systemParameters%varListSize_sound-1)
         enddo
     endif
 enddo
@@ -129,9 +131,9 @@ do io = 1 , sounding%obsNum
     endif
 enddo
 
-do iObsVar = 1 , varListSize
-    where ( adjustl(sounding%obs(:)%varName) .eq. adjustl(varList(iObsVar)) )
-        sounding%obs%available = use_varList(iObsVar)
+do iObsVar = 1 , systemParameters%varListSize_sound
+    where ( adjustl(sounding%obs(:)%varName) .eq. adjustl(systemParameters%varList_sound(iObsVar)) )
+        sounding%obs%available = systemParameters%use_varList_sound(iObsVar)
     end where
 enddo
 

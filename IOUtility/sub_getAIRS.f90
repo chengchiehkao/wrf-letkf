@@ -2,15 +2,13 @@
 !  include 'mod_derivedType.f90'
 !  include 'func_availableFileID.f90'
 
-subroutine getAIRS(airs,varList,varListSize,use_varList)
+subroutine getAIRS(airs,systemParameters)
 
 use derivedType
 
 implicit none
 type(obsParent),intent(out) :: airs
-integer,intent(in)                                   :: varListSize
-character(len=10),dimension(varListSize),intent(in)  :: varList
-logical,dimension(varListSize),intent(in)            :: use_varList
+type(systemParameter),intent(in) :: systemParameters
 
 real(kind=8) lon,lat
 integer levNum,serialNum
@@ -40,7 +38,7 @@ do
 
     read(header,*,iostat=ioStatus) dummyArg1,dummyArg2 , levNum
 
-    airs%obsNum = airs%obsNum + varListSize*levNum +1  ! +1 for PSFC
+    airs%obsNum = airs%obsNum + systemParameters%varListSize_airs*levNum +1  ! +1 for PSFC
     do i = 1,levNum+1  ! +1 for PSFC
         read(fileID,*)  ! just read through lines which are not headers.
     enddo
@@ -61,6 +59,10 @@ airs%obs(:)%instrument = 'AIRS      '
 airs%obs(:)%zName      = ''
 airs%obs(:)%varName    = ''
 airs%obs(:)%available  = .true.
+do io = 1 , airs%obsNum
+    allocate( airs%obs(io)%insideHorizontalDomain(systemParameters%max_domain) )
+    airs%obs(io)%insideHorizontalDomain(:) = .false.
+enddo
 
 rewind(fileID)
 
@@ -80,14 +82,14 @@ do
     read(fileID,*) airs%obs(serialNum)%value
     do i = 1,levNum
         serialNum = serialNum + 1
-        read(fileID,*) airs%obs(serialNum)%z,airs%obs(serialNum:serialNum+varListSize-1)%value
+        read(fileID,*) airs%obs(serialNum)%z,airs%obs(serialNum:serialNum+systemParameters%varListSize_airs-1)%value
 
-        airs%obs(serialNum:serialNum+varListSize-1)%lon = lon
-        airs%obs(serialNum:serialNum+varListSize-1)%lat = lat
-        airs%obs(serialNum:serialNum+varListSize-1)%z   = airs%obs(serialNum)%z
-        airs%obs(serialNum:serialNum+varListSize-1)%zName = 'P         '
-        airs%obs(serialNum:serialNum+varListSize-1)%varName = varList(1:varListSize)
-        serialNum = serialNum + (varListSize-1)
+        airs%obs(serialNum:serialNum+systemParameters%varListSize_airs-1)%lon = lon
+        airs%obs(serialNum:serialNum+systemParameters%varListSize_airs-1)%lat = lat
+        airs%obs(serialNum:serialNum+systemParameters%varListSize_airs-1)%z   = airs%obs(serialNum)%z
+        airs%obs(serialNum:serialNum+systemParameters%varListSize_airs-1)%zName = 'P         '
+        airs%obs(serialNum:serialNum+systemParameters%varListSize_airs-1)%varName = systemParameters%varList_airs(1:systemParameters%varListSize_airs)
+        serialNum = serialNum + (systemParameters%varListSize_airs-1)
     enddo
 
 enddo
@@ -109,9 +111,9 @@ do io = 1 , airs%obsNum
     endif
 enddo
 
-do iObsVar = 1 , varListSize
-    where ( adjustl(airs%obs(:)%varName) .eq. adjustl(varList(iObsVar)) )
-        airs%obs%available = use_varList(iObsVar)
+do iObsVar = 1 , systemParameters%varListSize_airs
+    where ( adjustl(airs%obs(:)%varName) .eq. adjustl(systemParameters%varList_airs(iObsVar)) )
+        airs%obs%available = systemParameters%use_varList_airs(iObsVar)
     end where
 enddo
 

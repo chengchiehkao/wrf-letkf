@@ -3,7 +3,7 @@
 !include 'sub_interp1d.f90'
 !include 'sub_interp2d.f90'
 
-subroutine mapGPSROFromGMHToP(domain_mean,gpsro)
+subroutine mapGPSROFromGMHToP(domain_mean,gpsro,domainID)
 
 use derivedType
 use basicUtility
@@ -12,6 +12,7 @@ implicit none
 
 type(domainInfo),intent(in)     :: domain_mean
 type(obsParent),intent(inout)   :: gpsro
+integer,intent(in) :: domainID
 
 integer obsVarIndexRankOne , obsVarIndexRankTwo
 integer obsZIndexRankOne   , obsZIndexRankTwo
@@ -28,13 +29,13 @@ integer io,iens,iz  ! loop counter
 #ifndef PGI
 !$omp parallel do default(none) &
 !$omp private(io,iens,iz,obsVarIndexRankOne,obsVarIndexRankTwo,obsZIndexRankOne,obsZIndexRankTwo,obsVarBuffer,obsZBuffer,dummy_output) &
-!$omp shared(gpsro,domain_mean) &
+!$omp shared(gpsro,domain_mean,domainID) &
 !$omp schedule(dynamic,100)
 #endif
 do io = 1 , gpsro%obsNum
 
 
-    if ( gpsro%obs(io)%available ) then  ! SHALL AWARE OF PSFC
+    if ( gpsro%obs(io)%available  .and. count(gpsro%obs(io)%insideHorizontalDomain(:)).eq.domainID ) then  ! SHALL AWARE OF PSFC
 
 
         call locateAsIndex2d( domain_mean%lon(:,:)        , domain_mean%lat(:,:) , &

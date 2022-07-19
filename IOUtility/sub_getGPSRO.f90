@@ -2,22 +2,20 @@
 !  include 'mod_derivedType.f90'
 !  include 'func_availableFileID.f90'
 
-subroutine getGPSRO(GPSRO,varList,varListSize,use_varList)
+subroutine getGPSRO(GPSRO,systemParameters)
 
 use derivedType
 
 implicit none
 type(obsParent),intent(out) :: GPSRO
-integer,intent(in)                                   :: varListSize
-character(len=10),dimension(varListSize),intent(in)  :: varList
-logical,dimension(varListSize),intent(in)            :: use_varList
+type(systemParameter),intent(in) :: systemParameters
 
 real(kind=8) lon,lat,rfict
 integer levNum,serialNum
 real :: dummyArg(1:3)
 
 integer ioStatus,fileID
-integer i,iObsVar  ! loop counter
+integer i,io,iObsVar  ! loop counter
 
 integer,external :: availableFileID
 !================================================
@@ -34,7 +32,7 @@ do
     if ( ioStatus .lt. 0 ) then
         exit
     endif
-    GPSRO%obsNum = GPSRO%obsNum + varListSize*levNum
+    GPSRO%obsNum = GPSRO%obsNum + systemParameters%varListSize_gpsro*levNum
     do i = 1,levNum
         read(fileID,*)  ! just read through lines which are not headers.
     enddo
@@ -54,6 +52,10 @@ GPSRO%obs(:)%instrument = 'COSMIC'
 GPSRO%obs(:)%zName      = 'GMH'
 GPSRO%obs(:)%varName    = ''
 GPSRO%obs(:)%available  = .true.
+do io = 1 , GPSRO%obsNum
+    allocate( GPSRO%obs(io)%insideHorizontalDomain(systemParameters%max_domain) )
+    GPSRO%obs(io)%insideHorizontalDomain(:) = .false.
+enddo
 
 rewind(fileID)
 
@@ -64,21 +66,21 @@ do
     if ( ioStatus .lt. 0 ) exit
     do i = 1,levNum
         serialNum = serialNum + 1
-        read(fileID,*) GPSRO%obs(serialNum)%z,GPSRO%obs(serialNum:serialNum+varListSize-1)%value
+        read(fileID,*) GPSRO%obs(serialNum)%z,GPSRO%obs(serialNum:serialNum+systemParameters%varListSize_gpsro-1)%value
 
-        GPSRO%obs(serialNum:serialNum+varListSize-1)%lon = lon
-        GPSRO%obs(serialNum:serialNum+varListSize-1)%lat = lat
-        GPSRO%obs(serialNum:serialNum+varListSize-1)%rfict = rfict
-        GPSRO%obs(serialNum:serialNum+varListSize-1)%z = GPSRO%obs(serialNum)%z
-        GPSRO%obs(serialNum:serialNum+varListSize-1)%varName = varList(1:varListSize)
-        serialNum = serialNum + (varListSize-1)
+        GPSRO%obs(serialNum:serialNum+systemParameters%varListSize_gpsro-1)%lon = lon
+        GPSRO%obs(serialNum:serialNum+systemParameters%varListSize_gpsro-1)%lat = lat
+        GPSRO%obs(serialNum:serialNum+systemParameters%varListSize_gpsro-1)%rfict = rfict
+        GPSRO%obs(serialNum:serialNum+systemParameters%varListSize_gpsro-1)%z = GPSRO%obs(serialNum)%z
+        GPSRO%obs(serialNum:serialNum+systemParameters%varListSize_gpsro-1)%varName = systemParameters%varList_gpsro(1:systemParameters%varListSize_gpsro)
+        serialNum = serialNum + (systemParameters%varListSize_gpsro-1)
     enddo
 enddo
 
 
-do iObsVar = 1 , varListSize
-    where ( adjustl(GPSRO%obs(:)%varName) .eq. adjustl(varList(iObsVar)) )
-        GPSRO%obs%available = use_varList(iObsVar)
+do iObsVar = 1 , systemParameters%varListSize_gpsro
+    where ( adjustl(GPSRO%obs(:)%varName) .eq. adjustl(systemParameters%varList_gpsro(iObsVar)) )
+        GPSRO%obs%available = systemParameters%use_varList_gpsro(iObsVar)
     end where
 enddo
 

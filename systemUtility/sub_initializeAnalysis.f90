@@ -13,6 +13,9 @@ type(domainInfo),intent(in)        :: domain(ensembleSize)
 integer iens  ! loop counter
 !================================================
 
+!$omp parallel do default(shared) &
+!$omp private(iens) &
+!$omp schedule(dynamic,1)
 do iens = 1,ensembleSize
 
     allocate( analysis(iens) % mu( domain(iens)%size_westToEast , domain(iens)%size_southToNorth ) )
@@ -34,6 +37,7 @@ do iens = 1,ensembleSize
     analysis(iens) % ph(:,:,:)     = background(iens) % ph(:,:,:)
 
 enddo
+!$omp end parallel do
 
 
 !================================================

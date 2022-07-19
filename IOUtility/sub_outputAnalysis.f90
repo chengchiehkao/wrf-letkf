@@ -1,5 +1,5 @@
 
-subroutine outputAnalysis(analysis,ensembleSize,domain)
+subroutine outputAnalysis(analysis,ensembleSize,domain,domainID)
 
 use derivedType
 
@@ -9,9 +9,11 @@ include 'netcdf.inc'
 integer,intent(in)                 :: ensembleSize
 type(backgroundInfo),intent(inout) :: analysis(ensembleSize)
 type(domainInfo),intent(in)        :: domain(ensembleSize)
+integer,intent(in)                 :: domainID
 
 character(len=255) backgroundSrc,analysisSrc
 character(len=2)  domainSeiralNumInString
+character(len=2)  domainIDInString
 
 integer ncStatus,ncID
 integer varID_mu , varID_t , varID_qvapor , varID_u , varID_v , varID_w ,varID_ph
@@ -31,7 +33,7 @@ do iens =1,ensembleSize
 
 enddo
 
-write(*,'(a)',advance='no') 'Output analysis:'
+write(*,'("D",i2.2,": ",a)',advance='no') domainID,'Output analysis:'
 
 
 do iens = 1 , ensembleSize
@@ -39,10 +41,12 @@ do iens = 1 , ensembleSize
     write(domainSeiralNumInString,'(i2.2)') iens
     if ( iens.ne.ensembleSize ) write(*,'(1x,a2)',advance='no' ) domainSeiralNumInString
     if ( iens.eq.ensembleSize ) write(*,'(1x,a2)',advance='yes') domainSeiralNumInString
+
+    write(domainIDInString,'(i2.2)') domainID
     analysisSrc = repeat(' ',len(analysisSrc))
-    analysisSrc = 'output/analysis_'//domainSeiralNumInString;
+    analysisSrc = 'output/analysis_d'//domainIDInString//'_'//domainSeiralNumInString;
     backgroundSrc = repeat(' ',len(backgroundSrc))
-    backgroundSrc = 'input/wrfinput_nc_'//domainSeiralNumInString;
+    backgroundSrc = 'input/background_d'//domainIDInString//'_'//domainSeiralNumInString;
 
     call system('cp '//backgroundSrc//' '//analysisSrc)
 
@@ -52,6 +56,8 @@ do iens = 1 , ensembleSize
         print*,nf_strError( ncStatus )
         stop
     endif
+
+    if ( iens.ne.ensembleSize ) write(*,'(",")',advance='no' )
 
     ncStatus = nf_inq_varID( ncID , 'MU' , varID_mu )
     ncStatus = nf_put_vara_double( ncID , varID_mu , (/1,1,1/) , (/domain(iens)%size_westToEast,domain(iens)%size_southToNorth,1/) , analysis(iens)%mu(:,:) )

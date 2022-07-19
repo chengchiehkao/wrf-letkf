@@ -27,120 +27,100 @@ interface
       implicit none
     end function availableFileID
 
-    subroutine getAirep(airep,varList,varListSize,use_varList)
+    subroutine getAirep(airep,systemParameters)
       use derivedType
       implicit none
       type(obsParent),intent(out) :: airep
-      integer,intent(in)                                   :: varListSize
-      character(len=10),dimension(varListSize),intent(in)  :: varList
-      logical,dimension(varListSize),intent(in)            :: use_varList
+      type(systemParameter),intent(in) :: systemParameters
     end subroutine getAirep
 
-    subroutine getAIRS(airs,varList,varListSize,use_varList)
+    subroutine getAIRS(airs,systemParameters)
       use derivedType
       implicit none
       type(obsParent),intent(out) :: airs
-      integer,intent(in)                                   :: varListSize
-      character(len=10),dimension(varListSize),intent(in)  :: varList
-      logical,dimension(varListSize),intent(in)            :: use_varList
+      type(systemParameter),intent(in) :: systemParameters
     end subroutine getAIRS
 
-    subroutine getAMV(amv,varList,varListSize,use_varList)
+    subroutine getAMV(amv,systemParameters)
       use derivedType
       implicit none
       type(obsParent),intent(out) :: amv
-      integer,intent(in)                                   :: varListSize
-      character(len=10),dimension(varListSize),intent(in)  :: varList
-      logical,dimension(varListSize),intent(in)            :: use_varList
+      type(systemParameter),intent(in) :: systemParameters
     end subroutine getAMV
 
-    subroutine getASCAT(ascat,varList,varListSize,use_varList)
+    subroutine getASCAT(ascat,systemParameters)
       use derivedType
       implicit none
       type(obsParent),intent(out) :: ascat
-      integer,intent(in)                                   :: varListSize
-      character(len=10),dimension(varListSize),intent(in)  :: varList
-      logical,dimension(varListSize),intent(in)            :: use_varList
+      type(systemParameter),intent(in) :: systemParameters
     end subroutine getASCAT
 
-    subroutine getBackground(background,ensembleSize,domain)
+    subroutine getBackground(background,ensembleSize,domain,domainID)
       use derivedType
       implicit none
       include 'netcdf.inc'
       integer,intent(in)                 :: ensembleSize
       type(backgroundInfo),intent(inout) :: background(ensembleSize)
       type(domainInfo),intent(in)        :: domain(ensembleSize)
+      integer,intent(in)                 :: domainID
     end subroutine getBackground
 
-    subroutine getCYGNSS(cygnss,varList,varListSize,use_varList)
+    subroutine getCYGNSS(cygnss,systemParameters)
       use derivedType
       implicit none
       type(obsParent),intent(out) :: cygnss
-      integer,intent(in)                                   :: varListSize
-      character(len=10),dimension(varListSize),intent(in)  :: varList
-      logical,dimension(varListSize),intent(in)            :: use_varList
+      type(systemParameter),intent(in) :: systemParameters
     end subroutine getCYGNSS
 
-    subroutine getDomain(domain,domainSize)
+    subroutine getDomain(domain,domainSize,domainID)
       use derivedType
       implicit none
       include 'netcdf.inc'
       integer,intent(in)           :: domainSize
       type(domainInfo),intent(out) :: domain(domainSize)
+      integer,intent(in)           :: domainID
     end subroutine getDomain
 
-    subroutine getGPSRO(GPSRO,varList,varListSize,use_varList)
+    subroutine getGPSRO(GPSRO,systemParameters)
       use derivedType
       implicit none
       type(obsParent),intent(out) :: GPSRO
-      integer,intent(in)                                   :: varListSize
-      character(len=10),dimension(varListSize),intent(in)  :: varList
-      logical,dimension(varListSize),intent(in)            :: use_varList
+      type(systemParameter),intent(in) :: systemParameters
     end subroutine getGPSRO
 
-    subroutine getIASI(iasi,varList,varListSize,use_varList)
+    subroutine getIASI(iasi,systemParameters)
       use derivedType
       implicit none
       type(obsParent),intent(out) :: iasi
-      integer,intent(in)                                   :: varListSize
-      character(len=10),dimension(varListSize),intent(in)  :: varList
-      logical,dimension(varListSize),intent(in)            :: use_varList
+      type(systemParameter),intent(in) :: systemParameters
     end subroutine getIASI
 
-    subroutine getOSCAT(oscat,varList,varListSize,use_varList)
+    subroutine getOSCAT(oscat,systemParameters)
       use derivedType
       implicit none
       type(obsParent),intent(out) :: oscat
-      integer,intent(in)                                   :: varListSize
-      character(len=10),dimension(varListSize),intent(in)  :: varList
-      logical,dimension(varListSize),intent(in)            :: use_varList
+      type(systemParameter),intent(in) :: systemParameters
     end subroutine getOSCAT
 
-    subroutine getQuikSCAT(quikscat,varList,varListSize,use_varList)
+    subroutine getQuikSCAT(quikscat,systemParameters)
       use derivedType
       implicit none
       type(obsParent),intent(out) :: quikscat
-      integer,intent(in)                                   :: varListSize
-      character(len=10),dimension(varListSize),intent(in)  :: varList
-      logical,dimension(varListSize),intent(in)            :: use_varList
+      type(systemParameter),intent(in) :: systemParameters
     end subroutine getQuikSCAT
 
-    subroutine getSounding(sounding,varList,varListSize,use_varList)
+    subroutine getSounding(sounding,systemParameters)
       use derivedType
       implicit none
       type(obsParent),intent(out) :: sounding
-      integer,intent(in)                                   :: varListSize
-      character(len=10),dimension(varListSize),intent(in)  :: varList
-      logical,dimension(varListSize),intent(in)            :: use_varList
+      type(systemParameter),intent(in) :: systemParameters
     end subroutine getSounding
 
-    subroutine getSynop(synop,varList,varListSize,use_varList)
+    subroutine getSynop(synop,systemParameters)
       use derivedType
       implicit none
       type(obsParent),intent(out) :: synop
-      integer,intent(in)                                   :: varListSize
-      character(len=10),dimension(varListSize),intent(in)  :: varList
-      logical,dimension(varListSize),intent(in)            :: use_varList
+      type(systemParameter),intent(in) :: systemParameters
     end subroutine getSynop
  
     subroutine getSystemParameter(systemParameters)
@@ -149,22 +129,21 @@ interface
       type(systemParameter),intent(out) :: systemParameters
     end subroutine getSystemParameter
 
-    subroutine getWindSat(windsat,varList,varListSize,use_varList)
+    subroutine getWindSat(windsat,systemParameters)
       use derivedType
       implicit none
       type(obsParent),intent(out) :: windsat
-      integer,intent(in)                                   :: varListSize
-      character(len=10),dimension(varListSize),intent(in)  :: varList
-      logical,dimension(varListSize),intent(in)            :: use_varList
+      type(systemParameter),intent(in) :: systemParameters
     end subroutine getWindSat
 
-    subroutine outputAnalysis(analysis,ensembleSize,domain)
+    subroutine outputAnalysis(analysis,ensembleSize,domain,domainID)
       use derivedType
       implicit none
       include 'netcdf.inc'
       integer,intent(in)                 :: ensembleSize
       type(backgroundInfo),intent(inout) :: analysis(ensembleSize)
       type(domainInfo),intent(in)        :: domain(ensembleSize)
+      integer,intent(in)                 :: domainID
     end subroutine outputAnalysis
 
 end interface

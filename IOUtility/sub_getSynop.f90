@@ -2,22 +2,20 @@
 !  include 'mod_derivedType.f90'
 !  include 'func_availableFileID.f90'
 
-subroutine getSynop(synop,varList,varListSize,use_varList)
+subroutine getSynop(synop,systemParameters)
 
 use derivedType
 
 implicit none
 type(obsParent),intent(out) :: synop
-integer,intent(in)                                   :: varListSize
-character(len=10),dimension(varListSize),intent(in)  :: varList
-logical,dimension(varListSize),intent(in)            :: use_varList
+type(systemParameter),intent(in) :: systemParameters
 
 real(kind=8) lon,lat
 integer levNum,serialNum
 real :: dummyArg1,dummyArg2
 
 integer ioStatus,fileID
-integer i,iObsVar  ! loop counter
+integer i,io,iObsVar  ! loop counter
 
 integer,external :: availableFileID
 !================================================
@@ -34,7 +32,7 @@ do
     if ( ioStatus .lt. 0 ) then
         exit
     endif
-    synop%obsNum = synop%obsNum + varListSize*levNum
+    synop%obsNum = synop%obsNum + systemParameters%varListSize_synop*levNum
     do i = 1,levNum
         read(fileID,*)  ! just read through lines which are not headers.
     enddo
@@ -53,6 +51,10 @@ synop%obs(:)%instrument = 'SYNOP'
 synop%obs(:)%zName      = 'TerrainHgt'
 synop%obs(:)%varName    = ''
 synop%obs(:)%available  = .true.
+do io = 1 , synop%obsNum
+    allocate( synop%obs(io)%insideHorizontalDomain(systemParameters%max_domain) )
+    synop%obs(io)%insideHorizontalDomain(:) = .false.
+enddo
 
 rewind(fileID)
 
@@ -63,19 +65,19 @@ do
     if ( ioStatus .lt. 0 ) exit
     do i = 1,levNum
         serialNum = serialNum + 1
-        read(fileID,*) synop%obs(serialNum:serialNum+varListSize-1)%value,synop%obs(serialNum)%z
+        read(fileID,*) synop%obs(serialNum:serialNum+systemParameters%varListSize_synop-1)%value,synop%obs(serialNum)%z
 
-        synop%obs(serialNum:serialNum+varListSize-1)%lon = lon
-        synop%obs(serialNum:serialNum+varListSize-1)%lat = lat
-        synop%obs(serialNum:serialNum+varListSize-1)%z = synop%obs(serialNum)%z
-        synop%obs(serialNum:serialNum+varListSize-1)%varName = varList(1:varListSize)
-        serialNum = serialNum + (varListSize-1)
+        synop%obs(serialNum:serialNum+systemParameters%varListSize_synop-1)%lon = lon
+        synop%obs(serialNum:serialNum+systemParameters%varListSize_synop-1)%lat = lat
+        synop%obs(serialNum:serialNum+systemParameters%varListSize_synop-1)%z = synop%obs(serialNum)%z
+        synop%obs(serialNum:serialNum+systemParameters%varListSize_synop-1)%varName = systemParameters%varList_synop(1:systemParameters%varListSize_synop)
+        serialNum = serialNum + (systemParameters%varListSize_synop-1)
     enddo
 enddo
 
-do iObsVar = 1 , varListSize
-    where ( adjustl(synop%obs(:)%varName) .eq. adjustl(varList(iObsVar)) )
-        synop%obs%available = use_varList(iObsVar)
+do iObsVar = 1 , systemParameters%varListSize_synop
+    where ( adjustl(synop%obs(:)%varName) .eq. adjustl(systemParameters%varList_synop(iObsVar)) )
+        synop%obs%available = systemParameters%use_varList_synop(iObsVar)
     end where
 enddo
 

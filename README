@@ -17,10 +17,9 @@ WRF-LETKF is a data assimilation system implemented LETKF(Local Ensemble Transfo
 #2 Where can I get WRF-LETKF?
 =============================
 
-The source code of WRF-LETKF is now available through certain git host. If you have a bitbucket account (https://bitbucket.org) and already installed any git client, just type:
+The source code of WRF-LETKF is now available through certain git host. If you have already installed any git client with command-line interface, just type:
 
           git clone git@github.com:chengchiehkao/wrf-letkf
-       or git clone ssh://git@bitbucket.org/chengchiehkao/wrf-letkf.git
 
 then the package will be downloaded.
 
@@ -33,6 +32,8 @@ then the package will be downloaded.
 
 #a Fortran Compiler
 A Fortran95-standard-compliant(95 or newer) and OpenMP2.5-compliant(V2.5 or newer) Fortran compiler is necessary. The following compilers were tested so far:
+     Intel Fortran v19.1.3.304
+     Intel Fortran v19.0.5.281
      Intel Fortran v15.0.1
      GNU Fortran v4.4.7
      PGI Fortran v12.10
@@ -47,7 +48,7 @@ NetCDF is a library for scientific data I/O and is necessary for compiling WRF-L
 LAPACK and BLAS are libraries for linear algebra, which are necessary for WRF-LETKF. Please make sure that the libraries you use are THREAD-SAFE, or the DA system might run into race condition when executing (which means the output will be messed up or the sytem will crash).
 
 #3-2 Compile
-Pick a makefile you would like to use and alter the options as the building environment is, then type:
+Pick a makefile you would like to use and edit the options as the building environment is, then type:
 
      make -f makefile.[theCompilerYouChoosed]
 

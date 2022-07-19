@@ -3,7 +3,7 @@
 !include 'sub_interp1d.f90'
 !include 'sub_interp2d.f90'
 
-subroutine convertBackgroundToGPSRO(background,ensembleSize,domain,gpsro)
+subroutine convertBackgroundToGPSRO(background,ensembleSize,domain,gpsro,domainID)
 
 use derivedType
 use basicUtility
@@ -14,6 +14,7 @@ integer,intent(in)              :: ensembleSize
 type(backgroundInfo),intent(in) :: background(ensembleSize)
 type(domainInfo),intent(in)     :: domain(ensembleSize)
 type(obsParent),intent(inout)   :: gpsro
+integer,intent(in)              :: domainID
 
 integer obsVarIndexRankOne , obsVarIndexRankTwo
 integer obsZIndexRankOne   , obsZIndexRankTwo
@@ -28,13 +29,13 @@ integer io,iens,iz  ! loop counter
 #ifndef PGI
 !$omp parallel do default(none) &
 !$omp private(io,iens,iz,obsVarIndexRankOne,obsVarIndexRankTwo,obsZIndexRankOne,obsZIndexRankTwo,obsVarBuffer,obsZBuffer) &
-!$omp shared(gpsro,domain,background,ensembleSize) &
+!$omp shared(gpsro,domain,background,ensembleSize,domainID) &
 !$omp schedule(dynamic,100)
 #endif
 do io = 1 , gpsro%obsNum
 
 
-    if ( gpsro%obs(io)%available ) then  ! SHALL AWARE OF PSFC
+    if ( gpsro%obs(io)%available .and. count(gpsro%obs(io)%insideHorizontalDomain(:)).eq.domainID ) then  ! SHALL AWARE OF PSFC
 
         allocate( gpsro%obs(io)%background(ensembleSize) )
         gpsro%obs(io)%background(:) = 0.d0

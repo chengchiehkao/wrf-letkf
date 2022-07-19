@@ -27,6 +27,7 @@ type systemParameter
     real(kind=8) :: inflationFactor
     integer :: boundaryWidth
     logical :: rotateUAndVOfObsBasedOnWRFMapProjection
+    integer :: max_domain
 end type systemParameter
 
 type obsChild
@@ -36,6 +37,7 @@ type obsChild
     character(len=10) :: type , instrument , zName , varName
     real(kind=8),pointer,dimension(:) :: background=>null()
     logical           :: available
+    logical,pointer,dimension(:) :: insideHorizontalDomain
 end type obsChild
 
 type obsParent
@@ -54,5 +56,6 @@ type backgroundInfo
     real(kind=8),pointer,dimension(:,:,:) :: ph=>null()  ! PH as perturbation geopotential in WRF.
     real(kind=8),pointer,dimension(:,:,:) :: normalT=>null() , stratifiedMU=>null() , RH=>null() , refractivity=>null()
 end type backgroundInfo
+
 
 end module derivedType

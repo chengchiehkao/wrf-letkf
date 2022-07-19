@@ -3,6 +3,7 @@
 FC = gfortran44 -ffree-line-length-512
 preprocess_flag = -cpp -E
 optimization_flag = -O2
+#optimization_flag = -g -frange-check
 debug_flag = -g -frange-check
 openmp_flag = -fopenmp
 netcdf_path = /SAS002/zerocustom/netcdf/REAS/gcc44_gfortran44/

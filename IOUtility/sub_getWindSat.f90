@@ -2,22 +2,20 @@
 !  include 'mod_derivedType.f90'
 !  include 'func_availableFileID.f90'
 
-subroutine getWindSat(windsat,varList,varListSize,use_varList)
+subroutine getWindSat(windsat,systemParameters)
 
 use derivedType
 
 implicit none
 type(obsParent),intent(out) :: windsat
-integer,intent(in)                                   :: varListSize
-character(len=10),dimension(varListSize),intent(in)  :: varList
-logical,dimension(varListSize),intent(in)            :: use_varList
+type(systemParameter),intent(in) :: systemParameters
 
 real(kind=8) lon,lat
 integer levNum,serialNum
 real :: dummyArg1,dummyArg2
 
 integer ioStatus,fileID
-integer i,iObsVar  ! loop counter
+integer i,io,iObsVar  ! loop counter
 
 integer,external :: availableFileID
 !================================================
@@ -34,7 +32,7 @@ do
     if ( ioStatus .lt. 0 ) then
         exit
     endif
-    windsat%obsNum = windsat%obsNum + varListSize*levNum
+    windsat%obsNum = windsat%obsNum + systemParameters%varListSize_windsat*levNum
     do i = 1,levNum
         read(fileID,*)  ! just read through lines which are not headers.
     enddo
@@ -53,6 +51,10 @@ windsat%obs(:)%instrument = 'WindSat'
 windsat%obs(:)%zName      = 'P'
 windsat%obs(:)%varName    = ''
 windsat%obs(:)%available  = .true.
+do io = 1 , windsat%obsNum
+    allocate( windsat%obs(io)%insideHorizontalDomain(systemParameters%max_domain) )
+    windsat%obs(io)%insideHorizontalDomain(:) = .false.
+enddo
 
 rewind(fileID)
 
@@ -63,22 +65,22 @@ do
     if ( ioStatus .lt. 0 ) exit
     do i = 1,levNum
         serialNum = serialNum + 1
-        read(fileID,*) windsat%obs(serialNum)%z,windsat%obs(serialNum:serialNum+varListSize-1)%value
+        read(fileID,*) windsat%obs(serialNum)%z,windsat%obs(serialNum:serialNum+systemParameters%varListSize_windsat-1)%value
 
-        windsat%obs(serialNum:serialNum+varListSize-1)%lon = lon
-        windsat%obs(serialNum:serialNum+varListSize-1)%lat = lat
-        windsat%obs(serialNum:serialNum+varListSize-1)%z   = windsat%obs(serialNum)%z
-        windsat%obs(serialNum:serialNum+varListSize-1)%varName = varList(1:varListSize)
-        serialNum = serialNum + (varListSize-1)
+        windsat%obs(serialNum:serialNum+systemParameters%varListSize_windsat-1)%lon = lon
+        windsat%obs(serialNum:serialNum+systemParameters%varListSize_windsat-1)%lat = lat
+        windsat%obs(serialNum:serialNum+systemParameters%varListSize_windsat-1)%z   = windsat%obs(serialNum)%z
+        windsat%obs(serialNum:serialNum+systemParameters%varListSize_windsat-1)%varName = systemParameters%varList_windsat(1:systemParameters%varListSize_windsat)
+        serialNum = serialNum + (systemParameters%varListSize_windsat-1)
     enddo
 enddo
 
 
 windsat%obs(:)%z = 100.d0 * windsat%obs(:)%z  !  convert hPa to Pa
 
-do iObsVar = 1 , varListSize
-    where ( adjustl(windsat%obs(:)%varName) .eq. adjustl(varList(iObsVar)) )
-        windsat%obs%available = use_varList(iObsVar)
+do iObsVar = 1 , systemParameters%varListSize_windsat
+    where ( adjustl(windsat%obs(:)%varName) .eq. adjustl(systemParameters%varList_windsat(iObsVar)) )
+        windsat%obs%available = systemParameters%use_varList_windsat(iObsVar)
     end where
 enddo
 

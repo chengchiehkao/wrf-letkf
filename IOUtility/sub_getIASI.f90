@@ -2,15 +2,13 @@
 !  include 'mod_derivedType.f90'
 !  include 'func_availableFileID.f90'
 
-subroutine getIASI(iasi,varList,varListSize,use_varList)
+subroutine getIASI(iasi,systemParameters)
 
 use derivedType
 
 implicit none
 type(obsParent),intent(out) :: iasi
-integer,intent(in)                                   :: varListSize
-character(len=10),dimension(varListSize),intent(in)  :: varList
-logical,dimension(varListSize),intent(in)            :: use_varList
+type(systemParameter),intent(in) :: systemParameters
 
 real(kind=8) lon,lat
 integer levNum,serialNum
@@ -40,7 +38,7 @@ do
 
     read(header,*,iostat=ioStatus) dummyArg1,dummyArg2 , levNum
 
-    iasi%obsNum = iasi%obsNum + varListSize*levNum
+    iasi%obsNum = iasi%obsNum + systemParameters%varListSize_iasi*levNum
     do i = 1,levNum
         read(fileID,*)  ! just read through lines which are not headers.
     enddo
@@ -60,6 +58,10 @@ iasi%obs(:)%instrument = 'IASI'
 iasi%obs(:)%zName      = 'P'
 iasi%obs(:)%varName    = ''
 iasi%obs(:)%available  = .true.
+do io = 1 , iasi%obsNum
+    allocate( iasi%obs(io)%insideHorizontalDomain(systemParameters%max_domain) )
+    iasi%obs(io)%insideHorizontalDomain(:) = .false.
+enddo
 
 rewind(fileID)
 
@@ -73,13 +75,13 @@ do
 
     do i = 1,levNum
         serialNum = serialNum + 1
-        read(fileID,*) iasi%obs(serialNum)%z,iasi%obs(serialNum:serialNum+varListSize-1)%value
+        read(fileID,*) iasi%obs(serialNum)%z,iasi%obs(serialNum:serialNum+systemParameters%varListSize_iasi-1)%value
 
-        iasi%obs(serialNum:serialNum+varListSize-1)%lon = lon
-        iasi%obs(serialNum:serialNum+varListSize-1)%lat = lat
-        iasi%obs(serialNum:serialNum+varListSize-1)%z   = iasi%obs(serialNum)%z
-        iasi%obs(serialNum:serialNum+varListSize-1)%varName = varList(1:varListSize)
-        serialNum = serialNum + (varListSize-1)
+        iasi%obs(serialNum:serialNum+systemParameters%varListSize_iasi-1)%lon = lon
+        iasi%obs(serialNum:serialNum+systemParameters%varListSize_iasi-1)%lat = lat
+        iasi%obs(serialNum:serialNum+systemParameters%varListSize_iasi-1)%z   = iasi%obs(serialNum)%z
+        iasi%obs(serialNum:serialNum+systemParameters%varListSize_iasi-1)%varName = systemParameters%varList_iasi(1:systemParameters%varListSize_iasi)
+        serialNum = serialNum + (systemParameters%varListSize_iasi-1)
     enddo
 
 enddo
@@ -96,9 +98,9 @@ enddo
 
 iasi%obs(:)%z = 100.d0 * iasi%obs(:)%z  !  convert hPa to Pa
 
-do iObsVar = 1 , varListSize
-    where ( adjustl(iasi%obs(:)%varName) .eq. adjustl(varList(iObsVar)) )
-        iasi%obs%available = use_varList(iObsVar)
+do iObsVar = 1 , systemParameters%varListSize_iasi
+    where ( adjustl(iasi%obs(:)%varName) .eq. adjustl(systemParameters%varList_iasi(iObsVar)) )
+        iasi%obs%available = systemParameters%use_varList_iasi(iObsVar)
     end where
 enddo
 
